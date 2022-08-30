@@ -1,7 +1,7 @@
 import react from 'react';
 import { Text, StyleSheet } from 'react-native-elements';
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
 inputText: {
     fontWeight: 'bold',
     paddingBottom: 5,

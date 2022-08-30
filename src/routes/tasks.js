@@ -10,4 +10,4 @@ router.post('/tasks')
 router.delete('/tasks/:id')
 router.put('/tasks/:id')
 
-export default router;
+export default router

@@ -6,7 +6,7 @@ const LPrecios = () => {
   return (
     
     <SafeAreaView style={ {marginTop: Constants.statusBarHeight, flexGrow: 1}}>
-        <Text style={styles.inputText}>Lista de precios</Text>           
+        <Text>Lista de precios</Text>           
     </SafeAreaView>
   );
 };
