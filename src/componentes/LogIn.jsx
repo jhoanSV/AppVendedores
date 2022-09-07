@@ -20,7 +20,6 @@ const LogIn = () => {
                     <View style={ styles.inputs } >
                     <Text style={styles.inputText}>Usuario</Text>
                     <TextInput
-                        
                         style={styles.input}
                         //onChangeText={onChangeText}
                         //value={text}
