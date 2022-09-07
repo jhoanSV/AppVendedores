@@ -13,8 +13,22 @@ export function DrawerNavigation(){
     return (
         <Drawer.Navigator 
             drawerContent={(props) => <MenuItems{...props} />}>
-            <Drawer.Screen name="Main" component={ Main }/>
-            <Drawer.Screen name="LPrecios" component={ LPrecios }/>
+            <Drawer.Screen 
+                name="Main" 
+                component={ Main }
+                options={{
+                    title: 'Pantalla de inicio',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+            }}/>
+            <Drawer.Screen 
+                name="LPrecios" 
+                component={ LPrecios } 
+                options={{
+                    title: 'Lista de precios',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+            }}/>
         </Drawer.Navigator>
     )
 }
