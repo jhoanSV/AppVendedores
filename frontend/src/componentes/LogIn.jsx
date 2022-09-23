@@ -3,12 +3,19 @@ import Constants from 'expo-constants';
 import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, ImageBackground } from "react-native";
 import { logoNameWhite, BackgroundAuth } from "../../assets";
 import { Input, Icon, Button } from 'react-native-elements';
+import { useNavigation } from '@react-navigation/native';
 
 const LogIn = () => {
-  //const [text, onChangeText] = React.useState("Usuario");
-  const [number, onChangeNumber] = React.useState("Contraseña");
+  const navigation = useNavigation()
   const [showPasswords, setShowPasswords] = React.useState(false);
-  const [text, setText] = useState('')
+  const [text, setText] = useState('');
+  const [password, setPassword] = useState('');
+  const onChange = (textValue) => setText(textValue);
+  const onchangepassword = (passwordValue) => setPassword(passwordValue);
+  const limpiar = () => {
+    setText('');
+    setPassword('');
+  };
 
   return (
     
@@ -21,9 +28,9 @@ const LogIn = () => {
                     <Text style={styles.inputText}>Usuario</Text>
                     <TextInput
                         style={styles.input}
-                        //onChangeText={onChangeText}
-                        //value={text}
                         placeholder="Ingrese su usuario"
+                        onChangeText={onChange}
+                        value={text}
                     />
                     <Text style={styles.inputText}>Contraseña</Text>
                     
@@ -31,7 +38,8 @@ const LogIn = () => {
                         style={styles.input}
                         secureTextEntry={!showPasswords}
                         placeholder="Ingrese su contraseña"
-                        
+                        onChangeText={onchangepassword}
+                        value={password}
                     />
                     <View style={styles.icon}>
                     <Icon
@@ -43,8 +51,16 @@ const LogIn = () => {
                     </View>
                     </View>
                         <View style={styles.buttons}>
-                            <Button buttonStyle={{backgroundColor: '#F2CB05', borderRadius: 40, margin: 4}} title="Iniciar sesión"/>
-                            <Button buttonStyle={{backgroundColor: '#D0D9F2', borderRadius: 40, margin: 4}} title="Cancelar"/>
+                            <Button 
+                              buttonStyle={[ styles.buttonLogin, {backgroundColor: '#F2CB05'}]} 
+                              title="Iniciar sesión" 
+                              onPress={() => navigation.navigate('Main')}
+                            />
+                            <Button 
+                              buttonStyle={[ styles.buttonLogin, {backgroundColor: '#D0D9F2'}]} 
+                              title="Cancelar" 
+                              onPress={limpiar}
+                            />
                         </View>
                 </View>
             </View>
@@ -122,7 +138,11 @@ icon: {
     zIndex: 1,
     left: 230,
     top: 133,
-  }
+  },
+buttonLogin : {
+  borderRadius: 40, 
+  margin: 4,
+},
 });
 
 export default LogIn;

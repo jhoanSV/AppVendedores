@@ -2,9 +2,12 @@ import react from 'react';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
 import Main from '../componentes/Main';
 import LPrecios from '../componentes/LPrecios';
+import DetalleProducto from '../componentes/DetalleProducto';
+import LogIn from '../componentes/LogIn';
 
-import { Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet, Icon } from 'react-native';
 import MenuButtonItem from '../components/MenuButtonItem';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 const Drawer = createDrawerNavigator()
@@ -12,8 +15,18 @@ const Drawer = createDrawerNavigator()
 export function DrawerNavigation(){
     return (
         <Drawer.Navigator 
+            backBehavior="history"
             drawerContent={(props) => <MenuItems{...props} />}>
-            <Drawer.Screen 
+            <Drawer.Screen
+                name="LogIn" 
+                component={ LogIn }
+                options={{
+                    title: 'Pantalla de inicio',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+                    headerShown: false,
+            }}/>
+            <Drawer.Screen
                 name="Main" 
                 component={ Main }
                 options={{
@@ -28,6 +41,16 @@ export function DrawerNavigation(){
                     title: 'Lista de precios',
                     headerStyle: {backgroundColor: '#193773'},
                     headerTitleStyle: {color: '#FFFF'},
+            }}/>
+            <Drawer.Screen
+                name="DetalleProducto" 
+                component={ DetalleProducto }
+                icon = "home"
+                options={{
+                    title: 'Detalle del producto',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+                    //navigationOptions: {icon: 'home' },
             }}/>
         </Drawer.Navigator>
     )

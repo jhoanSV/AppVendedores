@@ -1,0 +1,7 @@
+@api = http://localhost:3000/tasks
+GET {{api}}
+
+###
+GET {{api}}/AM001
+###
+GET {{api}}/search/AM002
