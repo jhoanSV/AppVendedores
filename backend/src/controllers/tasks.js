@@ -1,9 +1,16 @@
 import { connect } from "../database";
 
 export const getTasks = async(req, res) => {
-    const connection = await connect()
-    const [rows] = await connection.query("SELECT cod, Descripcion, UnidadOpaquete, EsUnidadOpaquete, SubCategoria, PVenta, Nota FROM productos");
-    res.json(rows)
+    //const connection = await connect()
+    //const [rows] = await connection.query("SELECT cod, Descripcion, UnidadOpaquete, EsUnidadOpaquete, SubCategoria, PVenta, Nota FROM productos");
+    //res.json(rows)
+    try {
+        const connection = await connect()
+        const [rows] = await connection.query("SELECT cod, Descripcion, UnidadOpaquete, EsUnidadOpaquete, SubCategoria, PVenta, Nota FROM productos");
+        res.json(rows)
+      } catch (error) {
+        console.log(error)
+      }
 };
 
 export const getTask = async(req, res) => {
