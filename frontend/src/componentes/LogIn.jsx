@@ -4,19 +4,40 @@ import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, ImageBackground
 import { logoNameWhite, BackgroundAuth } from "../../assets";
 import { Input, Icon, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
-
+import { validateUser } from '../api';
 const LogIn = () => {
   const navigation = useNavigation()
   const [showPasswords, setShowPasswords] = React.useState(false);
   const [text, setText] = useState('');
   const [password, setPassword] = useState('');
-  const onChange = (textValue) => setText(textValue);
-  const onchangepassword = (passwordValue) => setPassword(passwordValue);
-  const limpiar = () => {
-    setText('');
-    setPassword('');
-  };
+  const [User, setUser] = useState();
+  const [tasks, setTasks] = useState({
+    "Email" : text,
+    "Contraseña" : password
+  });
 
+  const handleChange = (name, value) => setTasks({...tasks, [name]: value});
+  const handleSubmit = async() => {
+    const valor = await validateUser(tasks)
+    if(valor.length === 1){
+      const usuario = JSON.stringify(valor[0]["Cod"])
+      setUser(usuario)
+      navigation.navigate('Main')
+      console.log(User)
+    } else {
+      console.log("El usuario o la contraseña son incorrectos")
+    }
+  }
+  const limpiar = () => setTasks({...tasks, ["Email"]: "", ["Contraseña"]: ""});
+
+  const Ingresar = () => {
+    const valor  = validateUser(text, password)
+    if (valor !== []) {
+      navigation.navigate('Main')
+    } else {
+      console.log("El usuario o la contraseña es incorrecta")
+    }
+  };
   return (
     
     <SafeAreaView style={ {marginTop: Constants.statusBarHeight, flexGrow: 1}}>
@@ -29,8 +50,8 @@ const LogIn = () => {
                     <TextInput
                         style={styles.input}
                         placeholder="Ingrese su usuario"
-                        onChangeText={onChange}
-                        value={text}
+                        onChangeText={text => handleChange("Email",text)}
+                        value={tasks.Email}
                     />
                     <Text style={styles.inputText}>Contraseña</Text>
                     
@@ -38,8 +59,8 @@ const LogIn = () => {
                         style={styles.input}
                         secureTextEntry={!showPasswords}
                         placeholder="Ingrese su contraseña"
-                        onChangeText={onchangepassword}
-                        value={password}
+                        onChangeText={text => handleChange("Contraseña",text)}
+                        value={tasks.Contraseña}
                     />
                     <View style={styles.icon}>
                     <Icon
@@ -54,7 +75,7 @@ const LogIn = () => {
                             <Button 
                               buttonStyle={[ styles.buttonLogin, {backgroundColor: '#F2CB05'}]} 
                               title="Iniciar sesión" 
-                              onPress={() => navigation.navigate('Main')}
+                              onPress={handleSubmit}
                             />
                             <Button 
                               buttonStyle={[ styles.buttonLogin, {backgroundColor: '#D0D9F2'}]} 
