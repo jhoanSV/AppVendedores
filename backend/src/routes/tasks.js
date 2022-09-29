@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { getTasks, searchTasks, getTask, saveTasks, deleteTasks, updateTasks } from '../controllers/tasks';
+import { getTasks, searchTasks, getTask, clientes, ValidarDatos, updateTasks } from '../controllers/tasks';
+
 
 const router = Router();
 
@@ -40,11 +41,12 @@ router.get('/tasks/:cod', getTask)
 /**
  * @swagger
  * /tasks:
- *  post:
+ *  get:
  *  summary: save a new product
  *  tags: [products]
  */
-router.post('/tasks', saveTasks)
+router.get('/tasks/clientes/:cod', clientes)
 
+router.post('/tasks/validar', ValidarDatos)
 
 export default router

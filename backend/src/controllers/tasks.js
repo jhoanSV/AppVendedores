@@ -1,9 +1,13 @@
 import { connect } from "../database";
 
 export const getTasks = async(req, res) => {
-    const connection = await connect()
-    const [rows] = await connection.query("SELECT cod, Descripcion, UnidadOpaquete, EsUnidadOpaquete, SubCategoria, PVenta, Nota FROM productos");
-    res.json(rows)
+    try {
+        const connection = await connect()
+        const [rows] = await connection.query("SELECT cod, Descripcion, UnidadOpaquete, EsUnidadOpaquete, SubCategoria, PVenta, Nota FROM productos");
+        res.json(rows)
+      } catch (error) {
+        console.log(error)
+      }
 };
 
 export const getTask = async(req, res) => {
@@ -18,12 +22,16 @@ export const searchTasks = async(req, res) => {
     res.json(rows)
 };
 
-export const saveTasks = (req, res) => {
-    res.send('Hello word')
+export const clientes = async(req, res) => {
+    const connection = await connect()
+    const [rows] = await connection.query("SELECT Cod, Nit, Ferreteria, Contacto, Telefono, Cel, Email, Direccion, Barrio, Ruta FROM clientes WHERE CodVendedor = ?", [req.params.cod]);
+    res.send(rows)
 };
 
-export const deleteTasks = (req, res) => {
-    res.send('Hello word')
+export const ValidarDatos = async(req, res) => {
+    const connection = await connect()
+    const [rows] = await connection.query("SELECT Cod FROM colaboradores WHERE Email = ? AND Contraseña = ?", [req.body.Email, req.body.Contraseña]);
+    res.json(rows)
 };
 
 export const updateTasks = (req, res) => {
