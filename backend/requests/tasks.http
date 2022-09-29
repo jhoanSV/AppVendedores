@@ -5,3 +5,15 @@ GET {{api}}
 GET {{api}}/AM001
 ###
 GET {{api}}/search/AM002
+
+###
+GET {{api}}/clientes/V2
+
+###
+POST {{api}}/validar
+Content-Type: application/json
+
+{
+    "Email": "prueba1",
+    "Contraseña": "prueba1"
+}  
