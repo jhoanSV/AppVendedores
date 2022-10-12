@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTasks, searchTasks, getTask, clientes, ValidarDatos, updateTasks } from '../controllers/tasks';
+import { getTasks, searchTasks, getTask, clientes, ValidarDatos, BuscarClientes, BuscarClientesTodos, updateTasks } from '../controllers/tasks';
 
 
 const router = Router();
@@ -48,5 +48,9 @@ router.get('/tasks/:cod', getTask)
 router.get('/tasks/clientes/:cod', clientes)
 
 router.post('/tasks/validar', ValidarDatos)
+
+router.post('/tasks/BuscarClientes', BuscarClientes)
+
+router.get('/tasks/BuscarClientesTodos/:cod', BuscarClientesTodos)
 
 export default router

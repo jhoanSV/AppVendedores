@@ -5,6 +5,11 @@ import { logoNameWhite, BackgroundAuth } from "../../assets";
 import { Input, Icon, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { validateUser } from '../api';
+
+//intento de hacer que recoja el codigo del vendedor
+import { setGlobal, getGlobal } from '../components/context/user';
+//Fin intento de hacer que recoja el codigo del vendedor
+
 const LogIn = () => {
   const navigation = useNavigation()
   const [showPasswords, setShowPasswords] = React.useState(false);
@@ -23,21 +28,14 @@ const LogIn = () => {
       const usuario = JSON.stringify(valor[0]["Cod"])
       setUser(usuario)
       navigation.navigate('Main')
-      console.log(User)
+      setGlobal({ User : usuario })
+      console.log(usuario)
     } else {
       console.log("El usuario o la contraseña son incorrectos")
     }
   }
   const limpiar = () => setTasks({...tasks, ["Email"]: "", ["Contraseña"]: ""});
 
-  const Ingresar = () => {
-    const valor  = validateUser(text, password)
-    if (valor !== []) {
-      navigation.navigate('Main')
-    } else {
-      console.log("El usuario o la contraseña es incorrecta")
-    }
-  };
   return (
     
     <SafeAreaView style={ {marginTop: Constants.statusBarHeight, flexGrow: 1}}>

@@ -39,6 +39,16 @@ export const ValidarDatos = async(req, res) => {
     connection.end()
 };
 
-export const updateTasks = (req, res) => {
-    res.send('Hello word')
+export const BuscarClientes = async(req, res) => {
+    const connection = await connect()
+    const [rows] = await connection.query("SELECT Cod, Nit, Ferreteria, Contacto, Telefono, Cel, Email, Direccion, Barrio, Ruta, Nota FROM clientes WHERE (Nit LIKE CONCAT('%', ?,  '%') OR  Ferreteria LIKE CONCAT('%', ?,  '%') OR Contacto LIKE CONCAT('%', ?,  '%') OR Ruta LIKE CONCAT('%', ?,  '%')) AND CodVendedor = ?", [req.body.busqueda,req.body.busqueda,req.body.busqueda,req.body.busqueda, req.body.CodVendedor]);
+    res.json(rows)
+    connection.end()
+};
+
+export const BuscarClientesTodos = async(req, res) => {
+    const connection = await connect()
+    const [rows] = await connection.query("SELECT Cod, Nit, Ferreteria, Contacto, Telefono, Cel, Email, Direccion, Barrio, Ruta, Nota FROM clientes WHERE CodVendedor = ?", [req.params.cod]);
+    res.json(rows)
+    connection.end()
 };
