@@ -17,3 +17,15 @@ Content-Type: application/json
     "Email": "prueba1",
     "Contraseña": "prueba1"
 }  
+
+###
+POST {{api}}/BuscarClientes
+Content-Type: application/json
+
+{
+    "CodVendedor": "V2",
+    "busqueda": "In"
+}
+
+###
+GET {{api}}/clientes/V2

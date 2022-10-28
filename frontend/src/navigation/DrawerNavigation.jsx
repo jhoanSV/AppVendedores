@@ -6,6 +6,7 @@ import LClientes from '../componentes/LClientes';
 import DetalleProducto from '../componentes/DetalleProducto';
 import DetalleCliente from '../componentes/DetalleCliente';
 import LogIn from '../componentes/LogIn';
+import NuevaVenta from '../componentes/NuevaVenta';
 
 import { Text, StyleSheet, Icon } from 'react-native';
 import MenuButtonItem from '../components/MenuButtonItem';
@@ -68,6 +69,16 @@ export function DrawerNavigation(){
                 //icon = "home"
                 options={{
                     title: 'Detalle del cliente',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+                    //navigationOptions: {icon: 'home' },
+            }}/>
+            <Drawer.Screen
+                name="NuevaVenta" 
+                component={ NuevaVenta }
+                //icon = "home"
+                options={{
+                    title: 'Nueva venta',
                     headerStyle: {backgroundColor: '#193773'},
                     headerTitleStyle: {color: '#FFFF'},
                     //navigationOptions: {icon: 'home' },
