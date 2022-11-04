@@ -47,7 +47,7 @@ function NuevaVenta({ navigation, route }) {
           let hoyDate = hoy.getDate() + '/' + (hoy.getMonth()+1) + '/' + hoy.getFullYear();
           let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
           let N = await consecutivos();
-          let NpreFactura = N[0]["PreFactura"] + 1
+          let NpreFactura = N[0]["PreFactura"]
           let OdePedido = N[0]["ODePedido"] + 1
           const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + route.params.Ferreteria + '\'' + ',' + '\'' + hoyDate + '\'' + ',' + '\'' + sumaTotal().replace(/,/g, '') + '\'' + ',' + '\'' +'Contado' + '\'' +',' + '\'' + 'Ingresado' + '\'' + ',' + '\'' + '' + '\'' + ',' + '\'' + hoyDate + '\'' +',' + '\'' + textDate + '\'' + ',' + '\'' + '' + '\'' +')';
           pedido.map((pedido, index) => {
@@ -64,7 +64,7 @@ function NuevaVenta({ navigation, route }) {
               "tabla": "tabladeestados",
               "cadenaDeInsercion": aEstados
             })
-            consPrefactura(NpreFactura)
+            consPrefactura(NpreFactura + 1)
             setTextDate('')
             setVisibleEnvioExitoso(true)
             setVisiblevCargando(false)
