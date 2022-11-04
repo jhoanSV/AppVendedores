@@ -52,3 +52,29 @@ export const BuscarClientesTodos = async(req, res) => {
     res.json(rows)
     connection.end()
 };
+
+export const aTablas = async(req, res) => {
+    try {
+        const connection = await connect()
+        let cadena = "INSERT INTO " + req.body.tabla + " VALUES " + req.body.cadenaDeInsercion
+        const [rows] = await connection.query(cadena);
+        res.json(rows)
+        connection.end()
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+export const consecutivos = async(req, res) => {
+        const connection = await connect()
+        const [rows] = await connection.query("SELECT (SELECT NPreFactura FROM consecutivos) As PreFactura, (SELECT MAX(ODePedido) FROM tabladeingresados) AS ODePedido");
+        res.json(rows)
+        connection.end()
+};
+
+export const consecutivoPrefactura = async(req, res) => {
+    const connection = await connect()
+    const [rows] = await connection.query("update consecutivos set NPreFactura = ? where 1 = 1", [req.params.con]);
+    res.send(rows[0])
+    connection.end()
+};

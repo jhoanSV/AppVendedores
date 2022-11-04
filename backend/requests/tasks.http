@@ -29,3 +29,18 @@ Content-Type: application/json
 
 ###
 GET {{api}}/clientes/V2
+
+###
+POST {{api}}/aTablas
+Content-Type: application/json
+
+{
+    "tabla": "tabladeingresados",
+    "cadenaDeInsercion": "('1','1','4','AM001','amarre 10 cm  2,5 mm','1300','undefined','5','V2','31/10/2022','2/11/2022','Contado','16:56:41','F','31/10/2022'),('1','1','5','CIN01','Cinta aislante 3m pequeña','1800','undefined','5','V2','31/10/2022','2/11/2022','Contado','16:56:41','F','31/10/2022')"
+}
+
+###
+POST {{api}}/con
+
+###
+POST {{api}}/consecutivoPrefactura/6192

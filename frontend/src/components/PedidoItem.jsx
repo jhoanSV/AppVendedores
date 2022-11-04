@@ -34,12 +34,14 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
   return (
     <TouchableOpacity>
         <View style={styles.itemContainer}>
-          <View style={{flexDirection: 'column'}}>
-            <Text style={[styles.itemText, {width: 80, fontWeight: 'bold'}]}>{item.cod}</Text>
-            <Text style={[styles.itemText, {width: 200}]}>{item.Descripcion}</Text>
-            <Text style={[styles.itemText, {width: 100}]}>PU: $ {formatNumber(item.PVenta)}</Text>
-            <Text style={[styles.itemText, {width: 100}]}>PT: $ {valorTotal(item.Cantidad, item.PVenta)}</Text>
-          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('DetalleProducto', {cod: item.cod, Descripcion: item.Descripcion, UnidadOpaquete: item.UnidadOpaquete, EsUnidadOpaquete: item.EsUnidadOpaquete,SubCategoria: item.SubCategoria,  PVenta: item.PVenta, Nota: item.Nota})}>
+            <View style={{flexDirection: 'column'}}>
+              <Text style={[styles.itemText, {width: 80, fontWeight: 'bold'}]}>{item.cod}</Text>
+              <Text style={[styles.itemText, {width: 200}]}>{item.Descripcion}</Text>
+              <Text style={[styles.itemText, {width: 100}]}>PU: $ {formatNumber(item.PVenta)}</Text>
+              <Text style={[styles.itemText, {width: 100}]}>PT: $ {valorTotal(item.Cantidad, item.PVenta)}</Text>
+            </View>
+          </TouchableOpacity>
           <View style={{flexDirection: 'row', justifyContent: 'center', alignItems:'center'}}>
             <View>
               <TextInput

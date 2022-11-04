@@ -1,13 +1,16 @@
 import React,{useState, useEffect} from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal} from 'react-native';
-import { getTasks, SearchTasks } from '../api';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image} from 'react-native';
+import { getTasks, SearchTasks, consecutivos, consPrefactura } from '../api';
 import DesTaskList from '../components/DesTaskList';
 import Layout from '../components/Layout';
 import { Icon } from 'react-native-elements'
 import { BorderlessButton } from 'react-native-gesture-handler';
 import PedidoItem from '../components/PedidoItem';
 import PedidoList from '../components/PedidoList';
-
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { setGlobal, getGlobal } from '../components/context/user';
+import { aTablas } from '../api';
+import { CargadoConExito, progress } from "../../assets";
 //import { useState } from 'react';
 
 function NuevaVenta({ navigation, route }) {
@@ -16,9 +19,130 @@ function NuevaVenta({ navigation, route }) {
   const [visible, setVisible] = useState(false);
   const [visibleAviso, setVisibleAviso] = useState(false);
   const [visibleAvisoProducto, setVisibleAvisoProducto] = useState(false);
-  setTimeout(() => {  
-    setVisibleAvisoProducto(false)
-  }, 5000);
+  const [visibleEnvioExitoso, setVisibleEnvioExitoso]= useState(false);
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
+  const [mode, setMode] = useState('date');
+  const [textDate, setTextDate] = useState('');
+  const [avisoRojo, setAvisoRojo] = useState(false);
+  const [notaRojo, setNotaRojo] = useState('');
+  const [visiblevCargando, setVisiblevCargando] = useState(false);
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const enviarPedido = async()=> {
+      if (textDate === ''){
+        setAvisoRojo(true)
+        setNotaRojo('Escoja una fecha de envio')
+        setTimeout(() => {  
+          setAvisoRojo(false)
+        }, 2000);
+      } else {
+        try {
+          setVisiblevCargando(true)
+          let aTablaDeIngresados = '';
+          let hoy = new Date(Date.now());
+          let hoyDate = hoy.getDate() + '/' + (hoy.getMonth()+1) + '/' + hoy.getFullYear();
+          let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
+          let N = await consecutivos();
+          let NpreFactura = N[0]["PreFactura"] + 1
+          let OdePedido = N[0]["ODePedido"] + 1
+          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + route.params.Ferreteria + '\'' + ',' + '\'' + hoyDate + '\'' + ',' + '\'' + sumaTotal().replace(/,/g, '') + '\'' + ',' + '\'' +'Contado' + '\'' +',' + '\'' + 'Ingresado' + '\'' + ',' + '\'' + '' + '\'' + ',' + '\'' + hoyDate + '\'' +',' + '\'' + textDate + '\'' + ',' + '\'' + '' + '\'' +')';
+          pedido.map((pedido, index) => {
+            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + OdePedido +  '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' +  '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.Descripcion + '\'' +',' + '\'' +  pedido.PVenta +  '\'' + ',' +  '\'' + pedido.Costo +  '\'' + ',' +  '\'' +  route.params.Cod  + '\'' + ',' +  '\'' + getGlobal('User').slice(1, -1) +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ',' +  '\'' + textDate +  '\'' + ',' +  '\'' + 'Contado' +  '\'' + ',' + '\'' + hora +  '\'' + ',' +  '\'' + 'F' +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ')'  + ','
+          })
+          aTablaDeIngresados = aTablaDeIngresados.slice(0, -1);
+
+            aTablas({
+              "tabla": "tabladeingresados",
+              "cadenaDeInsercion": aTablaDeIngresados
+            })
+
+            aTablas({
+              "tabla": "tabladeestados",
+              "cadenaDeInsercion": aEstados
+            })
+            consPrefactura(NpreFactura)
+            setTextDate('')
+            setVisibleEnvioExitoso(true)
+            setVisiblevCargando(false)
+            setTimeout(() => {  
+              setVisibleEnvioExitoso(false)
+              cancelarPedido()
+            }, 2000);
+            console.log(aTablaDeIngresados)
+            console.log(aEstados)
+        }catch (error) {
+          setVisiblevCargando(false)
+          setNotaRojo('Error al enviar')
+          setAvisoRojo(true)
+          setTimeout(() => {  
+            setAvisoRojo(false)
+          }, 2000);
+          console.log(error)
+
+        }
+      }
+    
+  };
+
+
+  const ModalAvisoRojo = ({visible, children}) => {
+    return (
+    <Modal transparent visible={visible}>
+        <View style={[styles.ModalBackground]}>
+          <View style={[styles.contenedorModal]}>
+            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
+              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setAvisoRojo(false)}>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>{notaRojo}</Text>
+            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#D6320E'}]} onPress={()=>{setAvisoRojo(false)}}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entendido</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShow(false); //Platform.OS === 'android'
+    setDate(currentDate)
+    let tempDate = new Date(currentDate);
+    let fDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
+    setTextDate(fDate)
+  };
+
+  const ModalCargando = ({visible, children}) => {
+    return (
+    <Modal transparent visible={visible}>
+        <View style={[styles.ModalBackground]}>
+          <View style={[styles.contenedorModal, { justifyContent: 'center', alignItems: 'center', borderRadius: 60 }]}>
+            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#193773'}]}>Enviando...</Text>
+            <Image style={[styles.logo]} source={ progress } resizeMode='contain' />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const ModalEnvioExitoso = ({visible, children}) => {
+    return (
+    <Modal transparent visible={visible}>
+        <View style={[styles.ModalBackground]}>
+          <View style={[styles.contenedorModal, {justifyContent: 'center', alignItems: 'center'}]}>
+            <Image style={[styles.logo]} source={ CargadoConExito } resizeMode='contain' />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   const ModalPopUpAvisoProducto = ({visible, children}) => {
     const [showModal, setShowModal] = useState(visible);
@@ -74,7 +198,20 @@ function NuevaVenta({ navigation, route }) {
               </TouchableOpacity>
             </View>
             <Text style={[styles.text]}>Fecha de entrega:</Text>
-            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>setVisible(true)}>
+              <TouchableOpacity onPress={()=>showMode('date')}>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  'black'}]}>Fecha</Text>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  'black'}]}>{textDate}</Text>
+              </TouchableOpacity>
+            {show && (<DateTimePicker
+              testID='dateTimePicker'
+              //open={show}
+              value={date}
+              mode='date'
+              is24Hour={true}
+              //display='default'
+              onChange={onChange}
+            />)}
+            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>enviarPedido()}>
               <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Enviar pedido</Text>
             </TouchableOpacity>
           </View>
@@ -83,16 +220,23 @@ function NuevaVenta({ navigation, route }) {
     );
   };
 
-  const cadenaDeIngresados = '(' + route.params.Ferreteria + ',' +')'
-
-  const eliminarProducto=(Cod)=>{
-    var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-    pedido.splice(index, 1)
+  const verificarAgregarPedido = () => {
+    if (pedido.length !== 0){
+      setVisible(true)
+    } else {
+      setAvisoRojo(true)
+      setNotaRojo('No hay productos para enviar')
+      setTimeout(() => {  
+        setAvisoRojo(false)
+      }, 2000);
+    }
   };
 
   const cancelarPedido=()=>{
     setPedido([])
+    setVisible(false)
     handleSubmit('')
+    setTextDate('')
     navigation.navigate('LClientes')
   };
 
@@ -108,6 +252,9 @@ function NuevaVenta({ navigation, route }) {
       pedido.push(objeto)
     } else if(index !== -1) {
       setVisibleAvisoProducto(true)
+      setTimeout(() => {  
+        setVisibleAvisoProducto(false)
+      }, 2000);
     }
   };
   
@@ -212,7 +359,7 @@ function NuevaVenta({ navigation, route }) {
           </TouchableOpacity>
         </View>
         <View>
-          <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>setVisible(true)}>
+          <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>verificarAgregarPedido()}>
             <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
           </TouchableOpacity>
         </View>
@@ -220,6 +367,9 @@ function NuevaVenta({ navigation, route }) {
       <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
       <ModalPopUpAviso visible={visibleAviso}></ModalPopUpAviso>
       <ModalPopUpAvisoProducto visible={visibleAvisoProducto}></ModalPopUpAvisoProducto>
+      <ModalEnvioExitoso visible={visibleEnvioExitoso}></ModalEnvioExitoso>
+      <ModalAvisoRojo visible={avisoRojo}></ModalAvisoRojo>
+      <ModalCargando visible={visiblevCargando}></ModalCargando>
     </View>
 
   )
@@ -299,8 +449,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFF',
     width: 300,
     height: 300,
-    
-  }
+  },
+  logo: {
+    position: 'relative',
+    width: 270,
+    height: 270,
+  },
 });
 
 export default NuevaVenta;

@@ -22,9 +22,9 @@ const LogIn = () => {
     "Contraseña" : password
   });
 
-  setTimeout(() => {  
-    setVisible(false)
-  }, 5000);
+  //setTimeout(() => {  
+    //setVisible(false)
+  //}, 5000);
 
   const ModalPopUpAviso = ({visible, children}) => {
     const [showModal, setShowModal] = useState(visible);
@@ -56,7 +56,9 @@ const LogIn = () => {
       console.log(usuario)
     } else {
       setVisible(true)
-      console.log("El usuario o la contraseña son incorrectos")
+      setTimeout(() => {  
+        setVisible(false)
+      }, 5000);//console.log("El usuario o la contraseña son incorrectos")
     }
   }
   const limpiar = () => setTasks({...tasks, ["Email"]: "", ["Contraseña"]: ""});
