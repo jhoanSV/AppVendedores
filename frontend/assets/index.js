@@ -6,4 +6,6 @@ export { default as noImage } from "./png/no-image.png";
 export { default as defaultUser } from "./png/default-user.png";
 
 export { default as BackgroundAuth } from "./png/background-auth.png";
+export { default as CargadoConExito} from "./png/CargadoConExito.png";
+export { default as progress } from "./png/progress.gif";
 //export { default as bannerHome } from "./jpg/banner-home.jpg";

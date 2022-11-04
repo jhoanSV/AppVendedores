@@ -4,6 +4,16 @@ import Layout from '../components/Layout';
 import { Icon } from 'react-native-elements'
 
 function DetalleProducto({ navigation, route }) {
+  function formatNumber(number){
+    return new Intl.NumberFormat().format(number);
+  }
+
+  function colorNota(text){
+    if(text === 'AGOTADO'){
+      const obj = {color: '#D6320E' }
+      return obj;
+    }
+  }
   return (
     
     <View style={styles.container}>
@@ -18,9 +28,9 @@ function DetalleProducto({ navigation, route }) {
       <Text style={styles.subTitle}>Sub categoria:</Text>
       <Text style={styles.text}>{route.params.SubCategoria}</Text>
       <Text style={styles.subTitle}>Precio de venta:</Text>
-      <Text style={styles.text}>$ {route.params.PVenta}</Text>
+      <Text style={styles.text}>$ {formatNumber(route.params.PVenta)}</Text>
       <Text style={styles.subTitle}>Nota:</Text>
-      <Text style={styles.text}>{route.params.Nota}</Text>
+      <Text style={[styles.text, colorNota(route.params.Nota)]}>{route.params.Nota}</Text>
     </View>
   )
 }

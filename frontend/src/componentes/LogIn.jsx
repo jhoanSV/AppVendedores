@@ -1,20 +1,49 @@
 import React, {useState} from "react";
 import Constants from 'expo-constants';
-import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, ImageBackground } from "react-native";
+import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, ImageBackground, Modal, TouchableOpacity } from "react-native";
 import { logoNameWhite, BackgroundAuth } from "../../assets";
 import { Input, Icon, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { validateUser } from '../api';
+
+//intento de hacer que recoja el codigo del vendedor
+import { setGlobal, getGlobal } from '../components/context/user';
+//Fin intento de hacer que recoja el codigo del vendedor
+
 const LogIn = () => {
   const navigation = useNavigation()
   const [showPasswords, setShowPasswords] = React.useState(false);
   const [text, setText] = useState('');
   const [password, setPassword] = useState('');
   const [User, setUser] = useState();
+  const [visible, setVisible] = useState(false);
   const [tasks, setTasks] = useState({
     "Email" : text,
     "Contraseña" : password
   });
+
+  //setTimeout(() => {  
+    //setVisible(false)
+  //}, 5000);
+
+  const ModalPopUpAviso = ({visible, children}) => {
+    const [showModal, setShowModal] = useState(visible);
+    return (
+    <Modal transparent visible={visible}>
+        <View style={[styles.ModalBackground]}>
+          <View style={[styles.contenedorModal]}>
+            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
+              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setVisible(false)}>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>Usuario o contraseña incorrecta, intente de nuevo</Text>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   const handleChange = (name, value) => setTasks({...tasks, [name]: value});
   const handleSubmit = async() => {
@@ -23,21 +52,17 @@ const LogIn = () => {
       const usuario = JSON.stringify(valor[0]["Cod"])
       setUser(usuario)
       navigation.navigate('Main')
-      console.log(User)
+      setGlobal({ User : usuario })
+      console.log(usuario)
     } else {
-      console.log("El usuario o la contraseña son incorrectos")
+      setVisible(true)
+      setTimeout(() => {  
+        setVisible(false)
+      }, 5000);//console.log("El usuario o la contraseña son incorrectos")
     }
   }
   const limpiar = () => setTasks({...tasks, ["Email"]: "", ["Contraseña"]: ""});
 
-  const Ingresar = () => {
-    const valor  = validateUser(text, password)
-    if (valor !== []) {
-      navigation.navigate('Main')
-    } else {
-      console.log("El usuario o la contraseña es incorrecta")
-    }
-  };
   return (
     
     <SafeAreaView style={ {marginTop: Constants.statusBarHeight, flexGrow: 1}}>
@@ -86,9 +111,8 @@ const LogIn = () => {
                 </View>
             </View>
         </ImageBackground>
+        <ModalPopUpAviso visible={visible}></ModalPopUpAviso>
     </SafeAreaView>
-    
-    
   );
 };
 const handlerShowPassword = () =>{
@@ -163,6 +187,24 @@ icon: {
 buttonLogin : {
   borderRadius: 40, 
   margin: 4,
+},
+ModalBackground: {
+  flex: 1,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+contenedorModal: {
+  backgroundColor: '#FFFF',
+  width: 300,
+  height: 300,
+  
+},
+subTitle: {
+  fontSize: 20, 
+  fontWeight: 'bold', 
+  margin: 8,
+  color: '#193773',
 },
 });
 

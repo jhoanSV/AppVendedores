@@ -3,8 +3,20 @@ import { View, Text, StyleSheet } from 'react-native'
 import { TouchableOpacity, onLongPress } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 
+import 'intl';
+import 'intl/locale-data/jsonp/en';
+
 const TasksItem = ({ task }) => {
 
+  function formatNumber(number){
+    return new Intl.NumberFormat().format(number);
+  }
+  function colorNota(text){
+    if(text === 'AGOTADO'){
+      const obj = {color: '#D6320E' }
+      return obj;
+    }
+  }
   const navigation = useNavigation()
   return (
     <TouchableOpacity onPress={() => navigation.navigate('DetalleProducto', {cod: task.cod, Descripcion: task.Descripcion, UnidadOpaquete: task.UnidadOpaquete, EsUnidadOpaquete: task.EsUnidadOpaquete,SubCategoria: task.SubCategoria,  PVenta: task.PVenta, Nota: task.Nota})}>
@@ -14,8 +26,8 @@ const TasksItem = ({ task }) => {
         <Text style={[styles.itemText, {width: 55}]}>{task.UnidadOpaquete}</Text>
         <Text style={[styles.itemText, {width: 40}]}>{task.EsUnidadOpaquete}</Text>
         <Text style={[styles.itemText, {width: 200}]}>{task.SubCategoria}</Text>
-        <Text style={[styles.itemText, {width: 100}]}>$ {task.PVenta}</Text>
-        <Text style={styles.itemText}>{task.Nota}</Text>
+        <Text style={[styles.itemText, {width: 100}]}>$ {formatNumber(task.PVenta)}</Text>
+        <Text style={[styles.itemText, colorNota(task.Nota)]}>{task.Nota}</Text>
     </View>
     </TouchableOpacity>
   )

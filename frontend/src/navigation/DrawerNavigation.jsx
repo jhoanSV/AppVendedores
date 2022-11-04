@@ -2,8 +2,11 @@ import react from 'react';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
 import Main from '../componentes/Main';
 import LPrecios from '../componentes/LPrecios';
+import LClientes from '../componentes/LClientes';
 import DetalleProducto from '../componentes/DetalleProducto';
+import DetalleCliente from '../componentes/DetalleCliente';
 import LogIn from '../componentes/LogIn';
+import NuevaVenta from '../componentes/NuevaVenta';
 
 import { Text, StyleSheet, Icon } from 'react-native';
 import MenuButtonItem from '../components/MenuButtonItem';
@@ -52,11 +55,40 @@ export function DrawerNavigation(){
                     headerTitleStyle: {color: '#FFFF'},
                     //navigationOptions: {icon: 'home' },
             }}/>
+            <Drawer.Screen 
+                name="LClientes" 
+                component={ LClientes } 
+                options={{
+                    title: 'Lista de Clientes',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+            }}/>
+            <Drawer.Screen
+                name="DetalleCliente" 
+                component={ DetalleCliente }
+                //icon = "home"
+                options={{
+                    title: 'Detalle del cliente',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+                    //navigationOptions: {icon: 'home' },
+            }}/>
+            <Drawer.Screen
+                name="NuevaVenta" 
+                component={ NuevaVenta }
+                //icon = "home"
+                options={{
+                    title: 'Nueva venta',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+                    //navigationOptions: {icon: 'home' },
+            }}/>
         </Drawer.Navigator>
     )
 }
 
 const MenuItems = ({ navigation }) =>{
+    
     return (
         <DrawerContentScrollView 
             style={styles.container}
@@ -70,6 +102,11 @@ const MenuItems = ({ navigation }) =>{
             <MenuButtonItem 
                 text = "Lista de precios"
                 onPress={() => navigation.navigate('LPrecios')}
+                icon = "list"
+            />
+            <MenuButtonItem 
+                text = "Lista de clientes"
+                onPress={() => navigation.navigate('LClientes')}
                 icon = "list"
             />
         </DrawerContentScrollView>
