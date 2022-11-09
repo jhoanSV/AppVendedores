@@ -1,5 +1,5 @@
-import React,{useState, useEffect, useRef } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image, Share} from 'react-native';
+import React,{useState, useEffect, useRef, Fragment } from 'react'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image} from 'react-native';
 import { getTasks, SearchTasks, consecutivos, consPrefactura } from '../api';
 import DesTaskList from '../components/DesTaskList';
 import Layout from '../components/Layout';
@@ -12,7 +12,9 @@ import { setGlobal, getGlobal } from '../components/context/user';
 import { aTablas } from '../api';
 import { CargadoConExito, progress, Logo_color } from "../../assets";
 import { captureRef } from 'react-native-view-shot';
-
+//import { Share } from 'react-native-share';
+//import {shareImageFromUri} from 'react-native-share-image';
+import * as Sharing from 'expo-sharing';
 
 function NuevaVenta({ navigation, route }) {
   const viewRef = useRef();
@@ -42,10 +44,13 @@ function NuevaVenta({ navigation, route }) {
     try {
       const uri = await captureRef(viewRef, {
         format: 'png',
-        quality: 0.7,
-
+        quality: 0.7
       });
-      await Share.open({ url: uri})
+      //shareImageFromUri(uri);
+      Sharing.shareAsync(uri)
+      setTimeout(() => {  
+        setRecordatorio(false)
+      }, 2000);
     } catch (errors) { 
       console.error(errors);
     }
@@ -140,14 +145,15 @@ function NuevaVenta({ navigation, route }) {
     return (
     <Modal transparent visible={visible}>
         <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal, {height: 330,}]} >
+          <View style={[styles.contenedorModal, {height: 370,}]} >
             <View style={[{flexDirection: 'row', backgroundColor: '#193773', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
               <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Recordatorio</Text>
               <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setRecordatorio(false)}>
                 <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
               </TouchableOpacity>
             </View>
-            <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5}} ref={viewRef}>
+            <Fragment>
+            <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFFF'}} ref={viewRef}>
               <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
               <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
               <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.NPedido}</Text>
@@ -158,10 +164,11 @@ function NuevaVenta({ navigation, route }) {
               <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
               <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaDesde}</Text>
               <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaHasta}</Text>
+              <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.FERRESIERRA.COM</Text>
             </View>
-            
-            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>{shareImage()}}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Enviar</Text>
+            </Fragment>
+            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>shareImage()}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Compartir</Text>
             </TouchableOpacity>
           </View>
         </View>

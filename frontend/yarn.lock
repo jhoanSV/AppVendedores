@@ -1754,10 +1754,10 @@
     prompts "^2.4.0"
     semver "^6.3.0"
 
-"@react-native-community/datetimepicker@6.2.0":
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/datetimepicker/-/datetimepicker-6.2.0.tgz#50bc629e70e4030c48205c01efbc65a8f35d82d4"
-  integrity sha512-w1ZS+wYO3qSASliRp+B7mPphOhtVm++rhSbj1WsgXdgLgDXSkDxpMnAXXQu9M0XdcgBwVJ6wDExeIwuzU5Jtfg==
+"@react-native-community/datetimepicker@^6.2.0":
+  version "6.5.4"
+  resolved "https://registry.yarnpkg.com/@react-native-community/datetimepicker/-/datetimepicker-6.5.4.tgz#b86225e8d2d0d13586833c54c944821825187697"
+  integrity sha512-6YUz6d6bEh409eG6HcL/oHmqElWtQgeHmVoVIfuJusf54ZsHr14NqHvrux0P1vBv5vcYrn9Qi8OwZZiFVyp9vw==
   dependencies:
     invariant "^2.2.4"
 
@@ -4575,6 +4575,11 @@ expo-pwa@0.0.123:
     chalk "^4.0.0"
     commander "2.20.0"
     update-check "1.5.3"
+
+expo-sharing@~10.3.0:
+  version "10.3.0"
+  resolved "https://registry.yarnpkg.com/expo-sharing/-/expo-sharing-10.3.0.tgz#4e8e2a50d1c22ea510699664bb6ce827cb06738e"
+  integrity sha512-j3kn43WCOykj7mlGTb5Q3Z56DG8raFdTk0A+rauA7lsmJ5Vakb2qGyTFZ7uwqwrML10EQIPAzNEcEYgpIzHKIw==
 
 expo-status-bar@~1.4.0:
   version "1.4.0"
@@ -8694,6 +8699,11 @@ react-native-screens@^3.15.0:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
+react-native-share-image@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-share-image/-/react-native-share-image-1.1.1.tgz#9709f40b8faebb8caea9f27d8c0afe06e5225a69"
+  integrity sha512-uCXwRIf5KB4+ioUhYA5OGWGFXlp1bcJHZxlUQ49wgCRj3QOBYmjBxT34nIinlEpi54PRm0LPgVfr9VhPpK32Lg==
+
 react-native-size-matters@^0.3.1:
   version "0.3.1"
   resolved "https://registry.yarnpkg.com/react-native-size-matters/-/react-native-size-matters-0.3.1.tgz#24d0cfc335a2c730f6d58bd7b43ea5a41be4b49f"
@@ -8706,6 +8716,11 @@ react-native-vector-icons@^9.2.0:
   dependencies:
     prop-types "^15.7.2"
     yargs "^16.1.1"
+
+react-native-view-shot@^3.5.0:
+  version "3.5.0"
+  resolved "https://registry.yarnpkg.com/react-native-view-shot/-/react-native-view-shot-3.5.0.tgz#129e92b893aca25918c6ecddc08ff44f29d70c27"
+  integrity sha512-+/a0zcEcCzAwuzQTU7CmwR1/bDcuy3Yj7093xI3Dhcjccb3FwxNiRyIBonsMSj3fQMmBcqV5d8DGCAeOJ5Ij3A==
 
 react-native-web@~0.18.7:
   version "0.18.7"
