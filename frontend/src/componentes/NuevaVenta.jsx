@@ -1,5 +1,5 @@
-import React,{useState, useEffect} from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image} from 'react-native';
+import React,{useState, useEffect, useRef } from 'react'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image, Share} from 'react-native';
 import { getTasks, SearchTasks, consecutivos, consPrefactura } from '../api';
 import DesTaskList from '../components/DesTaskList';
 import Layout from '../components/Layout';
@@ -10,10 +10,12 @@ import PedidoList from '../components/PedidoList';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { setGlobal, getGlobal } from '../components/context/user';
 import { aTablas } from '../api';
-import { CargadoConExito, progress } from "../../assets";
-//import { useState } from 'react';
+import { CargadoConExito, progress, Logo_color } from "../../assets";
+import { captureRef } from 'react-native-view-shot';
+
 
 function NuevaVenta({ navigation, route }) {
+  const viewRef = useRef();
   const [input, setInput] = useState('');
   const [pedido, setPedido] = useState([]);
   const [visible, setVisible] = useState(false);
@@ -27,9 +29,39 @@ function NuevaVenta({ navigation, route }) {
   const [avisoRojo, setAvisoRojo] = useState(false);
   const [notaRojo, setNotaRojo] = useState('');
   const [visiblevCargando, setVisiblevCargando] = useState(false);
+  const [recordatorio, setRecordatorio ] = useState(false);
+  const [confirmar, setConfirmar] = useState({
+    "NPedido": "NpreFactura",
+    "Cliente": "route.params.Ferreteria",
+    "Valor": "sumaTotal().replace(/,/g, '')",
+    "FechaDesde": "hoyDate",
+    "FechaHasta": "textDate"
+  });
+
+  const shareImage = async() => {
+    try {
+      const uri = await captureRef(viewRef, {
+        format: 'png',
+        quality: 0.7,
+
+      });
+      await Share.open({ url: uri})
+    } catch (errors) { 
+      console.error(errors);
+    }
+  };
+
   const showMode = (currentMode) => {
     setShow(true);
     setMode(currentMode);
+  };
+
+  const aLaTablaDeIngresados = async (cadena) => {
+    aTablas({
+      "tabla": "tabladeingresados",
+      "cadenaDeInsercion": cadena
+    })
+
   };
 
   const enviarPedido = async()=> {
@@ -46,6 +78,19 @@ function NuevaVenta({ navigation, route }) {
           let hoy = new Date(Date.now());
           let hoyDate = hoy.getDate() + '/' + (hoy.getMonth()+1) + '/' + hoy.getFullYear();
           let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
+          const dias = [
+            'domingo',
+            'lunes',
+            'martes',
+            'miércoles',
+            'jueves',
+            'viernes',
+            'sábado',
+          ];
+          const numeroDia = hoy.getDay();
+          const numeroDiaSeleccionado = new Date(textDate).getDay()
+          const nombreDia = dias[numeroDia];
+          const nombreDiaSeleccionado = dias[numeroDia + 1];
           let N = await consecutivos();
           let NpreFactura = N[0]["PreFactura"]
           let OdePedido = N[0]["ODePedido"] + 1
@@ -54,12 +99,7 @@ function NuevaVenta({ navigation, route }) {
             aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + OdePedido +  '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' +  '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.Descripcion + '\'' +',' + '\'' +  pedido.PVenta +  '\'' + ',' +  '\'' + pedido.Costo +  '\'' + ',' +  '\'' +  route.params.Cod  + '\'' + ',' +  '\'' + getGlobal('User').slice(1, -1) +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ',' +  '\'' + textDate +  '\'' + ',' +  '\'' + 'Contado' +  '\'' + ',' + '\'' + hora +  '\'' + ',' +  '\'' + 'F' +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ')'  + ','
           })
           aTablaDeIngresados = aTablaDeIngresados.slice(0, -1);
-
-            aTablas({
-              "tabla": "tabladeingresados",
-              "cadenaDeInsercion": aTablaDeIngresados
-            })
-
+            aLaTablaDeIngresados(aTablaDeIngresados)
             aTablas({
               "tabla": "tabladeestados",
               "cadenaDeInsercion": aEstados
@@ -71,9 +111,17 @@ function NuevaVenta({ navigation, route }) {
             setTimeout(() => {  
               setVisibleEnvioExitoso(false)
               cancelarPedido()
+              setRecordatorio(true)
             }, 2000);
             console.log(aTablaDeIngresados)
             console.log(aEstados)
+            setConfirmar({
+              "NPedido": NpreFactura,
+              "Cliente": route.params.Ferreteria,
+              "Valor": sumaTotal().replace(/,/g, ''),
+              "FechaDesde": nombreDia + ' ' + textDate,
+              "FechaHasta": "O a mas tardar un día habil despúes"
+            })
         }catch (error) {
           setVisiblevCargando(false)
           setNotaRojo('Error al enviar')
@@ -88,6 +136,38 @@ function NuevaVenta({ navigation, route }) {
     
   };
 
+  const ModalConfirmacion = ({visible, children}) => {
+    return (
+    <Modal transparent visible={visible}>
+        <View style={[styles.ModalBackground]}>
+          <View style={[styles.contenedorModal, {height: 330,}]} >
+            <View style={[{flexDirection: 'row', backgroundColor: '#193773', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Recordatorio</Text>
+              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setRecordatorio(false)}>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5}} ref={viewRef}>
+              <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
+              <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.NPedido}</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Cliente:</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.Cliente}</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>$ {confirmar.Valor}</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaDesde}</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaHasta}</Text>
+            </View>
+            
+            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>{shareImage()}}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Enviar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   const ModalAvisoRojo = ({visible, children}) => {
     return (
@@ -370,6 +450,7 @@ function NuevaVenta({ navigation, route }) {
       <ModalEnvioExitoso visible={visibleEnvioExitoso}></ModalEnvioExitoso>
       <ModalAvisoRojo visible={avisoRojo}></ModalAvisoRojo>
       <ModalCargando visible={visiblevCargando}></ModalCargando>
+      <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
     </View>
 
   )
