@@ -13,8 +13,8 @@ const Warning = ({visible, title, warningText, setMostrar}) =>{
               </TouchableOpacity>
             </View>
             <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>{warningText}</Text>
-          </View>
-        </View>
+            </View>
+            </View>
       </Modal>
     );
 };

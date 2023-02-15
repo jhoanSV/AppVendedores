@@ -12,6 +12,7 @@ import { setGlobal, getGlobal } from '../components/context/user';
 import { aTablas } from '../api';
 import { CargadoConExito, progress, Logo_color } from "../../assets";
 import { captureRef } from 'react-native-view-shot';
+import Warning from '../components/modal/Warning';
 //import { Share } from 'react-native-share';
 //import {shareImageFromUri} from 'react-native-share-image';
 import * as Sharing from 'expo-sharing';
@@ -72,7 +73,7 @@ function NuevaVenta({ navigation, route }) {
   const enviarPedido = async()=> {
       if (textDate === ''){
         setAvisoRojo(true)
-        setNotaRojo('Escoja una fecha de envio')
+        //setNotaRojo('Escoja una fecha de envio')
         setTimeout(() => {  
           setAvisoRojo(false)
         }, 2000);
@@ -93,9 +94,9 @@ function NuevaVenta({ navigation, route }) {
             'sábado',
           ];
           const numeroDia = hoy.getDay();
-          const numeroDiaSeleccionado = new Date(textDate).getDay()
+          const numeroDiaSeleccionado = new Date(date).getDay()
           const nombreDia = dias[numeroDia];
-          const nombreDiaSeleccionado = dias[numeroDia + 1];
+          const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
           let N = await consecutivos();
           let NpreFactura = N[0]["PreFactura"]
           let OdePedido = N[0]["ODePedido"] + 1
@@ -124,7 +125,7 @@ function NuevaVenta({ navigation, route }) {
               "NPedido": NpreFactura,
               "Cliente": route.params.Ferreteria,
               "Valor": sumaTotal().replace(/,/g, ''),
-              "FechaDesde": nombreDia + ' ' + textDate,
+              "FechaDesde": nombreDiaSeleccionado + ' ' + textDate,
               "FechaHasta": "O a mas tardar un día habil despúes"
             })
         }catch (error) {
@@ -176,7 +177,7 @@ function NuevaVenta({ navigation, route }) {
     );
   };
 
-  const ModalAvisoRojo = ({visible, children}) => {
+  /*const ModalAvisoRojo = ({visible, children}) => {
     return (
     <Modal transparent visible={visible}>
         <View style={[styles.ModalBackground]}>
@@ -195,7 +196,7 @@ function NuevaVenta({ navigation, route }) {
         </View>
       </Modal>
     );
-  };
+  };*/
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -231,7 +232,7 @@ function NuevaVenta({ navigation, route }) {
     );
   };
 
-  const ModalPopUpAvisoProducto = ({visible, children}) => {
+  /*const ModalPopUpAvisoProducto = ({visible, children}) => {
     const [showModal, setShowModal] = useState(visible);
     return (
     <Modal transparent visible={visible}>
@@ -248,7 +249,7 @@ function NuevaVenta({ navigation, route }) {
         </View>
       </Modal>
     );
-  };
+  };*/
 
   const ModalPopUpAviso = ({visible, children}) => {
     const [showModal, setShowModal] = useState(visible);
@@ -464,9 +465,12 @@ function NuevaVenta({ navigation, route }) {
       </View>
       <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
       <ModalPopUpAviso visible={visibleAviso}></ModalPopUpAviso>
-      <ModalPopUpAvisoProducto visible={visibleAvisoProducto}></ModalPopUpAvisoProducto>
+
+      <Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto}/>
+      <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo}/>
+
       <ModalEnvioExitoso visible={visibleEnvioExitoso}></ModalEnvioExitoso>
-      <ModalAvisoRojo visible={avisoRojo}></ModalAvisoRojo>
+      
       <ModalCargando visible={visiblevCargando}></ModalCargando>
       <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
     </View>

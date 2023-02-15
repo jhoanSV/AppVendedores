@@ -5,7 +5,7 @@ import { logoNameWhite, BackgroundAuth } from "../../assets";
 import { Input, Icon, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { validateUser } from '../api';
-
+import Warning from '../components/modal/Warning';
 //intento de hacer que recoja el codigo del vendedor
 import { setGlobal, getGlobal } from '../components/context/user';
 //Fin intento de hacer que recoja el codigo del vendedor
@@ -26,7 +26,7 @@ const LogIn = () => {
     //setVisible(false)
   //}, 5000);
 
-  const ModalPopUpAviso = ({visible, children}) => {
+  /*const ModalPopUpAviso = ({visible, children}) => {
     const [showModal, setShowModal] = useState(visible);
     return (
     <Modal transparent visible={visible}>
@@ -43,7 +43,7 @@ const LogIn = () => {
         </View>
       </Modal>
     );
-  };
+  };*/
 
   const handleChange = (name, value) => setTasks({...tasks, [name]: value});
   const handleSubmit = async() => {
@@ -111,7 +111,7 @@ const LogIn = () => {
                 </View>
             </View>
         </ImageBackground>
-        <ModalPopUpAviso visible={visible}></ModalPopUpAviso>
+        <Warning visible={visible} title={'Error al entrar'} warningText={'Usuario o contraseña incorrecta, intente de nuevo'} setMostrar={setVisible}/>                    
     </SafeAreaView>
   );
 };

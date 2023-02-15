@@ -43,7 +43,7 @@ function DetalleCliente({ navigation, route }) {
         <Text style={styles.text}>{route.params.Cod}</Text>
         <Text style={styles.subTitle}>Nit:</Text>
         <Text style={styles.text}>{route.params.Nit}</Text>
-        <Text style={styles.subTitle}>Ferretetia:</Text>
+        <Text style={styles.subTitle}>Empresa:</Text>
         <Text style={styles.text}>{route.params.Ferreteria}</Text>
         <Text style={styles.subTitle}>Contacto:</Text>
         <Text style={styles.text}>{route.params.Contacto}</Text>
