@@ -41,6 +41,10 @@ function NuevaVenta({ navigation, route }) {
     "FechaHasta": "textDate"
   });
 
+  useEffect(()=> {
+    handleSubmit('')
+  },[])
+
   const shareImage = async() => {
     try {
       const uri = await captureRef(viewRef, {
@@ -419,23 +423,25 @@ function NuevaVenta({ navigation, route }) {
         <Icon name='west'onPress={() => navigation.goBack()} style={styles.goBlack}/>
       </View>
       <View style={{flexDirection: 'row'}}>
-        <View>
-          <Text style={styles.subTitle}>Ferreteria:</Text>
-          <Text style={styles.text}>{route.params.Ferreteria}</Text>
+        <View style={{flexDirection: 'column'}}>
+          <View>
+            <Text style={styles.subTitle}>Empresa:</Text>
+            <Text style={styles.text}>{route.params.Ferreteria}</Text>
+          </View>
+          <View>
+            <Text style={styles.subTitle}>Dirección:</Text>
+            <Text style={styles.text}>{route.params.Direccion}</Text>
+          </View>
         </View>
+        <View style={{flexDirection: 'column'}}>
         <View>
-          <Text style={styles.subTitle}>Ruta:</Text>
-          <Text style={styles.text}>{route.params.Ruta}</Text>
-        </View>
-      </View>
-      <View style={{flexDirection: 'row'}}>
-        <View>
-          <Text style={styles.subTitle}>Dirección:</Text>
-          <Text style={styles.text}>{route.params.Direccion}</Text>
-        </View>
-        <View>
-          <Text style={styles.subTitle}>Barrio:</Text>
-          <Text style={styles.text}>{route.params.Barrio}</Text>
+            <Text style={styles.subTitle}>Ruta:</Text>
+            <Text style={styles.text}>{route.params.Ruta}</Text>
+          </View>
+          <View>
+            <Text style={styles.subTitle}>Barrio:</Text>
+            <Text style={styles.text}>{route.params.Barrio}</Text>
+          </View>
         </View>
       </View>
       <TextInput
