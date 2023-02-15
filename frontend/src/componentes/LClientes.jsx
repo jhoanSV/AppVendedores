@@ -9,22 +9,26 @@ import { setGlobal, getGlobal } from '../components/context/user';
 
 const LClientes = () => {
   const [clientes, setClientes] = useState([]);
+  const [cli, setCli] = useState([]);
   
-  const searClientesTodos = async(text) => {
-    const data = await SearClientesTodos(text);
+  const searClientesTodos = async() => {
+    const data = await SearClientesTodos(getGlobal('User'));
+    setCli(data);
     setClientes(data);
   };
   const loadClientes = async(text) => {
-    const data = await getClientes({
+    /*const data = await getClientes({
       "CodVendedor": getGlobal('User').slice(1, -1),
       "busqueda": text
-    });
-    setClientes(data);
+    });*/
+    const data = cli
+    const filtro = data.filter((data) => data.Nit.toString().toLowerCase().includes(text) || data.Ferreteria.toLowerCase().includes(text) || data.Contacto.toLowerCase().includes(text) || data.Ruta.toLowerCase().includes(text))
+    setClientes(filtro)
   };
   
   const handleSubmit = (text) => {
     if (text === ''){
-        searClientesTodos(getGlobal('User').slice(1, -1))
+        searClientesTodos()
     } else if (text !== '') {
         loadClientes(text)
     }
@@ -40,7 +44,7 @@ const LClientes = () => {
       <TextInput 
         style={ styles.input }
         placeholder="Buscar..."
-        onChangeText={text=> {handleSubmit(text)}}
+        onChangeText={text=> {handleSubmit(text.toLowerCase())}}
       />
         <View style={styles.container}>
           <Text style={[styles.text, {width: 100, margin: 5}]}>Nit</Text>

@@ -9,7 +9,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 
 const LPrecios = () => {
   const [tasks, setTasks] = React.useState([]);
-
+  const [pro, setPro] = React.useState([]);
   const [search, setSearch] = useState({
     Search: ''
   });
@@ -17,21 +17,20 @@ const LPrecios = () => {
   const loadTasks = async() => {
     const data = await getTasks();
     setTasks(data);
+    setPro(data);
   };
   
   const searchTasks = async(text) => {
-    const data = await SearchTasks(text);
-    setTasks(data);
+    /*const data = await getTasks(text);*/
+    const data = pro
+    const filtro = data.filter((data) => data.cod.toLowerCase().includes(text)||data.Descripcion.toLowerCase().includes(text) || data.SubCategoria.toLowerCase().includes(text))
+    setTasks(filtro);
   };
 
   useEffect(()=> {
     loadTasks()
   },[])
-  
-  
-
-  const handleChange = (name, value)=> setSearch({...search, [name]: value}) ;
-
+   
   const handleSubmit = (text) => {
     if (text === ''){
       loadTasks()
@@ -46,7 +45,7 @@ const LPrecios = () => {
       <TextInput 
         style={ styles.input }
         placeholder="Buscar..."
-        onChangeText={(text)=> handleSubmit(text)}//handleChange('Search',text) }
+        onChangeText={(text)=> handleSubmit(text.toLowerCase())}
       />
         <View style={styles.container}>
           <Text style={[styles.text, {width: 80, margin: 5}]}>Cod</Text>

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button} from 'rea
 import Layout from '../components/Layout';
 import { Icon } from 'react-native-elements'
 import { useState } from 'react';
+import Warning from '../components/modal/Warning';
 
 function DetalleCliente({ navigation, route }) {
   const cliente={
@@ -17,6 +18,21 @@ function DetalleCliente({ navigation, route }) {
     Barrio: route.params.Barrio,
     Ruta: route.params.Ruta,
     Nota: route.params.Nota
+  }
+  const [mostrar, setMostrar] = useState(false)
+  function colorNota(text){
+    if(text === 'BLOQUEADO'){
+      const obj = {color: '#D6320E' }
+      return obj;
+    }
+  }
+
+  const navegar=(text)=>{
+    if(text !== 'BLOQUEADO'){
+      navigation.navigate('NuevaVenta', cliente)
+    } else if (text === 'BLOQUEADO'){
+      setMostrar(true)
+    }
   }
   return (
     
@@ -44,12 +60,12 @@ function DetalleCliente({ navigation, route }) {
         <Text style={styles.subTitle}>Ruta:</Text>
         <Text style={styles.text}>{route.params.Ruta}</Text>
         <Text style={styles.subTitle}>Nota:</Text>
-        <Text style={styles.text}>{route.params.Nota}</Text>
+        <Text style={[styles.text, colorNota(route.params.Nota)]}>{route.params.Nota}</Text>
       </ScrollView>
-        <TouchableOpacity style={styles.buttonLogin} onPress={() => navigation.navigate('NuevaVenta', cliente)}>
+        <TouchableOpacity style={styles.buttonLogin} onPress={() => navegar(route.params.Nota)}>
           <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
         </TouchableOpacity>
-      
+        <Warning visible={mostrar} title={'Cliente bloqueado'} warningText={'Este cliente se encuentra bloqueado, por favor comunicarse con la oficina principal'} setMostrar={setMostrar}/>
     </View>
 
   )

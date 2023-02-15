@@ -27,7 +27,7 @@ router.get('/tasks', getTasks)
  *  summary: count all the products
  *  tags: [products]
  */
-router.get('/tasks/search/:cod', searchTasks)
+/*router.get('/tasks/search/:cod', searchTasks)*/
 
 /**
  * @swagger
@@ -36,7 +36,7 @@ router.get('/tasks/search/:cod', searchTasks)
  *  summary: Get a product by cod
  *  tags: [products]
  */
-router.get('/tasks/:cod', getTask)
+/*router.get('/tasks/:cod', getTask)*/
 
 /**
  * @swagger
@@ -45,11 +45,11 @@ router.get('/tasks/:cod', getTask)
  *  summary: save a new product
  *  tags: [products]
  */
-router.get('/tasks/clientes/:cod', clientes)
+/*router.get('/tasks/clientes/:cod', clientes)*/
 
 router.post('/tasks/validar', ValidarDatos)
 
-router.post('/tasks/BuscarClientes', BuscarClientes)
+/*router.post('/tasks/BuscarClientes', BuscarClientes)*/
 
 router.get('/tasks/BuscarClientesTodos/:cod', BuscarClientesTodos)
 
