@@ -11,7 +11,7 @@ import { useState } from 'react';
 const DesTasksItem = ({ agregarPedido, item, handleSubmit }) => {
   const AlPedido= ()=>{
     if(item.Nota !== 'AGOTADO'){
-      agregarPedido({cod: item.cod, Descripcion: item.Descripcion, UnidadOpaquete: item.UnidadOpaquete, EsUnidadOpaquete: item.EsUnidadOpaquete, SubCategoria: item.SubCategoria, PVenta: item.PVenta, Cantidad: 1, Costo: item.Costo, Nota: item.Nota});
+      agregarPedido({cod: item.cod, Descripcion: item.Descripcion, UnidadOpaquete: item.UnidadOpaquete, EsUnidadOpaquete: item.EsUnidadOpaquete, SubCategoria: item.SubCategoria, PVenta: item.PVenta, Cantidad: item.EsUnidadOpaquete, Costo: item.Costo, Nota: item.Nota});
       handleSubmit('')
     }
   }

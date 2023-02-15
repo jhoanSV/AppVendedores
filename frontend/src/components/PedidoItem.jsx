@@ -13,10 +13,11 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
   };
 
   const CambiarCantidad=(texto)=>{
-    if(texto=== ''){
-      setInput('')
-    } else if(texto!== ''){
-      modificarCantidad(item.cod, parseInt(texto))
+    if(input=== ''){
+      modificarCantidad(item.cod, 0, item.EsUnidadOpaquete)
+      setInput('' + item.Cantidad)
+    } else if(input!== ''){
+      modificarCantidad(item.cod, parseInt(input), item.EsUnidadOpaquete)
       setInput('' + item.Cantidad)
     }
   }
@@ -53,14 +54,15 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
                         backgroundColor: '#D9D9D9'}}
                 placeholder="0"
                 value={input}
-                onChangeText={text=>{CambiarCantidad(text)}}
+                onChangeText={text=>{setInput(text)}}
+                onEndEditing={text=>{CambiarCantidad(text)}}
               />
             </View>
             <View>
-              <TouchableOpacity style={styles.botonMasMenos} onPress={()=>{aumentarCantidad(item.cod); setInput('' + item.Cantidad)}}>
+              <TouchableOpacity style={styles.botonMasMenos} onPress={()=>{aumentarCantidad(item.cod, item.EsUnidadOpaquete); setInput('' + item.Cantidad)}}>
                 <Text style={{fontSize: 20, fontWeight: 'bold', color: '#FFFF'}}>+</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.botonMasMenos} onPress={()=>{disminuirCantidad(item.cod);setInput('' + item.Cantidad)}}>
+              <TouchableOpacity style={styles.botonMasMenos} onPress={()=>{disminuirCantidad(item.cod, item.EsUnidadOpaquete);setInput('' + item.Cantidad)}}>
                 <Text style={{fontSize: 20, fontWeight: 'bold', color: '#FFFF'}}>-</Text>
               </TouchableOpacity>
             </View>

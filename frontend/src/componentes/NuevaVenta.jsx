@@ -345,18 +345,18 @@ function NuevaVenta({ navigation, route }) {
     }
   };
   
-  const aumentarCantidad=(Cod)=>{
+  const aumentarCantidad=(Cod, paquete)=>{
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-      pedido[index].Cantidad = pedido[index].Cantidad + 1
+      pedido[index].Cantidad = pedido[index].Cantidad + paquete
       handleSubmit('')
     }
   };
   
-  const disminuirCantidad=(Cod)=>{
+  const disminuirCantidad=(Cod, paquete)=>{
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-      pedido[index].Cantidad = pedido[index].Cantidad - 1
+      pedido[index].Cantidad = pedido[index].Cantidad - paquete
       handleSubmit('')
       if(pedido[index].Cantidad<1){
         pedido.splice(index, 1)
@@ -365,26 +365,37 @@ function NuevaVenta({ navigation, route }) {
     }
   };
 
-  const modificarCantidad=(Cod,Cantidad)=>{
+  const modificarCantidad=(Cod,Cantidad,paquete)=>{
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-      pedido[index].Cantidad = Cantidad
+      var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
+      pedido[index].Cantidad = NuevaCantidad
       handleSubmit('')
+      if(pedido[index].Cantidad<1){
+        pedido.splice(index, 1)
+        handleSubmit('')
+      }
     }
   };
 
   const [tasks, setTasks] = React.useState([]);
-    const searchTasks = async(text) => {
-    const data = await SearchTasks(text);
-    setTasks(data);
+  const [pro, setPro] = React.useState([]);
+
+  const searchTasks = async(text) => {
+    /*const data = await SearchTasks(text);
+    setTasks(data);*/
+    const data = pro
+    const filtro = data.filter((data) => data.cod.toLowerCase().includes(text)||data.Descripcion.toLowerCase().includes(text) || data.SubCategoria.toLowerCase().includes(text))
+    setTasks(filtro);
   };
-  const handleSubmit = (text) => {
+  const handleSubmit = async(text) => {
     if (text === ''){
       setInput(text)
-      setTasks([])
+      const data = await getTasks();
+      setPro(data)
     } else {
       setInput(text)
-      searchTasks(text)
+      searchTasks(text.toLowerCase())
     }
   };
   function seachInput (){
