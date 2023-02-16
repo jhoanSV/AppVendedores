@@ -1,9 +1,13 @@
 import React from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button, Dimensions, SafeAreaView} from 'react-native';
 import Layout from '../components/Layout';
 import { Icon } from 'react-native-elements'
 import { useState } from 'react';
 import Warning from '../components/modal/Warning';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 
 function DetalleCliente({ navigation, route }) {
   const cliente={
@@ -36,8 +40,9 @@ function DetalleCliente({ navigation, route }) {
   }
   return (
     
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Icon name='west'onPress={() => navigation.goBack()} style={styles.goBlack}/>
+      <View style={{height: windowHeight*0.78}}>
       <ScrollView style={styles.scroll}>
         <Text style={styles.subTitle}>Cod:</Text>
         <Text style={styles.text}>{route.params.Cod}</Text>
@@ -62,11 +67,12 @@ function DetalleCliente({ navigation, route }) {
         <Text style={styles.subTitle}>Nota:</Text>
         <Text style={[styles.text, colorNota(route.params.Nota)]}>{route.params.Nota}</Text>
       </ScrollView>
-        <TouchableOpacity style={styles.buttonLogin} onPress={() => navegar(route.params.Nota)}>
-          <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
-        </TouchableOpacity>
-        <Warning visible={mostrar} title={'Cliente bloqueado'} warningText={'Este cliente se encuentra bloqueado, por favor comunicarse con la oficina principal'} setMostrar={setMostrar}/>
-    </View>
+      </View>
+      <TouchableOpacity style={styles.buttonLogin} onPress={() => navegar(route.params.Nota)}>
+        <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
+      </TouchableOpacity>
+      <Warning visible={mostrar} title={'Cliente bloqueado'} warningText={'Este cliente se encuentra bloqueado, por favor comunicarse con la oficina principal'} setMostrar={setMostrar}/>
+    </SafeAreaView>
 
   )
 }
@@ -89,7 +95,7 @@ const styles = StyleSheet.create({
   },
   scroll : {
     flex: 1,
-    paddingBottom: 540
+    //paddingBottom: windowHeight*0.78,//540
   },
   goBlack: {
     float: 'left'
@@ -101,12 +107,7 @@ const styles = StyleSheet.create({
     //justifyContent:'center',
     alignItems:'center',
   },
-  buttons: {
-    width: 255,
-    justifyContent:'center',
-    alignItems:'center',
-    //position:'absolute',
-  }
+  
 });
 
 export default DetalleCliente;

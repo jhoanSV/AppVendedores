@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet} from 'react-native';
+import { View, Text, FlatList, StyleSheet, Dimensions} from 'react-native';
 import DesTasksItem from './DesTasksItem';
+
+  const windowWidth = Dimensions.get('window').width;
+  const windowHeight = Dimensions.get('window').height;
 
 const DesTaskList =({ agregarPedido, tasks, handleSubmit}) => {
   const renderItem=({ item })=>{
@@ -18,8 +21,8 @@ const DesTaskList =({ agregarPedido, tasks, handleSubmit}) => {
 
 const styles = StyleSheet.create({
     container: {
-        height: 90,
-        width: 320,
+        height: windowHeight* 0.13, //90,
+        width: windowWidth * 0.94,//320,
         margin: 12,
         marginTop: 0,
         borderWidth: 0,

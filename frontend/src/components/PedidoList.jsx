@@ -1,6 +1,9 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet} from 'react-native';
+import { View, Text, FlatList, StyleSheet, Dimensions, ScrollView} from 'react-native';
 import PedidoItem from './PedidoItem';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const PedidoList =({ Pedido, aumentarCantidad, disminuirCantidad, modificarCantidad }) => {
   const renderItem=({ item })=>{
@@ -8,18 +11,20 @@ const PedidoList =({ Pedido, aumentarCantidad, disminuirCantidad, modificarCanti
   }  
   
   return (
+      <ScrollView horizontal={true} style={styles.container}>
         <FlatList
           data={Pedido}
           renderItem={renderItem}
-          style={styles.container}
-        />    
+          
+        />
+      </ScrollView>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        height: 320,
-        width: 320,
+        height: windowHeight*0.49,//320,
+        width: windowWidth * 0.94,//320,
         margin: 12,
         marginTop: 0,
         borderWidth: 0,

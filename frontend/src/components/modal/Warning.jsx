@@ -1,5 +1,8 @@
 import React, {useState} from "react";
-import {StyleSheet, Text, View, Modal, TouchableOpacity} from "react-native";
+import {StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions} from "react-native";
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const Warning = ({visible, title, warningText, setMostrar}) =>{
     return (
@@ -14,7 +17,10 @@ const Warning = ({visible, title, warningText, setMostrar}) =>{
             </View>
             <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>{warningText}</Text>
             </View>
-            </View>
+            <TouchableOpacity style={[styles.buttonLogin]} onPress={()=>{setMostrar(false)}}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entendido</Text>
+            </TouchableOpacity>
+          </View>
       </Modal>
     );
 };
@@ -39,8 +45,17 @@ const styles = StyleSheet.create({
   },
   contenedorModal: {
     backgroundColor: '#FFFF',
-    width: 300,
-    height: 300,
+    width: windowWidth*0.85, //300,
+    height: windowHeight*0.436,//300,
+  },
+
+  buttonLogin : {
+    borderRadius: 40, 
+    margin: 4,
+    position: 'relative',
+    bottom: windowHeight*0.07,
+    width: windowWidth*0.827,//290,
+    backgroundColor: '#D6320E'
   },
 });
 

@@ -1,10 +1,13 @@
 import React, {useState, useEffect} from 'react'
-import { View, Text, StyleSheet, TextInput } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Dimensions} from 'react-native'
 import { TouchableOpacity, onLongPress } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 
 import 'intl';
 import 'intl/locale-data/jsonp/en';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantidad }) => {
   const [input, setInput] = useState('' + item.Cantidad);
@@ -36,14 +39,14 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
     <TouchableOpacity>
         <View style={styles.itemContainer}>
           <TouchableOpacity onPress={() => navigation.navigate('DetalleProducto', {cod: item.cod, Descripcion: item.Descripcion, UnidadOpaquete: item.UnidadOpaquete, EsUnidadOpaquete: item.EsUnidadOpaquete,SubCategoria: item.SubCategoria,  PVenta: item.PVenta, Nota: item.Nota})}>
-            <View style={{flexDirection: 'column'}}>
+            <View style={{flexDirection: 'column', width: windowWidth*0.67}}>
               <Text style={[styles.itemText, {width: 80, fontWeight: 'bold'}]}>{item.cod}</Text>
               <Text style={[styles.itemText, {width: 200}]}>{item.Descripcion}</Text>
               <Text style={[styles.itemText, {width: 100}]}>PU: $ {formatNumber(item.PVenta)}</Text>
               <Text style={[styles.itemText, {width: 100}]}>PT: $ {valorTotal(item.Cantidad, item.PVenta)}</Text>
             </View>
           </TouchableOpacity>
-          <View style={{flexDirection: 'row', justifyContent: 'center', alignItems:'center'}}>
+          <View style={{flexDirection: 'row', justifyContent: 'center', alignItems:'center', left: windowWidth*0.01 }}>
             <View>
               <TextInput
                 keyboardType="numeric"

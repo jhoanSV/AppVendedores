@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import Constants from 'expo-constants';
-import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, ImageBackground, Modal, TouchableOpacity } from "react-native";
+import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, ImageBackground, Modal, TouchableOpacity , Dimensions} from "react-native";
 import { logoNameWhite, BackgroundAuth } from "../../assets";
 import { Input, Icon, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
@@ -9,6 +9,8 @@ import Warning from '../components/modal/Warning';
 //intento de hacer que recoja el codigo del vendedor
 import { setGlobal, getGlobal } from '../components/context/user';
 //Fin intento de hacer que recoja el codigo del vendedor
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const LogIn = () => {
   const navigation = useNavigation()
@@ -71,43 +73,44 @@ const LogIn = () => {
                 <View style={styles.container}>
                         <Image style={styles.logo} source={ logoNameWhite }/>
                     <View style={ styles.inputs } >
-                    <Text style={styles.inputText}>Usuario</Text>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Ingrese su usuario"
-                        onChangeText={text => handleChange("Email",text)}
-                        value={tasks.Email}
-                    />
-                    <Text style={styles.inputText}>Contraseña</Text>
-                    
-                    <TextInput
-                        style={styles.input}
-                        secureTextEntry={!showPasswords}
-                        placeholder="Ingrese su contraseña"
-                        onChangeText={text => handleChange("Contraseña",text)}
-                        value={tasks.Contraseña}
-                    />
-                    <View style={styles.icon}>
-                    <Icon
-                        type='material-community'
-                        name={showPasswords?'eye-off-outline':'eye-outline'}
-                        onPress={() =>{
-                            setShowPasswords(!showPasswords)
-                          }}/>
+                      <Text style={styles.inputText}>Usuario</Text>
+                      <TextInput
+                          style={styles.input}
+                          placeholder="Ingrese su usuario"
+                          onChangeText={text => handleChange("Email",text)}
+                          value={tasks.Email}
+                      />
+                      <Text style={styles.inputText}>Contraseña</Text>
+                      
+                        <TextInput
+                            style={styles.input}
+                            secureTextEntry={!showPasswords}
+                            placeholder="Ingrese su contraseña"
+                            onChangeText={text => handleChange("Contraseña",text)}
+                            value={tasks.Contraseña}
+                        />
+                        <View style={styles.icon}>
+                      
+                      <Icon
+                          type='material-community'
+                          name={showPasswords?'eye-off-outline':'eye-outline'}
+                          onPress={() =>{
+                              setShowPasswords(!showPasswords)
+                            }}/>
+                      </View>
                     </View>
+                    <View style={styles.buttons}>
+                      <Button 
+                        buttonStyle={[ styles.buttonLogin, {backgroundColor: '#F2CB05'}]} 
+                        title="Iniciar sesión" 
+                        onPress={handleSubmit}
+                      />
+                      <Button 
+                        buttonStyle={[ styles.buttonLogin, {backgroundColor: '#D0D9F2'}]} 
+                        title="Cancelar" 
+                        onPress={limpiar}
+                      />
                     </View>
-                        <View style={styles.buttons}>
-                            <Button 
-                              buttonStyle={[ styles.buttonLogin, {backgroundColor: '#F2CB05'}]} 
-                              title="Iniciar sesión" 
-                              onPress={handleSubmit}
-                            />
-                            <Button 
-                              buttonStyle={[ styles.buttonLogin, {backgroundColor: '#D0D9F2'}]} 
-                              title="Cancelar" 
-                              onPress={limpiar}
-                            />
-                        </View>
                 </View>
             </View>
         </ImageBackground>
@@ -120,8 +123,8 @@ const handlerShowPassword = () =>{
   };
 const styles = StyleSheet.create({
   input: {
-    height: 40,
-    width: 255,
+    height: windowHeight*0.0581,//40,
+    width: windowWidth * 0.78,//255,
     margin: 12,
     borderWidth: 1,
     padding: 10,
@@ -134,55 +137,52 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingBottom: 5,
     color:  '#FFFF',
-    left: 12,
+    left: windowWidth * 0.031,//12,
   },
   container: {
-    width: 305,
-    height: 550,
-    left: 30,
-    top: 15,
+    position: 'absolute',
+    width: windowWidth * 0.87,//305,
+    height: windowHeight*0.8,//550,
+    left: windowWidth * 0.065,//30,
+    top: windowHeight*0.1,//15,
     backgroundColor: '#193773',
-    
+    alignItems: 'center',
     borderWidth: 4,
     borderColor : '#F2CB05',
     borderRadius: 20,
   },
   logo: {
-    width: 270,
-    height: 80,
-    left: 15,
+    width: windowWidth * 0.77,//270,
+    height: windowHeight*0.116,//80,
+    //left: 15,
     top: 15,
   },
   inputs: {
     left: 5,
-    top: 80,
+    top: windowHeight*0.116,//80,
   },
   buttons: {
-    width: 255,
-    left: 17,
-    top: 150,
+    position: 'absolute',
+    width: windowWidth * 0.78,//255,
+    //left: 17,
+    //top: windowHeight*0.20,//150,
+    bottom: windowHeight*0.01,//-150
   },
-  button: {
-    width: 255,
-    Color: '#F2CB05',
-    left: 17,
-    top: 450,
-    borderRadius: 40,
-},
+  
 image: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
 },
 dark: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     backgroundColor:'rgba(0,0,0,0.5)',
 },
 icon: {
-    position: "absolute",
+    position: 'relative',
     zIndex: 1,
-    left: 230,
-    top: 133,
+    left: windowWidth * 0.33,//230,
+    top: windowHeight*-0.062,//-42//windowHeight*0.193,//133,
   },
 buttonLogin : {
   borderRadius: 40, 
@@ -193,12 +193,6 @@ ModalBackground: {
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
   justifyContent: 'center',
   alignItems: 'center',
-},
-contenedorModal: {
-  backgroundColor: '#FFFF',
-  width: 300,
-  height: 300,
-  
 },
 subTitle: {
   fontSize: 20, 

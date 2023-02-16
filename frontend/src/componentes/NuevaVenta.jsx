@@ -1,5 +1,5 @@
 import React,{useState, useEffect, useRef, Fragment } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image, Dimensions} from 'react-native';
 import { getTasks, SearchTasks, consecutivos, consPrefactura } from '../api';
 import DesTaskList from '../components/DesTaskList';
 import Layout from '../components/Layout';
@@ -16,6 +16,9 @@ import Warning from '../components/modal/Warning';
 //import { Share } from 'react-native-share';
 //import {shareImageFromUri} from 'react-native-share-image';
 import * as Sharing from 'expo-sharing';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 function NuevaVenta({ navigation, route }) {
   const viewRef = useRef();
@@ -419,31 +422,30 @@ function NuevaVenta({ navigation, route }) {
   }
   return (
     <View style={styles.container}>
-      <View style={{position: 'absolute', right: 5, margin: 5}}>
-        <Icon name='west'onPress={() => navigation.goBack()} style={styles.goBlack}/>
-      </View>
-      <View style={{flexDirection: 'row'}}>
-        <View style={{flexDirection: 'column'}}>
-          <View>
-            <Text style={styles.subTitle}>Empresa:</Text>
-            <Text style={styles.text}>{route.params.Ferreteria}</Text>
+      <ScrollView horizontal={true}>
+        <View style={{flexDirection: 'row'}}>
+          <View style={{flexDirection: 'column'}}>
+            <View>
+              <Text style={styles.subTitle}>Empresa:</Text>
+              <Text style={styles.text}>{route.params.Ferreteria}</Text>
+            </View>
+            <View>
+              <Text style={styles.subTitle}>Dirección:</Text>
+              <Text style={styles.text}>{route.params.Direccion}</Text>
+            </View>
           </View>
+          <View style={{flexDirection: 'column'}}>
           <View>
-            <Text style={styles.subTitle}>Dirección:</Text>
-            <Text style={styles.text}>{route.params.Direccion}</Text>
+              <Text style={styles.subTitle}>Ruta:</Text>
+              <Text style={styles.text}>{route.params.Ruta}</Text>
+            </View>
+            <View>
+              <Text style={styles.subTitle}>Barrio:</Text>
+              <Text style={styles.text}>{route.params.Barrio}</Text>
+            </View>
           </View>
         </View>
-        <View style={{flexDirection: 'column'}}>
-        <View>
-            <Text style={styles.subTitle}>Ruta:</Text>
-            <Text style={styles.text}>{route.params.Ruta}</Text>
-          </View>
-          <View>
-            <Text style={styles.subTitle}>Barrio:</Text>
-            <Text style={styles.text}>{route.params.Barrio}</Text>
-          </View>
-        </View>
-      </View>
+      </ScrollView>
       <TextInput
         style={ seachInput() }
         placeholder="Buscar producto..."
@@ -454,7 +456,8 @@ function NuevaVenta({ navigation, route }) {
       <View>
         <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
       </View>
-      <View style={{backgroundColor:'#F2CB05', height: 40, alignItems:'flex-end'}}>
+
+      <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
         <Text style={[styles.subTitle,{right: 0}]}>Total: {sumaTotal()} </Text>
       </View>
       <View style={{flexDirection: 'row'}}>
@@ -486,7 +489,7 @@ function NuevaVenta({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container : {
-    padding: 10,
+    //padding: 10,
     paddingBottom: 10
   },
   subTitle: {
@@ -511,7 +514,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     margin: 2,
     bottom: 0,
-    width: 170,
+    width: windowWidth * 0.49,//170,
     //alignItems:'center',
   },
   buttons: {
@@ -522,7 +525,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: 320,
+    width: windowWidth * 0.94,//320,
     margin: 12,
     //marginBottom: 0,
     padding: 10,
@@ -535,7 +538,7 @@ const styles = StyleSheet.create({
   },
   input2: {
     height: 40,
-    width: 320,
+    width: windowWidth * 0.94,//320,
     margin: 12,
     marginBottom: 0,
     padding: 10,
