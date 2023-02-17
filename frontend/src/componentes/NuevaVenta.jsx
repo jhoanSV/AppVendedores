@@ -109,7 +109,7 @@ function NuevaVenta({ navigation, route }) {
           let OdePedido = N[0]["ODePedido"] + 1
           const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + route.params.Ferreteria + '\'' + ',' + '\'' + hoyDate + '\'' + ',' + '\'' + sumaTotal().replace(/,/g, '') + '\'' + ',' + '\'' +'Contado' + '\'' +',' + '\'' + 'Ingresado' + '\'' + ',' + '\'' + '' + '\'' + ',' + '\'' + hoyDate + '\'' +',' + '\'' + textDate + '\'' + ',' + '\'' + '' + '\'' +')';
           pedido.map((pedido, index) => {
-            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + OdePedido +  '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' +  '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.Descripcion + '\'' +',' + '\'' +  pedido.PVenta +  '\'' + ',' +  '\'' + pedido.Costo +  '\'' + ',' +  '\'' +  route.params.Cod  + '\'' + ',' +  '\'' + getGlobal('User').slice(1, -1) +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ',' +  '\'' + textDate +  '\'' + ',' +  '\'' + 'Contado' +  '\'' + ',' + '\'' + hora +  '\'' + ',' +  '\'' + 'F' +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ')'  + ','
+            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + OdePedido +  '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' +  '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.Descripcion + '\'' +',' + '\'' +  pedido.PVenta +  '\'' + ',' +  '\'' + pedido.Costo +  '\'' + ',' +  '\'' +  route.params.Cod  + '\'' + ',' +  '\'' + getGlobal('User') +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ',' +  '\'' + textDate +  '\'' + ',' +  '\'' + 'Contado' +  '\'' + ',' + '\'' + hora +  '\'' + ',' +  '\'' + 'F' +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ')'  + ','
           })
           aTablaDeIngresados = aTablaDeIngresados.slice(0, -1);
             aLaTablaDeIngresados(aTablaDeIngresados)
@@ -184,27 +184,6 @@ function NuevaVenta({ navigation, route }) {
     );
   };
 
-  /*const ModalAvisoRojo = ({visible, children}) => {
-    return (
-    <Modal transparent visible={visible}>
-        <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal]}>
-            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
-              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setAvisoRojo(false)}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>{notaRojo}</Text>
-            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#D6320E'}]} onPress={()=>{setAvisoRojo(false)}}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entendido</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-    );
-  };*/
-
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(false); //Platform.OS === 'android'
@@ -238,25 +217,6 @@ function NuevaVenta({ navigation, route }) {
       </Modal>
     );
   };
-
-  /*const ModalPopUpAvisoProducto = ({visible, children}) => {
-    const [showModal, setShowModal] = useState(visible);
-    return (
-    <Modal transparent visible={visible}>
-        <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal]}>
-            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
-              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setVisibleAvisoProducto(false)}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>Producto repetido, verifique el pedido</Text>
-          </View>
-        </View>
-      </Modal>
-    );
-  };*/
 
   const ModalPopUpAviso = ({visible, children}) => {
     const [showModal, setShowModal] = useState(visible);
@@ -345,6 +305,7 @@ function NuevaVenta({ navigation, route }) {
     var index = pedido.map(codigo => codigo.cod).indexOf(objeto.cod);
     if(index === -1) {
       pedido.push(objeto)
+      console.log(objeto)
     } else if(index !== -1) {
       setVisibleAvisoProducto(true)
       setTimeout(() => {  

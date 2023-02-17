@@ -30,25 +30,6 @@ const LogIn = () => {
     setVisible(false)
   }, 5000);
 
-  /*const ModalPopUpAviso = ({visible, children}) => {
-    const [showModal, setShowModal] = useState(visible);
-    return (
-    <Modal transparent visible={visible}>
-        <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal]}>
-            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
-              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setVisible(false)}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>Usuario o contraseña incorrecta, intente de nuevo</Text>
-          </View>
-        </View>
-      </Modal>
-    );
-  };*/
-
   const handleChange = (name, value) => setTasks({...tasks, [name]: value});
   const handleSubmit = async() => {
     setCargando(true)
