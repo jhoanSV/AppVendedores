@@ -1,15 +1,16 @@
 import React, {useState} from "react";
-import {StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions} from "react-native";
+import {StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions, Image} from 'react-native';
+import { progress } from '../../../assets';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const ModalCargando = ({visible, children}) => {
+const Loading = ({visible, mensaje}) => {
     return (
     <Modal transparent visible={visible}>
         <View style={[styles.ModalBackground]}>
           <View style={[styles.contenedorModal, { justifyContent: 'center', alignItems: 'center', borderRadius: 60 }]}>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#193773'}]}>Enviando...</Text>
+            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#193773'}]}>{mensaje}</Text>
             <Image style={[styles.logo]} source={ progress } resizeMode='contain' />
           </View>
         </View>
@@ -24,11 +25,6 @@ const ModalCargando = ({visible, children}) => {
       margin: 8,
       color: '#193773',
     },
-    text: {
-      fontSize: 16,  
-      marginLeft: 8,
-      color: 'black',
-    },
       ModalBackground: {
       flex: 1,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -40,15 +36,6 @@ const ModalCargando = ({visible, children}) => {
       width: windowWidth*0.85, //300,
       height: windowHeight*0.436,//300,
     },
-  
-    buttonLogin : {
-      borderRadius: 40, 
-      margin: 4,
-      position: 'relative',
-      bottom: windowHeight*0.07,
-      width: windowWidth*0.827,//290,
-      backgroundColor: '#D6320E'
-    },
     logo: {
         position: 'relative',
         width: windowWidth*0.77,//270,
@@ -56,4 +43,4 @@ const ModalCargando = ({visible, children}) => {
       },
   });
   
-  export default Warning;
+  export default Loading;

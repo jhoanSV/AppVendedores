@@ -6,6 +6,7 @@ import { Input, Icon, Button } from 'react-native-elements';
 import { useNavigation } from '@react-navigation/native';
 import { validateUser } from '../api';
 import Warning from '../components/modal/Warning';
+import Loading from '../components/modal/Loading';
 //intento de hacer que recoja el codigo del vendedor
 import { setGlobal, getGlobal } from '../components/context/user';
 //Fin intento de hacer que recoja el codigo del vendedor
@@ -19,14 +20,15 @@ const LogIn = () => {
   const [password, setPassword] = useState('');
   const [User, setUser] = useState();
   const [visible, setVisible] = useState(false);
+  const [cargando, setCargando] = useState(false);
   const [tasks, setTasks] = useState({
     "Email" : text,
     "Contraseña" : password
   });
 
-  //setTimeout(() => {  
-    //setVisible(false)
-  //}, 5000);
+  setTimeout(() => {  
+    setVisible(false)
+  }, 5000);
 
   /*const ModalPopUpAviso = ({visible, children}) => {
     const [showModal, setShowModal] = useState(visible);
@@ -49,6 +51,7 @@ const LogIn = () => {
 
   const handleChange = (name, value) => setTasks({...tasks, [name]: value});
   const handleSubmit = async() => {
+    setCargando(true)
     const valor = await validateUser(tasks)
     if(valor.length === 1){
       const usuario = JSON.stringify(valor[0]["Cod"])
@@ -56,8 +59,10 @@ const LogIn = () => {
       navigation.navigate('Main')
       setGlobal({ User : usuario })
       console.log(usuario)
+      setCargando(false)
     } else {
       setVisible(true)
+      setCargando(false)
       setTimeout(() => {  
         setVisible(false)
       }, 5000);//console.log("El usuario o la contraseña son incorrectos")
@@ -89,14 +94,13 @@ const LogIn = () => {
                             onChangeText={text => handleChange("Contraseña",text)}
                             value={tasks.Contraseña}
                         />
-                        <View style={styles.icon}>
-                      
-                      <Icon
+                      <View style={styles.icon}>
+                        <Icon
                           type='material-community'
                           name={showPasswords?'eye-off-outline':'eye-outline'}
                           onPress={() =>{
                               setShowPasswords(!showPasswords)
-                            }}/>
+                        }}/>
                       </View>
                     </View>
                     <View style={styles.buttons}>
@@ -115,6 +119,7 @@ const LogIn = () => {
             </View>
         </ImageBackground>
         <Warning visible={visible} title={'Error al entrar'} warningText={'Usuario o contraseña incorrecta, intente de nuevo'} setMostrar={setVisible}/>                    
+        <Loading visible={cargando} mensaje={'Validando...'}/>
     </SafeAreaView>
   );
 };
@@ -180,8 +185,9 @@ dark: {
 },
 icon: {
     position: 'relative',
+    width: 25,
     zIndex: 1,
-    left: windowWidth * 0.33,//230,
+    left: windowWidth * 0.70,//230,
     top: windowHeight*-0.062,//-42//windowHeight*0.193,//133,
   },
 buttonLogin : {
