@@ -46,7 +46,11 @@ function NuevaVenta({ navigation, route }) {
 
   useEffect(()=> {
     handleSubmit('')
-  },[])
+  },[]);
+
+  function formatNumber(number){
+    return new Intl.NumberFormat().format(number);
+  };
 
   const shareImage = async() => {
     try {
@@ -165,10 +169,10 @@ function NuevaVenta({ navigation, route }) {
               <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
               <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
               <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.NPedido}</Text>
-              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Cliente:</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
               <Text style={[styles.text, {color: '#193773'}]}>{confirmar.Cliente}</Text>
               <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
-              <Text style={[styles.text, {color: '#193773'}]}>$ {confirmar.Valor}</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>$ {formatNumber(confirmar.Valor)}</Text>
               <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
               <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaDesde}</Text>
               <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaHasta}</Text>
@@ -305,7 +309,6 @@ function NuevaVenta({ navigation, route }) {
     var index = pedido.map(codigo => codigo.cod).indexOf(objeto.cod);
     if(index === -1) {
       pedido.push(objeto)
-      console.log(objeto)
     } else if(index !== -1) {
       setVisibleAvisoProducto(true)
       setTimeout(() => {  
