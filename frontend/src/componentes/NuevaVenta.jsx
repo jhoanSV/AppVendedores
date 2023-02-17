@@ -415,7 +415,11 @@ function NuevaVenta({ navigation, route }) {
   }
   function seachDesplegable (){
     if(input !== ''){
-      return <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
+      return (
+        <ScrollView horizontal={true} style={styles.container2}>
+          <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
+        </ScrollView>
+        )
     } else {
       return
     }
@@ -567,6 +571,19 @@ const styles = StyleSheet.create({
     width: 270,
     height: 270,
   },
+  container2: {
+    height: windowHeight* 0.13, //90,
+    width: windowWidth * 0.94,//320,
+    margin: 12,
+    marginTop: 0,
+    borderWidth: 0,
+    padding: 0,
+    backgroundColor: '#ffff',
+    borderColor: '#F2CB05',
+    borderWidth: 2,
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20,
+}
 });
 
 export default NuevaVenta;

@@ -11,13 +11,11 @@ const PedidoList =({ Pedido, aumentarCantidad, disminuirCantidad, modificarCanti
   }  
   
   return (
-      <ScrollView horizontal={true} style={styles.container}>
         <FlatList
           data={Pedido}
           renderItem={renderItem}
-          
+          style={styles.container}
         />
-      </ScrollView>
     );
 };
 

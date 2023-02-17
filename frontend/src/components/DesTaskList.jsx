@@ -14,8 +14,7 @@ const DesTaskList =({ agregarPedido, tasks, handleSubmit}) => {
         <FlatList
           data={tasks}
           renderItem={renderItem}
-          style={styles.container}
-        />    
+        />
     );
 };
 
