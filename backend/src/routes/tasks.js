@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTasks, searchTasks, getTask, clientes, ValidarDatos, BuscarClientes, BuscarClientesTodos, updateTasks, aTablas, consecutivos, consecutivoPrefactura } from '../controllers/tasks';
+import { getTasks, ValidarDatos, BuscarClientesTodos, aTablas, consecutivos } from '../controllers/tasks';
 
 
 const router = Router();
@@ -49,15 +49,13 @@ router.get('/tasks', getTasks)
 
 router.post('/tasks/validar', ValidarDatos)
 
-/*router.post('/tasks/BuscarClientes', BuscarClientes)*/
-
 router.get('/tasks/BuscarClientesTodos/:cod', BuscarClientesTodos)
 
 router.post('/tasks/aTablas', aTablas)
 
 router.post('/tasks/con', consecutivos)
 
-router.post('/tasks/consecutivoPrefactura/:con', consecutivoPrefactura)
+/*router.post('/tasks/consecutivoPrefactura/:con', consecutivoPrefactura)*/
 
 
 export default router

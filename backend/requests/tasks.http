@@ -14,8 +14,8 @@ POST {{api}}/validar
 Content-Type: application/json
 
 {
-    "Email": "prueba1",
-    "Contraseña": "prueba1"
+    "Email": "alex",
+    "Contraseña": "alex2022"
 }  
 
 ###
@@ -41,6 +41,13 @@ Content-Type: application/json
 
 ###
 POST {{api}}/con
+Content-Type: application/json
 
+{
+    "Columna": "NDePedido",
+    "Tabla": "tabladeestados"
+}
 ###
 POST {{api}}/consecutivoPrefactura/6192
+
+

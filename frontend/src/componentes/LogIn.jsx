@@ -26,9 +26,9 @@ const LogIn = () => {
     "Contraseña" : password
   });
 
-  setTimeout(() => {  
+  /*setTimeout(() => {  
     setVisible(false)
-  }, 5000);
+  }, 5000);*/
 
   const handleChange = (name, value) => setTasks({...tasks, [name]: value});
   const handleSubmit = async() => {
@@ -99,7 +99,7 @@ const LogIn = () => {
                 </View>
             </View>
         </ImageBackground>
-        <Warning visible={visible} title={'Error al entrar'} warningText={'Usuario o contraseña incorrecta, intente de nuevo'} setMostrar={setVisible}/>                    
+        <Warning visible={visible} title={'Error al entrar'} warningText={'Usuario o contraseña incorrecta, intente de nuevo'} setMostrar={setVisible} ConfirmationText={'Entendido'} SetConfirmation={setVisible}/>                    
         <Loading visible={cargando} mensaje={'Validando...'}/>
     </SafeAreaView>
   );

@@ -4,8 +4,8 @@ import {StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions} from "react
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const Warning = ({visible, title, warningText, setMostrar}) =>{
-    return (
+export default function Warning({visible, title, warningText, setMostrar, ConfirmationText, SetConfirmation}) {
+  return (
     <Modal transparent visible={visible}>
         <View style={[styles.ModalBackground]}>
           <View style={[styles.contenedorModal]}>
@@ -17,8 +17,8 @@ const Warning = ({visible, title, warningText, setMostrar}) =>{
             </View>
             <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>{warningText}</Text>
             </View>
-            <TouchableOpacity style={[styles.buttonLogin]} onPress={()=>{setMostrar(false)}}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entendido</Text>
+            <TouchableOpacity style={[styles.buttonLogin]} onPress={()=>{SetConfirmation(),setMostrar(false)}}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>{ConfirmationText}</Text>
             </TouchableOpacity>
           </View>
       </Modal>
@@ -59,4 +59,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Warning;
+/*export default Warning;*/

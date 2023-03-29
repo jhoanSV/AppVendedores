@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, FlatList, StyleSheet, Dimensions, ScrollView} from 'react-native';
+import { RefreshControl } from 'react-native-gesture-handler';
 import PedidoItem from './PedidoItem';
 
 const windowWidth = Dimensions.get('window').width;

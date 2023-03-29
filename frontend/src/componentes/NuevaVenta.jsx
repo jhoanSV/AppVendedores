@@ -1,11 +1,11 @@
 import React,{useState, useEffect, useRef, Fragment } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image, Dimensions} from 'react-native';
-import { getTasks, SearchTasks, consecutivos, consPrefactura } from '../api';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image, Dimensions, RefreshControl} from 'react-native';
+import { getTasks, SearchTasks, consecutivos } from '../api';
 import DesTaskList from '../components/DesTaskList';
-import Layout from '../components/Layout';
+/*import Layout from '../components/Layout';
 import { Icon } from 'react-native-elements'
 import { BorderlessButton } from 'react-native-gesture-handler';
-import PedidoItem from '../components/PedidoItem';
+import PedidoItem from '../components/PedidoItem';*/
 import PedidoList from '../components/PedidoList';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { setGlobal, getGlobal } from '../components/context/user';
@@ -13,9 +13,11 @@ import { aTablas } from '../api';
 import { CargadoConExito, progress, Logo_color } from "../../assets";
 import { captureRef } from 'react-native-view-shot';
 import Warning from '../components/modal/Warning';
+import Loading from '../components/modal/Loading';
 //import { Share } from 'react-native-share';
 //import {shareImageFromUri} from 'react-native-share-image';
 import * as Sharing from 'expo-sharing';
+import { useIsFocused } from '@react-navigation/native';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -36,6 +38,11 @@ function NuevaVenta({ navigation, route }) {
   const [notaRojo, setNotaRojo] = useState('');
   const [visiblevCargando, setVisiblevCargando] = useState(false);
   const [recordatorio, setRecordatorio ] = useState(false);
+  const [suma, setSuma] = useState(0);
+  const [refreshing, setrefreshing] = useState(false)
+  const [tasks, setTasks] = React.useState([]);
+  const [pro, setPro] = React.useState([]);
+  const isFocused = useIsFocused()
   const [confirmar, setConfirmar] = useState({
     "NPedido": "NpreFactura",
     "Cliente": "route.params.Ferreteria",
@@ -45,8 +52,16 @@ function NuevaVenta({ navigation, route }) {
   });
 
   useEffect(()=> {
-    handleSubmit('')
-  },[]);
+    /*handleSubmit('')*/
+    actualizar()
+  },[isFocused]);
+
+  const actualizar = async () => {
+    setrefreshing(true);
+    const data = await getTasks();
+    setPro(data);
+    setrefreshing(false);
+  };
 
   function formatNumber(number){
     return new Intl.NumberFormat().format(number);
@@ -78,13 +93,11 @@ function NuevaVenta({ navigation, route }) {
       "tabla": "tabladeingresados",
       "cadenaDeInsercion": cadena
     })
-
   };
 
   const enviarPedido = async()=> {
       if (textDate === ''){
         setAvisoRojo(true)
-        //setNotaRojo('Escoja una fecha de envio')
         setTimeout(() => {  
           setAvisoRojo(false)
         }, 2000);
@@ -93,7 +106,7 @@ function NuevaVenta({ navigation, route }) {
           setVisiblevCargando(true)
           let aTablaDeIngresados = '';
           let hoy = new Date(Date.now());
-          let hoyDate = hoy.getDate() + '/' + (hoy.getMonth()+1) + '/' + hoy.getFullYear();
+          let hoyDate = hoy.getFullYear() + '-' + (hoy.getMonth()+1) + '-' + hoy.getDate();
           let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
           const dias = [
             'domingo',
@@ -108,12 +121,16 @@ function NuevaVenta({ navigation, route }) {
           const numeroDiaSeleccionado = new Date(date).getDay()
           const nombreDia = dias[numeroDia];
           const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
-          let N = await consecutivos();
-          let NpreFactura = N[0]["PreFactura"]
-          let OdePedido = N[0]["ODePedido"] + 1
-          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + route.params.Ferreteria + '\'' + ',' + '\'' + hoyDate + '\'' + ',' + '\'' + sumaTotal().replace(/,/g, '') + '\'' + ',' + '\'' +'Contado' + '\'' +',' + '\'' + 'Ingresado' + '\'' + ',' + '\'' + '' + '\'' + ',' + '\'' + hoyDate + '\'' +',' + '\'' + textDate + '\'' + ',' + '\'' + '' + '\'' +')';
+          let N = await consecutivos({
+            "Columna": "NDePedido",
+            "Tabla": "tabladeestados"
+          });
+          let NpreFactura = N[0]["consecutivo"]
+          /*let OdePedido = N[0]["ODePedido"] + 1*/
+          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ')';
           pedido.map((pedido, index) => {
-            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + OdePedido +  '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' +  '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.Descripcion + '\'' +',' + '\'' +  pedido.PVenta +  '\'' + ',' +  '\'' + pedido.Costo +  '\'' + ',' +  '\'' +  route.params.Cod  + '\'' + ',' +  '\'' + getGlobal('User') +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ',' +  '\'' + textDate +  '\'' + ',' +  '\'' + 'Contado' +  '\'' + ',' + '\'' + hora +  '\'' + ',' +  '\'' + 'F' +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ')'  + ','
+            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ','  + '\'' + pedido.Costo +  '\'' + ')'  + ','
+          console.log(aTablaDeIngresados)                                      
           })
           aTablaDeIngresados = aTablaDeIngresados.slice(0, -1);
             aLaTablaDeIngresados(aTablaDeIngresados)
@@ -121,7 +138,7 @@ function NuevaVenta({ navigation, route }) {
               "tabla": "tabladeestados",
               "cadenaDeInsercion": aEstados
             })
-            consPrefactura(NpreFactura + 1)
+            /*consPrefactura(NpreFactura + 1)*/
             setTextDate('')
             setVisibleEnvioExitoso(true)
             setVisiblevCargando(false)
@@ -193,21 +210,8 @@ function NuevaVenta({ navigation, route }) {
     setShow(false); //Platform.OS === 'android'
     setDate(currentDate)
     let tempDate = new Date(currentDate);
-    let fDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
+    let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth()+1) + '-' + tempDate.getDate();
     setTextDate(fDate)
-  };
-
-  const ModalCargando = ({visible, children}) => {
-    return (
-    <Modal transparent visible={visible}>
-        <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal, { justifyContent: 'center', alignItems: 'center', borderRadius: 60 }]}>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#193773'}]}>Enviando...</Text>
-            <Image style={[styles.logo]} source={ progress } resizeMode='contain' />
-          </View>
-        </View>
-      </Modal>
-    );
   };
 
   const ModalEnvioExitoso = ({visible, children}) => {
@@ -216,28 +220,6 @@ function NuevaVenta({ navigation, route }) {
         <View style={[styles.ModalBackground]}>
           <View style={[styles.contenedorModal, {justifyContent: 'center', alignItems: 'center'}]}>
             <Image style={[styles.logo]} source={ CargadoConExito } resizeMode='contain' />
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-
-  const ModalPopUpAviso = ({visible, children}) => {
-    const [showModal, setShowModal] = useState(visible);
-    return (
-    <Modal transparent visible={visible}>
-        <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal]}>
-            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
-              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setVisibleAviso(false)}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>¿Esta seguro que desea cancelar este pedido?</Text>
-            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#D6320E'}]} onPress={()=>{cancelarPedido(),setVisibleAviso(false)}}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Cancelar pedido</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -291,9 +273,8 @@ function NuevaVenta({ navigation, route }) {
     }
   };
 
-  const cancelarPedido=()=>{
+  function cancelarPedido(){
     setPedido([])
-    setVisible(false)
     handleSubmit('')
     setTextDate('')
     navigation.navigate('LClientes')
@@ -309,6 +290,7 @@ function NuevaVenta({ navigation, route }) {
     var index = pedido.map(codigo => codigo.cod).indexOf(objeto.cod);
     if(index === -1) {
       pedido.push(objeto)
+      setSuma(sumaTotal())
     } else if(index !== -1) {
       setVisibleAvisoProducto(true)
       setTimeout(() => {  
@@ -321,7 +303,9 @@ function NuevaVenta({ navigation, route }) {
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
       pedido[index].Cantidad = pedido[index].Cantidad + paquete
-      handleSubmit('')
+      setSuma(sumaTotal());
+      /*handleSubmit('')*/
+      /*setPro(datos)*/
     }
   };
   
@@ -329,7 +313,8 @@ function NuevaVenta({ navigation, route }) {
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
       pedido[index].Cantidad = pedido[index].Cantidad - paquete
-      handleSubmit('')
+      /*handleSubmit('')*/
+      setSuma(sumaTotal());
       if(pedido[index].Cantidad<1){
         pedido.splice(index, 1)
         handleSubmit('')
@@ -342,7 +327,8 @@ function NuevaVenta({ navigation, route }) {
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
       var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
       pedido[index].Cantidad = NuevaCantidad
-      handleSubmit('')
+      /*handleSubmit('')*/
+      setSuma(sumaTotal())
       if(pedido[index].Cantidad<1){
         pedido.splice(index, 1)
         handleSubmit('')
@@ -350,8 +336,7 @@ function NuevaVenta({ navigation, route }) {
     }
   };
 
-  const [tasks, setTasks] = React.useState([]);
-  const [pro, setPro] = React.useState([]);
+  
 
   const searchTasks = async(text) => {
     /*const data = await SearchTasks(text);
@@ -363,8 +348,9 @@ function NuevaVenta({ navigation, route }) {
   const handleSubmit = async(text) => {
     if (text === ''){
       setInput(text)
-      const data = await getTasks();
-      setPro(data)
+      /*const data = await getTasks();
+      setPro(data)*/
+      setSuma(sumaTotal())
     } else {
       setInput(text)
       searchTasks(text.toLowerCase())
@@ -390,7 +376,11 @@ function NuevaVenta({ navigation, route }) {
   }
   return (
     <View style={styles.container}>
-      <ScrollView horizontal={true}>
+      <ScrollView 
+        horizontal={true} 
+        refreshControl={<RefreshControl 
+                          refreshing={refreshing} 
+                          onRefresh={()=>actualizar()}/>}>
         <View style={{flexDirection: 'row'}}>
           <View style={{flexDirection: 'column'}}>
             <View>
@@ -426,7 +416,7 @@ function NuevaVenta({ navigation, route }) {
       </View>
 
       <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
-        <Text style={[styles.subTitle,{right: 0}]}>Total: {sumaTotal()} </Text>
+        <Text style={[styles.subTitle,{right: 0}]}>Total: {suma}</Text>
       </View>
       <View style={{flexDirection: 'row'}}>
         <View>
@@ -441,14 +431,14 @@ function NuevaVenta({ navigation, route }) {
         </View>
       </View>
       <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
-      <ModalPopUpAviso visible={visibleAviso}></ModalPopUpAviso>
-
-      <Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto}/>
-      <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo}/>
+            
+      <Warning visible={visibleAviso} title={'Cancelar pedido'} warningText={'¿Esta seguro que desea cancelar este pedido?'} setMostrar={setVisibleAviso} ConfirmationText={'Cancelar pedido'} SetConfirmation={cancelarPedido} />
+      <Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto} ConfirmationText={'Entendido'} SetConfirmation={setVisibleAvisoProducto}/>
+      <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo} ConfirmationText={'Entendido'} SetConfirmation={{}} />
 
       <ModalEnvioExitoso visible={visibleEnvioExitoso}></ModalEnvioExitoso>
+      <Loading visible={visiblevCargando} mensaje={'Enviando...'}></Loading>
       
-      <ModalCargando visible={visiblevCargando}></ModalCargando>
       <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
     </View>
 

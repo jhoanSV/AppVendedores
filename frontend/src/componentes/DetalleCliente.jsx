@@ -4,6 +4,7 @@ import Layout from '../components/Layout';
 import { Icon } from 'react-native-elements'
 import { useState } from 'react';
 import Warning from '../components/modal/Warning';
+import { getTasks } from '../api';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -23,7 +24,7 @@ function DetalleCliente({ navigation, route }) {
     Ruta: route.params.Ruta,
     Nota: route.params.Nota
   }
-  const [mostrar, setMostrar] = useState(false)
+  const [mostrar, setMostrar] = useState(false);
   function colorNota(text){
     if(text === 'BLOQUEADO'){
       const obj = {color: '#D6320E' }
