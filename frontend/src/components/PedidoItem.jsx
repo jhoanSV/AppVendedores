@@ -15,6 +15,10 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
     return new Intl.NumberFormat().format(number);
   };
 
+  useEffect(() => {
+    setInput('' + item.Cantidad);
+  }, [item])
+
   const CambiarCantidad=(texto)=>{
     if(input=== ''){
       modificarCantidad(item.cod, 0, item.EsUnidadOpaquete)

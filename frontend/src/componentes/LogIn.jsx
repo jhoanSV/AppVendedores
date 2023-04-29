@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import Constants from 'expo-constants';
 import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, ImageBackground, Modal, TouchableOpacity , Dimensions} from "react-native";
 import { logoNameWhite, BackgroundAuth } from "../../assets";
@@ -26,10 +26,6 @@ const LogIn = () => {
     "Contraseña" : password
   });
 
-  /*setTimeout(() => {  
-    setVisible(false)
-  }, 5000);*/
-
   const handleChange = (name, value) => setTasks({...tasks, [name]: value});
   const handleSubmit = async() => {
     setCargando(true)
@@ -53,7 +49,7 @@ const LogIn = () => {
 
   return (
     
-    <SafeAreaView style={ {marginTop: Constants.statusBarHeight, flexGrow: 1}}>
+    <SafeAreaView style={{flexGrow: 1}}>
         <ImageBackground source={ BackgroundAuth } resizeMode="cover"  style={styles.image}>
             <View style={ styles.dark }>
                 <View style={styles.container}>

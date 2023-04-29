@@ -72,7 +72,7 @@ function DetalleCliente({ navigation, route }) {
       <TouchableOpacity style={styles.buttonLogin} onPress={() => navegar(route.params.Nota)}>
         <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
       </TouchableOpacity>
-      <Warning visible={mostrar} title={'Cliente bloqueado'} warningText={'Este cliente se encuentra bloqueado, por favor comunicarse con la oficina principal'} setMostrar={setMostrar}/>
+      <Warning visible={mostrar} title={'Cliente bloqueado'} warningText={'Este cliente se encuentra bloqueado, por favor comunicarse con la oficina principal'} setMostrar={setMostrar} SetConfirmation={()=>{}} ConfirmationText={'Entendido'}/>
     </SafeAreaView>
 
   )

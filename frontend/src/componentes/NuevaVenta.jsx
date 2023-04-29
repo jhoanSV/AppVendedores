@@ -42,7 +42,9 @@ function NuevaVenta({ navigation, route }) {
   const [refreshing, setrefreshing] = useState(false)
   const [tasks, setTasks] = React.useState([]);
   const [pro, setPro] = React.useState([]);
+  const [Npdido, setNpdido] = React.useState(0);
   const isFocused = useIsFocused()
+  const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
   const [confirmar, setConfirmar] = useState({
     "NPedido": "NpreFactura",
     "Cliente": "route.params.Ferreteria",
@@ -52,7 +54,6 @@ function NuevaVenta({ navigation, route }) {
   });
 
   useEffect(()=> {
-    /*handleSubmit('')*/
     actualizar()
   },[isFocused]);
 
@@ -73,8 +74,7 @@ function NuevaVenta({ navigation, route }) {
         format: 'png',
         quality: 0.7
       });
-      //shareImageFromUri(uri);
-      Sharing.shareAsync(uri)
+      Sharing.shareAsync(uri);
       setTimeout(() => {  
         setRecordatorio(false)
       }, 2000);
@@ -88,14 +88,30 @@ function NuevaVenta({ navigation, route }) {
     setMode(currentMode);
   };
 
-  const aLaTablaDeIngresados = async (cadena) => {
+  /*const aLaTablaDeIngresados = async (cadena) => {
     aTablas({
       "tabla": "tabladeingresados",
       "cadenaDeInsercion": cadena
     })
   };
 
-  const enviarPedido = async()=> {
+  const ingresoATablas = async (tabla,cadena) => {
+    aTablas({
+      "tabla": tabla,
+      "cadenaDeInsercion": cadena
+    })
+  };
+
+  const consecutivo = async ()=>{
+    let N = await consecutivos({
+      "Columna": "NDePedido",
+      "Tabla": "tabladeestados"
+    })
+    console.log(N[0]["consecutivo"]);
+    return setNpdido(N[0]["consecutivo"]);
+  };*/
+
+  const enviarPedido = async ()=>{
       if (textDate === ''){
         setAvisoRojo(true)
         setTimeout(() => {  
@@ -122,38 +138,50 @@ function NuevaVenta({ navigation, route }) {
           const nombreDia = dias[numeroDia];
           const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
           let N = await consecutivos({
-            "Columna": "NDePedido",
-            "Tabla": "tabladeestados"
+              "Columna": "NDePedido",
+              "Tabla": "tabladeestados"
           });
-          let NpreFactura = N[0]["consecutivo"]
+          /*let N = consecutivo()*/
+          /*await consecutivo()*/
+          let NpreFactura = N[0]["consecutivo"] /*Npdido*/
           /*let OdePedido = N[0]["ODePedido"] + 1*/
           const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ')';
           pedido.map((pedido, index) => {
-            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ','  + '\'' + pedido.Costo +  '\'' + ')'  + ','
-          console.log(aTablaDeIngresados)                                      
+            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','
+                                             
           })
-          aTablaDeIngresados = aTablaDeIngresados.slice(0, -1);
-            aLaTablaDeIngresados(aTablaDeIngresados)
-            aTablas({
+          
+            aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)
+            await aTablas({
               "tabla": "tabladeestados",
               "cadenaDeInsercion": aEstados
-            })
+            });
+            await aTablas({
+              "tabla": "tabladeingresados",
+              "cadenaDeInsercion": aTablaDeIngresados
+            });
+            /*aLaTablaDeIngresados(aTablaDeIngresados.slice(0, -1))*/
+            /*ingresoATablas ('tabladeestados',aEstados)*/
+            /*ingresoATablas ('tabladeingresados',aTablaDeIngresados)*/
+            /*aTablas({
+              "tabla": "tabladeingresados",
+              "cadenaDeInsercion": aTablaDeIngresados
+            })*/
             /*consPrefactura(NpreFactura + 1)*/
             setTextDate('')
             setVisibleEnvioExitoso(true)
             setVisiblevCargando(false)
             setTimeout(() => {  
               setVisibleEnvioExitoso(false)
+              setVisible(false)
               cancelarPedido()
               setRecordatorio(true)
             }, 2000);
-            console.log(aTablaDeIngresados)
-            console.log(aEstados)
-            setConfirmar({
+              setConfirmar({
               "NPedido": NpreFactura,
               "Cliente": route.params.Ferreteria,
               "Valor": sumaTotal().replace(/,/g, ''),
-              "FechaDesde": nombreDiaSeleccionado + ' ' + textDate,
+              "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
               "FechaHasta": "O a mas tardar un día habil despúes"
             })
         }catch (error) {
@@ -211,7 +239,9 @@ function NuevaVenta({ navigation, route }) {
     setDate(currentDate)
     let tempDate = new Date(currentDate);
     let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth()+1) + '-' + tempDate.getDate();
+    let EDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
     setTextDate(fDate)
+    setFechaEnvioAviso(EDate)
   };
 
   const ModalEnvioExitoso = ({visible, children}) => {
@@ -304,43 +334,44 @@ function NuevaVenta({ navigation, route }) {
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
       pedido[index].Cantidad = pedido[index].Cantidad + paquete
       setSuma(sumaTotal());
-      /*handleSubmit('')*/
-      /*setPro(datos)*/
     }
   };
   
   const disminuirCantidad=(Cod, paquete)=>{
     if(pedido.length !== 0){
-      var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-      pedido[index].Cantidad = pedido[index].Cantidad - paquete
-      /*handleSubmit('')*/
-      setSuma(sumaTotal());
-      if(pedido[index].Cantidad<1){
-        pedido.splice(index, 1)
-        handleSubmit('')
+      try {
+        var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
+        pedido[index].Cantidad = pedido[index].Cantidad - paquete
+        setSuma(sumaTotal());
+        if(pedido[index].Cantidad<1){
+          pedido.splice(index, 1)
+          handleSubmit('')
+        }
+      } catch (error) {
+      console.error(error);
       }
     }
   };
 
   const modificarCantidad=(Cod,Cantidad,paquete)=>{
     if(pedido.length !== 0){
-      var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-      var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
-      pedido[index].Cantidad = NuevaCantidad
-      /*handleSubmit('')*/
-      setSuma(sumaTotal())
-      if(pedido[index].Cantidad<1){
-        pedido.splice(index, 1)
-        handleSubmit('')
+      try {
+        var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
+        var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
+        pedido[index].Cantidad = NuevaCantidad
+        /*handleSubmit('')*/
+        setSuma(sumaTotal())
+        if(pedido[index].Cantidad<1){
+          pedido.splice(index, 1)
+          handleSubmit('')
+        }
+      } catch (error) {
+      console.error(error);
       }
     }
   };
 
-  
-
   const searchTasks = async(text) => {
-    /*const data = await SearchTasks(text);
-    setTasks(data);*/
     const data = pro
     const filtro = data.filter((data) => data.cod.toLowerCase().includes(text)||data.Descripcion.toLowerCase().includes(text) || data.SubCategoria.toLowerCase().includes(text))
     setTasks(filtro);
@@ -348,8 +379,6 @@ function NuevaVenta({ navigation, route }) {
   const handleSubmit = async(text) => {
     if (text === ''){
       setInput(text)
-      /*const data = await getTasks();
-      setPro(data)*/
       setSuma(sumaTotal())
     } else {
       setInput(text)
@@ -434,7 +463,7 @@ function NuevaVenta({ navigation, route }) {
             
       <Warning visible={visibleAviso} title={'Cancelar pedido'} warningText={'¿Esta seguro que desea cancelar este pedido?'} setMostrar={setVisibleAviso} ConfirmationText={'Cancelar pedido'} SetConfirmation={cancelarPedido} />
       <Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto} ConfirmationText={'Entendido'} SetConfirmation={setVisibleAvisoProducto}/>
-      <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo} ConfirmationText={'Entendido'} SetConfirmation={{}} />
+      <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo} ConfirmationText={'Entendido'} SetConfirmation={()=>{}} />
 
       <ModalEnvioExitoso visible={visibleEnvioExitoso}></ModalEnvioExitoso>
       <Loading visible={visiblevCargando} mensaje={'Enviando...'}></Loading>
