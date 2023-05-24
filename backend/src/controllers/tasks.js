@@ -13,14 +13,14 @@ export const getTasks = async(req, res) => {
 
 export const ValidarDatos = async(req, res) => {
     const connection = await connect()
-    const [rows] = await connection.query("SELECT Cod FROM colaboradores WHERE Usuario = ? AND Contraseña = ?", [req.body.Email, req.body.Contraseña]);
+    const [rows] = await connection.query("SELECT Cod, Cargo FROM colaboradores WHERE Usuario = ? AND Contraseña = ?", [req.body.Email, req.body.Contraseña]);
     res.json(rows)
     connection.end()
 };
 
 export const BuscarClientesTodos = async(req, res) => {
     const connection = await connect()
-    const [rows] = await connection.query("SELECT c.Cod, c.Nit, c.Ferreteria, c.Contacto, c.Telefono, c.Cel, c.Email, c.Direccion, c.Barrio, (SELECT nombreRuta FROM rutas WHERE codRuta= c.ruta) AS Ruta, c.Nota FROM clientes AS c WHERE CodVendedor = ?", [req.params.cod]);
+    const [rows] = await connection.query("SELECT c.Cod, c.Nit, c.Ferreteria, c.Contacto, c.Telefono, c.Cel, c.Email, c.Direccion, c.Barrio, (SELECT nombreRuta FROM rutas WHERE codRuta= c.ruta) AS Ruta, c.Geolocalizacion , c.Nota FROM clientes AS c WHERE CodVendedor = ?", [req.params.cod]);
     res.json(rows)
     connection.end()
 };

@@ -1,11 +1,7 @@
 import React,{useState, useEffect, useRef, Fragment } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image, Dimensions, RefreshControl} from 'react-native';
-import { getTasks, SearchTasks, consecutivos } from '../api';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl} from 'react-native';
+import { getTasks, consecutivos } from '../api';
 import DesTaskList from '../components/DesTaskList';
-/*import Layout from '../components/Layout';
-import { Icon } from 'react-native-elements'
-import { BorderlessButton } from 'react-native-gesture-handler';
-import PedidoItem from '../components/PedidoItem';*/
 import PedidoList from '../components/PedidoList';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { setGlobal, getGlobal } from '../components/context/user';
@@ -14,8 +10,6 @@ import { CargadoConExito, progress, Logo_color } from "../../assets";
 import { captureRef } from 'react-native-view-shot';
 import Warning from '../components/modal/Warning';
 import Loading from '../components/modal/Loading';
-//import { Share } from 'react-native-share';
-//import {shareImageFromUri} from 'react-native-share-image';
 import * as Sharing from 'expo-sharing';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -43,6 +37,7 @@ function NuevaVenta({ navigation, route }) {
   const [tasks, setTasks] = React.useState([]);
   const [pro, setPro] = React.useState([]);
   const [Npdido, setNpdido] = React.useState(0);
+  const [visibleSendWarning, setVisibleSendWarning] = useState(false);
   const isFocused = useIsFocused()
   const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
   const [confirmar, setConfirmar] = useState({
@@ -56,6 +51,13 @@ function NuevaVenta({ navigation, route }) {
   useEffect(()=> {
     actualizar()
   },[isFocused]);
+
+
+  const sendWarning = ( title, warningText, ConfirmationText, SetConfirmation) => {
+    
+    <Warning visible={visibleSendWarning} title={title} warningText={warningText} setMostrar={setVisibleSendWarning} ConfirmationText={ConfirmationText} SetConfirmation={SetConfirmation} />
+    setVisibleSendWarning(true);
+  };
 
   const actualizar = async () => {
     setrefreshing(true);
@@ -88,29 +90,6 @@ function NuevaVenta({ navigation, route }) {
     setMode(currentMode);
   };
 
-  /*const aLaTablaDeIngresados = async (cadena) => {
-    aTablas({
-      "tabla": "tabladeingresados",
-      "cadenaDeInsercion": cadena
-    })
-  };
-
-  const ingresoATablas = async (tabla,cadena) => {
-    aTablas({
-      "tabla": tabla,
-      "cadenaDeInsercion": cadena
-    })
-  };
-
-  const consecutivo = async ()=>{
-    let N = await consecutivos({
-      "Columna": "NDePedido",
-      "Tabla": "tabladeestados"
-    })
-    console.log(N[0]["consecutivo"]);
-    return setNpdido(N[0]["consecutivo"]);
-  };*/
-
   const enviarPedido = async ()=>{
       if (textDate === ''){
         setAvisoRojo(true)
@@ -141,14 +120,10 @@ function NuevaVenta({ navigation, route }) {
               "Columna": "NDePedido",
               "Tabla": "tabladeestados"
           });
-          /*let N = consecutivo()*/
-          /*await consecutivo()*/
-          let NpreFactura = N[0]["consecutivo"] /*Npdido*/
-          /*let OdePedido = N[0]["ODePedido"] + 1*/
+          let NpreFactura = N[0]["consecutivo"]
           const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ')';
           pedido.map((pedido, index) => {
-            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','
-                                             
+            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','                         
           })
           
             aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)
@@ -160,14 +135,6 @@ function NuevaVenta({ navigation, route }) {
               "tabla": "tabladeingresados",
               "cadenaDeInsercion": aTablaDeIngresados
             });
-            /*aLaTablaDeIngresados(aTablaDeIngresados.slice(0, -1))*/
-            /*ingresoATablas ('tabladeestados',aEstados)*/
-            /*ingresoATablas ('tabladeingresados',aTablaDeIngresados)*/
-            /*aTablas({
-              "tabla": "tabladeingresados",
-              "cadenaDeInsercion": aTablaDeIngresados
-            })*/
-            /*consPrefactura(NpreFactura + 1)*/
             setTextDate('')
             setVisibleEnvioExitoso(true)
             setVisiblevCargando(false)
@@ -292,14 +259,18 @@ function NuevaVenta({ navigation, route }) {
   };
 
   const verificarAgregarPedido = () => {
-    if (pedido.length !== 0){
+    if (pedido.length !== 0 && suma.replace(/,/g, '')>=100000){
       setVisible(true)
-    } else {
+      /*var sumaFactura = parseFloat(formatNumber(suma).replace(/,/g, ''))
+      console.log(suma.replace(/,/g, '')<100000);*/
+    } else if (pedido.length === 0){
       setAvisoRojo(true)
       setNotaRojo('No hay productos para enviar')
-      setTimeout(() => {  
+      setTimeout(() => {
         setAvisoRojo(false)
       }, 2000);
+    } else if (suma.replace(/,/g, '')<100000){
+      setVisibleSendWarning(true)
     }
   };
 
@@ -464,6 +435,7 @@ function NuevaVenta({ navigation, route }) {
       <Warning visible={visibleAviso} title={'Cancelar pedido'} warningText={'¿Esta seguro que desea cancelar este pedido?'} setMostrar={setVisibleAviso} ConfirmationText={'Cancelar pedido'} SetConfirmation={cancelarPedido} />
       <Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto} ConfirmationText={'Entendido'} SetConfirmation={setVisibleAvisoProducto}/>
       <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo} ConfirmationText={'Entendido'} SetConfirmation={()=>{}} />
+      <Warning visible={visibleSendWarning} title={'Pedido insuficiente'} warningText={'El pedido no cuenta con el minimo de $100.000, para ser enviado.'} setMostrar={setVisibleSendWarning} ConfirmationText={'Entendido'} SetConfirmation={()=>{}} />
 
       <ModalEnvioExitoso visible={visibleEnvioExitoso}></ModalEnvioExitoso>
       <Loading visible={visiblevCargando} mensaje={'Enviando...'}></Loading>

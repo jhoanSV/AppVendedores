@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button, Dimensions, SafeAreaView} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Button, Dimensions, SafeAreaView, Linking} from 'react-native';
 import Layout from '../components/Layout';
 import { Icon } from 'react-native-elements'
 import { useState } from 'react';
@@ -22,9 +22,12 @@ function DetalleCliente({ navigation, route }) {
     Direccion: route.params.Direccion, 
     Barrio: route.params.Barrio,
     Ruta: route.params.Ruta,
+    Geo: route.params.Geolocalizacion,
     Nota: route.params.Nota
   }
   const [mostrar, setMostrar] = useState(false);
+  const [mostrarGeo, setMostrarGeo] = useState(false);
+
   function colorNota(text){
     if(text === 'BLOQUEADO'){
       const obj = {color: '#D6320E' }
@@ -32,6 +35,13 @@ function DetalleCliente({ navigation, route }) {
     }
   }
 
+  const Geo =(input)=>{
+    if (input !== ""){
+      Linking.openURL('google.navigation:q='+ route.params.Geolocalizacion)
+    } else {
+      setMostrarGeo(true)
+    }
+  }
   const navegar=(text)=>{
     if(text !== 'BLOQUEADO'){
       navigation.navigate('NuevaVenta', cliente)
@@ -65,6 +75,10 @@ function DetalleCliente({ navigation, route }) {
         <Text style={styles.text}>{route.params.Barrio}</Text>
         <Text style={styles.subTitle}>Ruta:</Text>
         <Text style={styles.text}>{route.params.Ruta}</Text>
+        <Text style={styles.subTitle}>Geolocalización:</Text>
+        <TouchableOpacity onPress={() => Geo(route.params.Geolocalizacion)}> 
+          <Text style={[styles.text, {color: '#003baa', textDecorationLine: 'underline'} ]}>{route.params.Geolocalizacion}</Text>
+        </TouchableOpacity>
         <Text style={styles.subTitle}>Nota:</Text>
         <Text style={[styles.text, colorNota(route.params.Nota)]}>{route.params.Nota}</Text>
       </ScrollView>
@@ -73,6 +87,7 @@ function DetalleCliente({ navigation, route }) {
         <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
       </TouchableOpacity>
       <Warning visible={mostrar} title={'Cliente bloqueado'} warningText={'Este cliente se encuentra bloqueado, por favor comunicarse con la oficina principal'} setMostrar={setMostrar} SetConfirmation={()=>{}} ConfirmationText={'Entendido'}/>
+      <Warning visible={mostrarGeo} title={'Sin Geolocalización'} warningText={'Este cliente aun no nuenta con geolocalización, por favor solicitarla a la oficina principal'} setMostrar={setMostrarGeo} SetConfirmation={()=>{}} ConfirmationText={'Entendido'}/>
     </SafeAreaView>
 
   )

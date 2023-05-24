@@ -32,10 +32,11 @@ const LogIn = () => {
     const valor = await validateUser(tasks)
     if(valor.length === 1){
       const usuario = JSON.stringify(valor[0]["Cod"])
+      const cargo = JSON.stringify(valor[0]["Cargo"])
       setUser(usuario)
       navigation.navigate('Main')
-      setGlobal({ User : usuario })
-      console.log(usuario)
+      setGlobal({ User : usuario, Position: cargo})
+      console.log(usuario + " " + cargo)
       setCargando(false)
     } else {
       setVisible(true)

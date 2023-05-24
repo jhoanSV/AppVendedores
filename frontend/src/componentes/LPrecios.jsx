@@ -35,7 +35,7 @@ const LPrecios = () => {
     if (text === ''){
       loadTasks()
     } else {
-    searchTasks(text)
+      searchTasks(text)
     }
   };
 
