@@ -261,8 +261,6 @@ function NuevaVenta({ navigation, route }) {
   const verificarAgregarPedido = () => {
     if (pedido.length !== 0 && suma.replace(/,/g, '')>=100000){
       setVisible(true)
-      /*var sumaFactura = parseFloat(formatNumber(suma).replace(/,/g, ''))
-      console.log(suma.replace(/,/g, '')<100000);*/
     } else if (pedido.length === 0){
       setAvisoRojo(true)
       setNotaRojo('No hay productos para enviar')
@@ -330,7 +328,6 @@ function NuevaVenta({ navigation, route }) {
         var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
         var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
         pedido[index].Cantidad = NuevaCantidad
-        /*handleSubmit('')*/
         setSuma(sumaTotal())
         if(pedido[index].Cantidad<1){
           pedido.splice(index, 1)
