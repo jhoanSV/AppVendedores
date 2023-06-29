@@ -9,4 +9,5 @@ export { default as BackgroundAuth } from "./png/background-auth.png";
 export { default as CargadoConExito} from "./png/CargadoConExito.png";
 export { default as progress } from "./png/progress.gif";
 export { default as Logo_color } from "./png/Logo_color.png";
+export { default as progressBar1 } from "./png/progressBar1.png";
 //export { default as bannerHome } from "./jpg/banner-home.jpg";
