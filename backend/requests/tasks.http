@@ -50,4 +50,11 @@ Content-Type: application/json
 ###
 POST {{api}}/consecutivoPrefactura/6192
 
+###
+GET {{api}}/TotalVentasMes/9
 
+###
+GET {{api}}/PedidosEnviados/9
+
+###
+GET {{api}}/DetallePedidoVendedor/7472

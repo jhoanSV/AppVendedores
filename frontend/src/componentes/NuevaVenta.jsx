@@ -36,7 +36,7 @@ function NuevaVenta({ navigation, route }) {
   const [refreshing, setrefreshing] = useState(false)
   const [tasks, setTasks] = React.useState([]);
   const [pro, setPro] = React.useState([]);
-  const [Npdido, setNpdido] = React.useState(0);
+  const [isVisible, setIsVisible] = React.useState(false);
   const [visibleSendWarning, setVisibleSendWarning] = useState(false);
   const isFocused = useIsFocused()
   const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
@@ -348,9 +348,11 @@ function NuevaVenta({ navigation, route }) {
     if (text === ''){
       setInput(text)
       setSuma(sumaTotal())
+      setIsVisible(false)
     } else {
       setInput(text)
       searchTasks(text.toLowerCase())
+      setIsVisible(true)
     }
   };
   function seachInput (){
@@ -407,7 +409,11 @@ function NuevaVenta({ navigation, route }) {
         value={input}
         onChangeText={text=> {handleSubmit(text)}}
       />
-      {seachDesplegable()}
+      {isVisible && (
+        <ScrollView horizontal={true} style={styles.container2}>
+          <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
+        </ScrollView>
+      )}
       <View>
         <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
       </View>
