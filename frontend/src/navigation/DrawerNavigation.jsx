@@ -1,4 +1,4 @@
-import react from 'react';
+import react, { useEffect } from 'react';
 import { createDrawerNavigator, DrawerContentScrollView } from '@react-navigation/drawer';
 import Main from '../componentes/Main';
 import LPrecios from '../componentes/LPrecios';
@@ -10,12 +10,12 @@ import NuevaVenta from '../componentes/NuevaVenta';
 
 import { Text, StyleSheet, Icon } from 'react-native';
 import MenuButtonItem from '../components/MenuButtonItem';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-
+/*import { TouchableOpacity } from 'react-native-gesture-handler';*/
 
 const Drawer = createDrawerNavigator()
-
+   
 export function DrawerNavigation(){
+    
     return (
         <Drawer.Navigator 
             backBehavior="history"
@@ -81,7 +81,6 @@ export function DrawerNavigation(){
                     title: 'Nueva venta',
                     headerStyle: {backgroundColor: '#193773'},
                     headerTitleStyle: {color: '#FFFF'},
-                    //navigationOptions: {icon: 'home' },
             }}/>
         </Drawer.Navigator>
     )

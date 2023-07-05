@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTasks, searchTasks, getTask, clientes, ValidarDatos, BuscarClientes, BuscarClientesTodos, updateTasks, aTablas, consecutivos, consecutivoPrefactura } from '../controllers/tasks';
+import { getTasks, ValidarDatos, BuscarClientesTodos, aTablas, consecutivos, TotalVentasDelMes, PedidosEnviados, DetalleDelPedidoVendedor } from '../controllers/tasks';
 
 
 const router = Router();
@@ -27,7 +27,7 @@ router.get('/tasks', getTasks)
  *  summary: count all the products
  *  tags: [products]
  */
-router.get('/tasks/search/:cod', searchTasks)
+/*router.get('/tasks/search/:cod', searchTasks)*/
 
 /**
  * @swagger
@@ -36,7 +36,7 @@ router.get('/tasks/search/:cod', searchTasks)
  *  summary: Get a product by cod
  *  tags: [products]
  */
-router.get('/tasks/:cod', getTask)
+/*router.get('/tasks/:cod', getTask)*/
 
 /**
  * @swagger
@@ -45,11 +45,9 @@ router.get('/tasks/:cod', getTask)
  *  summary: save a new product
  *  tags: [products]
  */
-router.get('/tasks/clientes/:cod', clientes)
+/*router.get('/tasks/clientes/:cod', clientes)*/
 
 router.post('/tasks/validar', ValidarDatos)
-
-router.post('/tasks/BuscarClientes', BuscarClientes)
 
 router.get('/tasks/BuscarClientesTodos/:cod', BuscarClientesTodos)
 
@@ -57,7 +55,10 @@ router.post('/tasks/aTablas', aTablas)
 
 router.post('/tasks/con', consecutivos)
 
-router.post('/tasks/consecutivoPrefactura/:con', consecutivoPrefactura)
+router.get('/tasks/TotalVentasMes/:cod', TotalVentasDelMes)
 
+router.get('/tasks/PedidosEnviados/:cod', PedidosEnviados)
+
+router.get('/tasks/DetallePedidoVendedor/:cod', DetalleDelPedidoVendedor)
 
 export default router

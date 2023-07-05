@@ -1,19 +1,23 @@
-import React,{useState, useEffect} from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Button, FlatList, Pressable, ProgressBarAndroidComponent, Modal, Platform, Image} from 'react-native';
-import { getTasks, SearchTasks, consecutivos, consPrefactura } from '../api';
+import React,{useState, useEffect, useRef, Fragment } from 'react'
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl} from 'react-native';
+import { getTasks, consecutivos } from '../api';
 import DesTaskList from '../components/DesTaskList';
-import Layout from '../components/Layout';
-import { Icon } from 'react-native-elements'
-import { BorderlessButton } from 'react-native-gesture-handler';
-import PedidoItem from '../components/PedidoItem';
 import PedidoList from '../components/PedidoList';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { setGlobal, getGlobal } from '../components/context/user';
 import { aTablas } from '../api';
-import { CargadoConExito, progress } from "../../assets";
-//import { useState } from 'react';
+import { CargadoConExito, progress, Logo_color } from "../../assets";
+import { captureRef } from 'react-native-view-shot';
+import Warning from '../components/modal/Warning';
+import Loading from '../components/modal/Loading';
+import * as Sharing from 'expo-sharing';
+import { useIsFocused } from '@react-navigation/native';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 function NuevaVenta({ navigation, route }) {
+  const viewRef = useRef();
   const [input, setInput] = useState('');
   const [pedido, setPedido] = useState([]);
   const [visible, setVisible] = useState(false);
@@ -27,15 +31,68 @@ function NuevaVenta({ navigation, route }) {
   const [avisoRojo, setAvisoRojo] = useState(false);
   const [notaRojo, setNotaRojo] = useState('');
   const [visiblevCargando, setVisiblevCargando] = useState(false);
+  const [recordatorio, setRecordatorio ] = useState(false);
+  const [suma, setSuma] = useState(0);
+  const [refreshing, setrefreshing] = useState(false)
+  const [tasks, setTasks] = React.useState([]);
+  const [pro, setPro] = React.useState([]);
+  const [isVisible, setIsVisible] = React.useState(false);
+  const [visibleSendWarning, setVisibleSendWarning] = useState(false);
+  const isFocused = useIsFocused()
+  const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
+  const [confirmar, setConfirmar] = useState({
+    "NPedido": "NpreFactura",
+    "Cliente": "route.params.Ferreteria",
+    "Valor": "sumaTotal().replace(/,/g, '')",
+    "FechaDesde": "hoyDate",
+    "FechaHasta": "textDate"
+  });
+
+  useEffect(()=> {
+    actualizar()
+  },[isFocused]);
+
+
+  const sendWarning = ( title, warningText, ConfirmationText, SetConfirmation) => {
+    
+    <Warning visible={visibleSendWarning} title={title} warningText={warningText} setMostrar={setVisibleSendWarning} ConfirmationText={ConfirmationText} SetConfirmation={SetConfirmation} />
+    setVisibleSendWarning(true);
+  };
+
+  const actualizar = async () => {
+    setrefreshing(true);
+    const data = await getTasks();
+    setPro(data);
+    setrefreshing(false);
+  };
+
+  function formatNumber(number){
+    return new Intl.NumberFormat().format(number);
+  };
+
+  const shareImage = async() => {
+    try {
+      const uri = await captureRef(viewRef, {
+        format: 'png',
+        quality: 0.7
+      });
+      Sharing.shareAsync(uri);
+      setTimeout(() => {  
+        setRecordatorio(false)
+      }, 2000);
+    } catch (errors) { 
+      console.error(errors);
+    }
+  };
+
   const showMode = (currentMode) => {
     setShow(true);
     setMode(currentMode);
   };
 
-  const enviarPedido = async()=> {
+  const enviarPedido = async ()=>{
       if (textDate === ''){
         setAvisoRojo(true)
-        setNotaRojo('Escoja una fecha de envio')
         setTimeout(() => {  
           setAvisoRojo(false)
         }, 2000);
@@ -44,36 +101,56 @@ function NuevaVenta({ navigation, route }) {
           setVisiblevCargando(true)
           let aTablaDeIngresados = '';
           let hoy = new Date(Date.now());
-          let hoyDate = hoy.getDate() + '/' + (hoy.getMonth()+1) + '/' + hoy.getFullYear();
+          let hoyDate = hoy.getFullYear() + '-' + (hoy.getMonth()+1) + '-' + hoy.getDate();
           let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
-          let N = await consecutivos();
-          let NpreFactura = N[0]["PreFactura"]
-          let OdePedido = N[0]["ODePedido"] + 1
-          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + route.params.Ferreteria + '\'' + ',' + '\'' + hoyDate + '\'' + ',' + '\'' + sumaTotal().replace(/,/g, '') + '\'' + ',' + '\'' +'Contado' + '\'' +',' + '\'' + 'Ingresado' + '\'' + ',' + '\'' + '' + '\'' + ',' + '\'' + hoyDate + '\'' +',' + '\'' + textDate + '\'' + ',' + '\'' + '' + '\'' +')';
+          const dias = [
+            'domingo',
+            'lunes',
+            'martes',
+            'miércoles',
+            'jueves',
+            'viernes',
+            'sábado',
+          ];
+          const numeroDia = hoy.getDay();
+          const numeroDiaSeleccionado = new Date(date).getDay()
+          const nombreDia = dias[numeroDia];
+          const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
+          let N = await consecutivos({
+              "Columna": "NDePedido",
+              "Tabla": "tabladeestados"
+          });
+          let NpreFactura = N[0]["consecutivo"]
+          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ')';
           pedido.map((pedido, index) => {
-            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + OdePedido +  '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' +  '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.Descripcion + '\'' +',' + '\'' +  pedido.PVenta +  '\'' + ',' +  '\'' + pedido.Costo +  '\'' + ',' +  '\'' +  route.params.Cod  + '\'' + ',' +  '\'' + getGlobal('User').slice(1, -1) +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ',' +  '\'' + textDate +  '\'' + ',' +  '\'' + 'Contado' +  '\'' + ',' + '\'' + hora +  '\'' + ',' +  '\'' + 'F' +  '\'' + ',' +  '\'' +  hoyDate +  '\'' + ')'  + ','
+            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','                         
           })
-          aTablaDeIngresados = aTablaDeIngresados.slice(0, -1);
-
-            aTablas({
-              "tabla": "tabladeingresados",
-              "cadenaDeInsercion": aTablaDeIngresados
-            })
-
-            aTablas({
+          
+            aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)
+            await aTablas({
               "tabla": "tabladeestados",
               "cadenaDeInsercion": aEstados
-            })
-            consPrefactura(NpreFactura + 1)
+            });
+            await aTablas({
+              "tabla": "tabladeingresados",
+              "cadenaDeInsercion": aTablaDeIngresados
+            });
             setTextDate('')
             setVisibleEnvioExitoso(true)
             setVisiblevCargando(false)
             setTimeout(() => {  
               setVisibleEnvioExitoso(false)
+              setVisible(false)
               cancelarPedido()
+              setRecordatorio(true)
             }, 2000);
-            console.log(aTablaDeIngresados)
-            console.log(aEstados)
+              setConfirmar({
+              "NPedido": NpreFactura,
+              "Cliente": route.params.Ferreteria,
+              "Valor": sumaTotal().replace(/,/g, ''),
+              "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
+              "FechaHasta": "O a mas tardar un día habil despúes"
+            })
         }catch (error) {
           setVisiblevCargando(false)
           setNotaRojo('Error al enviar')
@@ -88,21 +165,34 @@ function NuevaVenta({ navigation, route }) {
     
   };
 
-
-  const ModalAvisoRojo = ({visible, children}) => {
+  const ModalConfirmacion = ({visible, children}) => {
     return (
     <Modal transparent visible={visible}>
         <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal]}>
-            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
-              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setAvisoRojo(false)}>
+          <View style={[styles.contenedorModal, {height: 370,}]} >
+            <View style={[{flexDirection: 'row', backgroundColor: '#193773', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Recordatorio</Text>
+              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setRecordatorio(false)}>
                 <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>{notaRojo}</Text>
-            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#D6320E'}]} onPress={()=>{setAvisoRojo(false)}}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entendido</Text>
+            <Fragment>
+            <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFFF'}} ref={viewRef}>
+              <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
+              <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.NPedido}</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.Cliente}</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>$ {formatNumber(confirmar.Valor)}</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaDesde}</Text>
+              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaHasta}</Text>
+              <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.FERRESIERRA.COM</Text>
+            </View>
+            </Fragment>
+            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>shareImage()}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Compartir</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -115,21 +205,10 @@ function NuevaVenta({ navigation, route }) {
     setShow(false); //Platform.OS === 'android'
     setDate(currentDate)
     let tempDate = new Date(currentDate);
-    let fDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
+    let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth()+1) + '-' + tempDate.getDate();
+    let EDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
     setTextDate(fDate)
-  };
-
-  const ModalCargando = ({visible, children}) => {
-    return (
-    <Modal transparent visible={visible}>
-        <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal, { justifyContent: 'center', alignItems: 'center', borderRadius: 60 }]}>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#193773'}]}>Enviando...</Text>
-            <Image style={[styles.logo]} source={ progress } resizeMode='contain' />
-          </View>
-        </View>
-      </Modal>
-    );
+    setFechaEnvioAviso(EDate)
   };
 
   const ModalEnvioExitoso = ({visible, children}) => {
@@ -138,47 +217,6 @@ function NuevaVenta({ navigation, route }) {
         <View style={[styles.ModalBackground]}>
           <View style={[styles.contenedorModal, {justifyContent: 'center', alignItems: 'center'}]}>
             <Image style={[styles.logo]} source={ CargadoConExito } resizeMode='contain' />
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-
-  const ModalPopUpAvisoProducto = ({visible, children}) => {
-    const [showModal, setShowModal] = useState(visible);
-    return (
-    <Modal transparent visible={visible}>
-        <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal]}>
-            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
-              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setVisibleAvisoProducto(false)}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>Producto repetido, verifique el pedido</Text>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
-
-  const ModalPopUpAviso = ({visible, children}) => {
-    const [showModal, setShowModal] = useState(visible);
-    return (
-    <Modal transparent visible={visible}>
-        <View style={[styles.ModalBackground]}>
-          <View style={[styles.contenedorModal]}>
-            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Aviso</Text>
-              <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setVisibleAviso(false)}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>¿Esta seguro que desea cancelar este pedido?</Text>
-            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#D6320E'}]} onPress={()=>{cancelarPedido(),setVisibleAviso(false)}}>
-              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Cancelar pedido</Text>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -221,20 +259,21 @@ function NuevaVenta({ navigation, route }) {
   };
 
   const verificarAgregarPedido = () => {
-    if (pedido.length !== 0){
+    if (pedido.length !== 0 && suma.replace(/,/g, '')>=100000){
       setVisible(true)
-    } else {
+    } else if (pedido.length === 0){
       setAvisoRojo(true)
       setNotaRojo('No hay productos para enviar')
-      setTimeout(() => {  
+      setTimeout(() => {
         setAvisoRojo(false)
       }, 2000);
+    } else if (suma.replace(/,/g, '')<100000){
+      setVisibleSendWarning(true)
     }
   };
 
-  const cancelarPedido=()=>{
+  function cancelarPedido(){
     setPedido([])
-    setVisible(false)
     handleSubmit('')
     setTextDate('')
     navigation.navigate('LClientes')
@@ -250,6 +289,7 @@ function NuevaVenta({ navigation, route }) {
     var index = pedido.map(codigo => codigo.cod).indexOf(objeto.cod);
     if(index === -1) {
       pedido.push(objeto)
+      setSuma(sumaTotal())
     } else if(index !== -1) {
       setVisibleAvisoProducto(true)
       setTimeout(() => {  
@@ -258,46 +298,61 @@ function NuevaVenta({ navigation, route }) {
     }
   };
   
-  const aumentarCantidad=(Cod)=>{
+  const aumentarCantidad=(Cod, paquete)=>{
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-      pedido[index].Cantidad = pedido[index].Cantidad + 1
-      handleSubmit('')
+      pedido[index].Cantidad = pedido[index].Cantidad + paquete
+      setSuma(sumaTotal());
     }
   };
   
-  const disminuirCantidad=(Cod)=>{
+  const disminuirCantidad=(Cod, paquete)=>{
     if(pedido.length !== 0){
-      var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-      pedido[index].Cantidad = pedido[index].Cantidad - 1
-      handleSubmit('')
-      if(pedido[index].Cantidad<1){
-        pedido.splice(index, 1)
-        handleSubmit('')
+      try {
+        var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
+        pedido[index].Cantidad = pedido[index].Cantidad - paquete
+        setSuma(sumaTotal());
+        if(pedido[index].Cantidad<1){
+          pedido.splice(index, 1)
+          handleSubmit('')
+        }
+      } catch (error) {
+      console.error(error);
       }
     }
   };
 
-  const modificarCantidad=(Cod,Cantidad)=>{
+  const modificarCantidad=(Cod,Cantidad,paquete)=>{
     if(pedido.length !== 0){
-      var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
-      pedido[index].Cantidad = Cantidad
-      handleSubmit('')
+      try {
+        var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
+        var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
+        pedido[index].Cantidad = NuevaCantidad
+        setSuma(sumaTotal())
+        if(pedido[index].Cantidad<1){
+          pedido.splice(index, 1)
+          handleSubmit('')
+        }
+      } catch (error) {
+      console.error(error);
+      }
     }
   };
 
-  const [tasks, setTasks] = React.useState([]);
-    const searchTasks = async(text) => {
-    const data = await SearchTasks(text);
-    setTasks(data);
+  const searchTasks = async(text) => {
+    const data = pro
+    const filtro = data.filter((data) => data.cod.toLowerCase().includes(text)||data.Descripcion.toLowerCase().includes(text) || data.SubCategoria.toLowerCase().includes(text))
+    setTasks(filtro);
   };
-  const handleSubmit = (text) => {
+  const handleSubmit = async(text) => {
     if (text === ''){
       setInput(text)
-      setTasks([])
+      setSuma(sumaTotal())
+      setIsVisible(false)
     } else {
       setInput(text)
-      searchTasks(text)
+      searchTasks(text.toLowerCase())
+      setIsVisible(true)
     }
   };
   function seachInput (){
@@ -309,48 +364,62 @@ function NuevaVenta({ navigation, route }) {
   }
   function seachDesplegable (){
     if(input !== ''){
-      return <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
+      return (
+        <ScrollView horizontal={true} style={styles.container2}>
+          <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
+        </ScrollView>
+        )
     } else {
       return
     }
   }
   return (
     <View style={styles.container}>
-      <View style={{position: 'absolute', right: 5, margin: 5}}>
-        <Icon name='west'onPress={() => navigation.goBack()} style={styles.goBlack}/>
-      </View>
-      <View style={{flexDirection: 'row'}}>
-        <View>
-          <Text style={styles.subTitle}>Ferreteria:</Text>
-          <Text style={styles.text}>{route.params.Ferreteria}</Text>
+      <ScrollView 
+        horizontal={true} 
+        refreshControl={<RefreshControl 
+                          refreshing={refreshing} 
+                          onRefresh={()=>actualizar()}/>}>
+        <View style={{flexDirection: 'row'}}>
+          <View style={{flexDirection: 'column'}}>
+            <View>
+              <Text style={styles.subTitle}>Empresa:</Text>
+              <Text style={styles.text}>{route.params.Ferreteria}</Text>
+            </View>
+            <View>
+              <Text style={styles.subTitle}>Dirección:</Text>
+              <Text style={styles.text}>{route.params.Direccion}</Text>
+            </View>
+          </View>
+          <View style={{flexDirection: 'column'}}>
+          <View>
+              <Text style={styles.subTitle}>Ruta:</Text>
+              <Text style={styles.text}>{route.params.Ruta}</Text>
+            </View>
+            <View>
+              <Text style={styles.subTitle}>Barrio:</Text>
+              <Text style={styles.text}>{route.params.Barrio}</Text>
+            </View>
+          </View>
         </View>
-        <View>
-          <Text style={styles.subTitle}>Ruta:</Text>
-          <Text style={styles.text}>{route.params.Ruta}</Text>
-        </View>
-      </View>
-      <View style={{flexDirection: 'row'}}>
-        <View>
-          <Text style={styles.subTitle}>Dirección:</Text>
-          <Text style={styles.text}>{route.params.Direccion}</Text>
-        </View>
-        <View>
-          <Text style={styles.subTitle}>Barrio:</Text>
-          <Text style={styles.text}>{route.params.Barrio}</Text>
-        </View>
-      </View>
+      </ScrollView>
       <TextInput
         style={ seachInput() }
         placeholder="Buscar producto..."
         value={input}
         onChangeText={text=> {handleSubmit(text)}}
       />
-      {seachDesplegable()}
+      {isVisible && (
+        <ScrollView horizontal={true} style={styles.container2}>
+          <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
+        </ScrollView>
+      )}
       <View>
         <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
       </View>
-      <View style={{backgroundColor:'#F2CB05', height: 40, alignItems:'flex-end'}}>
-        <Text style={[styles.subTitle,{right: 0}]}>Total: {sumaTotal()} </Text>
+
+      <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
+        <Text style={[styles.subTitle,{right: 0}]}>Total: {suma}</Text>
       </View>
       <View style={{flexDirection: 'row'}}>
         <View>
@@ -365,11 +434,16 @@ function NuevaVenta({ navigation, route }) {
         </View>
       </View>
       <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
-      <ModalPopUpAviso visible={visibleAviso}></ModalPopUpAviso>
-      <ModalPopUpAvisoProducto visible={visibleAvisoProducto}></ModalPopUpAvisoProducto>
+            
+      <Warning visible={visibleAviso} title={'Cancelar pedido'} warningText={'¿Esta seguro que desea cancelar este pedido?'} setMostrar={setVisibleAviso} ConfirmationText={'Cancelar pedido'} SetConfirmation={cancelarPedido} />
+      <Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto} ConfirmationText={'Entendido'} SetConfirmation={setVisibleAvisoProducto}/>
+      <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo} ConfirmationText={'Entendido'} SetConfirmation={()=>{}} />
+      <Warning visible={visibleSendWarning} title={'Pedido insuficiente'} warningText={'El pedido no cuenta con el minimo de $100.000, para ser enviado.'} setMostrar={setVisibleSendWarning} ConfirmationText={'Entendido'} SetConfirmation={()=>{}} />
+
       <ModalEnvioExitoso visible={visibleEnvioExitoso}></ModalEnvioExitoso>
-      <ModalAvisoRojo visible={avisoRojo}></ModalAvisoRojo>
-      <ModalCargando visible={visiblevCargando}></ModalCargando>
+      <Loading visible={visiblevCargando} mensaje={'Enviando...'}></Loading>
+      
+      <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
     </View>
 
   )
@@ -377,7 +451,7 @@ function NuevaVenta({ navigation, route }) {
 
 const styles = StyleSheet.create({
   container : {
-    padding: 10,
+    //padding: 10,
     paddingBottom: 10
   },
   subTitle: {
@@ -402,7 +476,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     margin: 2,
     bottom: 0,
-    width: 170,
+    width: windowWidth * 0.49,//170,
     //alignItems:'center',
   },
   buttons: {
@@ -413,7 +487,7 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 40,
-    width: 320,
+    width: windowWidth * 0.94,//320,
     margin: 12,
     //marginBottom: 0,
     padding: 10,
@@ -426,7 +500,7 @@ const styles = StyleSheet.create({
   },
   input2: {
     height: 40,
-    width: 320,
+    width: windowWidth * 0.94,//320,
     margin: 12,
     marginBottom: 0,
     padding: 10,
@@ -455,6 +529,19 @@ const styles = StyleSheet.create({
     width: 270,
     height: 270,
   },
+  container2: {
+    height: windowHeight* 0.13, //90,
+    width: windowWidth * 0.94,//320,
+    margin: 12,
+    marginTop: 0,
+    borderWidth: 0,
+    padding: 0,
+    backgroundColor: '#ffff',
+    borderColor: '#F2CB05',
+    borderWidth: 2,
+    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 20,
+}
 });
 
 export default NuevaVenta;
