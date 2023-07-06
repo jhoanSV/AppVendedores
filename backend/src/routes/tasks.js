@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTasks, ValidarDatos, BuscarClientesTodos, aTablas, consecutivos, TotalVentasDelMes, PedidosEnviados, DetalleDelPedidoVendedor } from '../controllers/tasks';
+import { getTasks, ValidarDatos, BuscarClientesTodos, aTablas, consecutivos, DatosProgreso, PedidosEnviados, DetalleDelPedidoVendedor } from '../controllers/tasks';
 
 
 const router = Router();
@@ -55,7 +55,7 @@ router.post('/tasks/aTablas', aTablas)
 
 router.post('/tasks/con', consecutivos)
 
-router.get('/tasks/TotalVentasMes/:cod', TotalVentasDelMes)
+router.get('/tasks/DatosProgreso/:cod', DatosProgreso)
 
 router.get('/tasks/PedidosEnviados/:cod', PedidosEnviados)
 

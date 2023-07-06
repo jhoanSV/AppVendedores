@@ -48,9 +48,9 @@ export const consecutivos = async(req, res) => {
     }
 };
 
-export const TotalVentasDelMes = async(req, res) => {
+export const DatosProgreso = async(req, res) => {
     const connection = await connect()
-    const [rows] = await connection.query("SELECT SUM(Cantidad*VrUnitario) AS VentasMes FROM salidas WHERE MONTH(FechaDeIngreso) = MONTH(NOW()) AND CodColaborador = ?", [req.params.cod]);
+    const [rows] = await connection.query("SELECT me.Meta, me.Meta2, (SELECT MAX(re.Valor_por_fecha) AS record FROM (SELECT SUM(sa.Cantidad*sa.VrUnitario) AS Valor_por_fecha , DATE_FORMAT(sa.FechaDeIngreso, '%m-%Y') AS Fecha, sa.CodColaborador FROM salidas AS sa WHERE CodColaborador <> '000' GROUP BY MONTH(FechaDeIngreso), CodColaborador) AS re) AS record ,IFNULL(Vm.VentasMes, 0) AS VentasMes FROM DM_Metas AS me LEFT JOIN (SELECT IFNULL(SUM(sa.Cantidad * sa.VrUnitario), 0) AS VentasMes, sa.CodColaborador FROM salidas AS sa WHERE sa.CodColaborador = ? AND MONTH(sa.FechaDeIngreso) = MONTH(NOW()) GROUP BY sa.CodColaborador) AS Vm ON 1=1 WHERE YEAR(me.Fecha) = YEAR(NOW()) AND MONTH(me.Fecha) = MONTH(NOW())", [req.params.cod]);
     res.json(rows)
     connection.end()
 };
