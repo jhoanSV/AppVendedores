@@ -44,11 +44,17 @@ const Main = () => {
 
     return (
         <SafeAreaView style={ { flexGrow: 1, padding: 15}}>
-            <View style={ { alignContent: 'center'}}>
-                <Image style={{ flex: 1, width: '20%', height: 20,resizeMode: 'contain'}} source={ Oro }/>
-                <Text style={styles.vendedorText}>{vendedor}</Text>
-                <Image style={{ flex: 1, width: '20%', resizeMode: 'contain'}} source={ award }/>
-            </View>            
+            <View style={ {width: '100%', aspectRatio: 6, flexDirection: 'row', alignContent: 'space-between'}}>
+                <View style={{ flex: 1 }}>
+                    <Image style={{ width: '86%', height: '100%',resizeMode: 'contain' }} source={ Oro }/>
+                </View>
+                <View style={{ flex: 1, alignSelf: "center" }}>
+                    <Text style={styles.vendedorText}>{vendedor}</Text>
+                </View>
+                <View style={{ flex: 1}}>
+                    <Image style={{ width: '130%', height: '100%',resizeMode: 'contain'}} source={ award }/>
+                </View>
+            </View>
             <View style={{ width: '100%', aspectRatio: (1710/580)}}>
                 <Image style={{ flex: 1, width: '100%', resizeMode: 'contain'}} source={ progressBar1 }/>
                 <View style={ styles.proBarTextContainer}>
@@ -90,13 +96,14 @@ const styles = StyleSheet.create({
     vendedorText: {
         color: '#193773',
         fontSize: 18,
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        marginLeft: '12%',
     },
     proBarTextContainer: {
         position: 'absolute', 
         width: 60,
         height: 60,
-        left: '6%',
+        left: '7%',
         bottom: '25%',
         justifyContent: 'center',
         alignItems: 'center'
