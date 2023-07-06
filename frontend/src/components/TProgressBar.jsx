@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 
-const TProgressBar = ({ pct, width, height, color }) => {
+const TProgressBar = ({ pct, color }) => {
 
   const square = {
-    height: height,
-    width: width,
+    width: 100 + '%',
+    height: 100 + '%',
+    borderStyle: 'solid',
+    borderColor: '#193773',
     borderRadius: 16,
     backgroundColor: 'white',
     overflow: 'hidden',

@@ -2,7 +2,7 @@ import React, { useEffect, useState} from "react";
 import Constants from 'expo-constants';
 import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, Button } from "react-native";
 
-import { progressBar1 } from "../../assets";
+import { progressBar1, award, Oro, bright } from "../../assets";
 
 import TProgressBar from '../components/TProgressBar';
 
@@ -44,8 +44,10 @@ const Main = () => {
 
     return (
         <SafeAreaView style={ { flexGrow: 1, padding: 15}}>
-            <View style={ { alignItems: 'center'}}>
+            <View style={ { alignContent: 'center'}}>
+                <Image style={{ flex: 1, width: '20%', height: 20,resizeMode: 'contain'}} source={ Oro }/>
                 <Text style={styles.vendedorText}>{vendedor}</Text>
+                <Image style={{ flex: 1, width: '20%', resizeMode: 'contain'}} source={ award }/>
             </View>            
             <View style={{ width: '100%', aspectRatio: (1710/580)}}>
                 <Image style={{ flex: 1, width: '100%', resizeMode: 'contain'}} source={ progressBar1 }/>
@@ -54,12 +56,12 @@ const Main = () => {
                         {parseInt(progress*100)}%
                     </Text>
                 </View>
-                <Text style={{position: 'absolute', left: 116, top: 42, fontWeight: 'bold', fontSize: 16,
+                <Text style={{position: 'absolute', left: '31%', top: '30%', fontWeight: 'bold', fontSize: 16,
                     zIndex: 2, color: 'white',}}>
                     Progreso
                 </Text>
-                <View style={{position: 'absolute', left: 116, bottom: 32}}>
-                    <TProgressBar pct={progress/*-0.021*/} width={242} height={54} color={colorBar} />
+                <View style={{position: 'absolute', left: '31%', bottom: '20%', width: (63) + '%', height: 54}}>
+                    <TProgressBar pct={progress} color={colorBar} />
                 </View>
             </View>
             <Button
@@ -87,15 +89,15 @@ const Main = () => {
 const styles = StyleSheet.create({
     vendedorText: {
         color: '#193773',
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold'
     },
     proBarTextContainer: {
         position: 'absolute', 
         width: 60,
         height: 60,
-        left: 26,
-        bottom: 34.5,
+        left: '6%',
+        bottom: '25%',
         justifyContent: 'center',
         alignItems: 'center'
     },
