@@ -1,6 +1,7 @@
 import React, { useEffect, useState} from "react";
 import Constants from 'expo-constants';
 import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, Button } from "react-native";
+import { setGlobal, getGlobal } from '../components/context/user';
 
 import { progressBar1, award, Oro, bright } from "../../assets";
 
@@ -18,7 +19,7 @@ const Main = () => {
     const[ventTotales, setVentTotales] = useState(null);
     const[progress, setProgress] = useState(null);
     const[colorBar, setColorBar] = useState(null);
-    const vendedor = ['Vendedor1'];
+    const vendedor = getGlobal('Name').slice(1,(getGlobal('Name').length - 1));
 
     useEffect(()=>{
         setProgress((ventTotales)/(meta));
