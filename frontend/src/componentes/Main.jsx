@@ -3,38 +3,50 @@ import Constants from 'expo-constants';
 import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, Button } from "react-native";
 import { setGlobal, getGlobal } from '../components/context/user';
 
-import { progressBar1, award, Oro, bright } from "../../assets";
+import { progressBar1, award, Bronce, Plata, Oro, bright } from "../../assets";
 
 import TProgressBar from '../components/TProgressBar';
 
 
 const Main = () => {
 
-    /*function formatNumber(number){
+    function formatNumber(number){
         return new Intl.NumberFormat().format(number);
-    };*/
-    
-    let meta = 38000000;
-    //const[metaDia, setMetaDia] =useState(2000000);
+    };
+    let meta = 35000000;
+    let meta2 = 48000000;
+    let record = 55000000;
+    //const[meta, setMeta] =useState(38000000);
+    //const[meta2, setMeta2] =useState(48000000);
+    //const[record, setRecord] =useState(50000000);
     const[ventTotales, setVentTotales] = useState(null);
     const[progress, setProgress] = useState(null);
+    const[progress2, setProgress2] = useState(null);
     const[colorBar, setColorBar] = useState(null);
-    const vendedor = getGlobal('Name').slice(1,(getGlobal('Name').length - 1));
+    const[rank, setRank] = useState(null);
+    const vendedor = getGlobal('Name');
 
     useEffect(()=>{
-        setProgress((ventTotales)/(meta));
-        checkColor();
-    },[ventTotales, progress])
+        setProgress((ventTotales)/(meta2));
+        setProgress2((ventTotales)/(record));
+        check();
+    },[ventTotales, progress, progress2])
 
-    const checkColor = () =>{
-        if ((progress*100) < 33){
+    const check = () =>{
+        if ((progress*100) < ((meta/meta2)*100)){
+            setRank('');
             setColorBar('#FF0000');
-        }else if((progress*100) >= 33 && (progress*100) < 67){
+        }else if((progress*100) < 100){
+            setRank(Bronce);
             setColorBar('#FAB400');
-        }else{
+        }else if((progress*100) < (record/meta2)*100){
+            setRank(Plata);
             setColorBar('#1DD200');
+        }else{
+            setRank(Oro);
+            setColorBar('yellow');
         }
-    }
+    }    
     
     const newVenta = () =>{
         setVentTotales(ventTotales + 1000000);
@@ -46,14 +58,17 @@ const Main = () => {
     return (
         <SafeAreaView style={ { flexGrow: 1, padding: 15}}>
             <View style={ {width: '100%', aspectRatio: 6, flexDirection: 'row', alignContent: 'space-between'}}>
-                <View style={{ flex: 1 }}>
-                    <Image style={{ width: '86%', height: '100%',resizeMode: 'contain' }} source={ Oro }/>
+                <View style={{ flex: 1}}>
+                    <Image style={{ width: '86%', height: '85%',resizeMode: 'contain' }} source={ rank }/>
                 </View>
                 <View style={{ flex: 1, alignSelf: "center" }}>
-                    <Text style={styles.vendedorText}>{vendedor}</Text>
+                    {vendedor &&
+                        <Text style={styles.vendedorText}>{vendedor.slice(1,vendedor.length-1)}</Text>
+                    }
                 </View>
-                <View style={{ flex: 1}}>
-                    <Image style={{ width: '130%', height: '100%',resizeMode: 'contain'}} source={ award }/>
+                <View style={{ position: 'relative', flex: 1, }}>
+                    <Image style={{ position: 'relative', width: '130%', height: '100%',resizeMode: 'contain', zIndex: 2,}} source={ award }/>
+                    <Image style={{ position: 'absolute', top: -18,width: '125%', height: '170%',resizeMode: 'contain', zIndex: 1,}} source={ bright }/>
                 </View>
             </View>
             <View style={{ width: '100%', aspectRatio: (1710/580)}}>
@@ -68,8 +83,19 @@ const Main = () => {
                     Progreso
                 </Text>
                 <View style={{position: 'absolute', left: '31%', bottom: '20%', width: (63) + '%', height: 54}}>
-                    <TProgressBar pct={progress} color={colorBar} />
+                    <TProgressBar 
+                        pct={progress2}
+                        color={colorBar}
+                        m1={meta/record}
+                        m2={meta2/record}
+                        valorMeta={(meta/1000000)+'M'}
+                        valorMeta2={(meta2/1000000)+'M'}
+                    />
                 </View>
+            </View>
+            <View style={styles.containerVentas} >
+                <Text style={styles.ventasText}> Mis Ventas</Text>
+                <Text style={styles.ventasValor}> $ {formatNumber(ventTotales)}</Text>
             </View>
             <Button
                 onPress={newVenta}
@@ -96,16 +122,16 @@ const Main = () => {
 const styles = StyleSheet.create({
     vendedorText: {
         color: '#193773',
-        fontSize: 18,
+        fontSize: 25,
         fontWeight: 'bold',
         marginLeft: '12%',
     },
     proBarTextContainer: {
-        position: 'absolute', 
-        width: 60,
-        height: 60,
-        left: '7%',
-        bottom: '25%',
+        position: 'absolute',
+        width: '18%',
+        height: '45%',
+        left: '6%',
+        bottom: '27%',
         justifyContent: 'center',
         alignItems: 'center'
     },
@@ -113,7 +139,24 @@ const styles = StyleSheet.create({
         color: '#193773',
         fontSize: 22,
         fontWeight: 'bold'
-    },    
+    },containerVentas: {
+        alignSelf: 'center',
+        alignItems: 'center',
+        width: 265,
+        height: 60,
+        borderRadius: 16,
+        backgroundColor: '#D9D9D9',
+        elevation: 15,
+    },
+    ventasText: {
+        fontSize: 20,
+        color: '#193773'
+    },
+    ventasValor: {
+        fontSize: 20,
+        color: '#00000'
+    },
+
 })
 
 export default Main;

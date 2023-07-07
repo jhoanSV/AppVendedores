@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 
-const TProgressBar = ({ pct, color }) => {
+const TProgressBar = ({ pct, color, m1, m2, valorMeta, valorMeta2 }) => {
 
   const square = {
+    position: 'relative',
     width: 100 + '%',
     height: 100 + '%',
     borderStyle: 'solid',
@@ -27,17 +28,57 @@ const TProgressBar = ({ pct, color }) => {
     width: 300,
     backgroundColor: '#193773',
     transform: [{ rotate: '168deg' }],
-    zIndex: 2,        
+    zIndex: 2,
   }
+  const bar1 = {
+    position: 'absolute',
+    left: (m1*100) + '%',
+    width: 2,
+    height: 60,
+    backgroundColor: 'black',
+    zIndex: 1,
+  }
+  const bar2 = {
+    width: 1.5,
+    left: (m2*100) + '%',
+  }
+  const etiq = {
+    position: 'absolute',
+    top: '110%',
+    left: (m1*100) + '%',
+    marginLeft: -12,
+    zIndex: 3,
+    fontSize: 12,
+  }
+  const etiq2 = {
+    left: (m2*100) + '%',
+  }
+  const etiq3 = {
+    left: (100) + '%',
+  }
+
   return (
-    /*<View style={progressStyle}>*/
-    <>
+    <View style={{position: 'relative'}}>
       <View style={square}>
         <View style={jsjs}/>
         <View style={progressBar}/>
+        <View style={bar1}/>
+        <View style={[bar1, bar2]}>
+          <Text>
+            {valorMeta2}
+          </Text>
+        </View>
       </View>
-    </>
-    /*</View>*/
+      <Text style={etiq}>
+        {valorMeta}
+      </Text>
+      <Text style={[etiq, etiq2]}>
+        {valorMeta2}
+      </Text>
+      <Text style={[etiq, etiq2, etiq3]}>
+        Record
+      </Text>
+    </View>
   );
 };
 
