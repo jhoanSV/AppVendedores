@@ -1,11 +1,13 @@
 import React, { useEffect, useState} from "react";
 import Constants from 'expo-constants';
-import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, Button } from "react-native";
+import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, Button, TouchableOpacity } from "react-native";
 import { setGlobal, getGlobal } from '../components/context/user';
 
 import { progressBar1, award, Bronce, Plata, Oro, bright } from "../../assets";
 
 import TProgressBar from '../components/TProgressBar';
+import Record from "../components/modal/Record";
+
 
 
 const Main = () => {
@@ -25,6 +27,7 @@ const Main = () => {
     const[colorBar, setColorBar] = useState(null);
     const[rank, setRank] = useState(null);
     const vendedor = getGlobal('Name');
+    const [mVisible, setMVisible] = useState(false);
 
     useEffect(()=>{
         setProgress((ventTotales)/(meta2));
@@ -67,8 +70,10 @@ const Main = () => {
                     }
                 </View>
                 <View style={{ position: 'relative', flex: 1, }}>
-                    <Image style={{ position: 'relative', width: '130%', height: '100%',resizeMode: 'contain', zIndex: 2,}} source={ award }/>
-                    <Image style={{ position: 'absolute', top: -18,width: '125%', height: '170%',resizeMode: 'contain', zIndex: 1,}} source={ bright }/>
+                    <TouchableOpacity onPress={()=>{setMVisible(true)}}>
+                        <Image style={ styles.awardImg } source={ award }/>
+                        <Image style={ styles.brightImg } source={ bright }/>
+                    </TouchableOpacity>
                 </View>
             </View>
             <View style={{ width: '100%', aspectRatio: (1710/580)}}>
@@ -114,6 +119,7 @@ const Main = () => {
                 color="#193773"
                 accessibilityLabel="prueba"
             />
+            <Record modalVisible={mVisible} setModalVisible={setMVisible}/>
         </SafeAreaView>
     )
 }
@@ -155,6 +161,21 @@ const styles = StyleSheet.create({
     ventasValor: {
         fontSize: 20,
         color: '#00000'
+    },
+    brightImg: {
+        position: 'absolute',
+        top: -18,
+        width: '125%',
+        height: '170%',
+        resizeMode: 'contain',
+        zIndex: 1,
+    },
+    awardImg: {
+        position: 'relative',
+        width: '130%',
+        height: '100%',
+        resizeMode: 'contain',
+        zIndex: 2,
     },
 
 })
