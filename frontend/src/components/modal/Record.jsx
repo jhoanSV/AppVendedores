@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, StyleSheet, Text, Pressable, View} from 'react-native';
 
-const Record = ({modalVisible, setModalVisible}) => {
+const Record = ({modalVisible, setModalVisible, rec}) => {
 
   return (
     <View style={styles.centeredView}>
@@ -14,11 +14,12 @@ const Record = ({modalVisible, setModalVisible}) => {
         }}>
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>jsjsjsjjs</Text>
+            <Text style={styles.modalText}>El record es: </Text>
+            <Text style={[styles.modalText, styles.modalValue]}>{rec}</Text>
             <Pressable
               style={[styles.button, styles.buttonClose]}
               onPress={() => setModalVisible(!modalVisible)}>
-              <Text style={styles.textStyle}>cerrar</Text>
+              <Text style={styles.textStyle}>Cerrar</Text>
             </Pressable>
           </View>
         </View>
@@ -65,6 +66,13 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
+    fontSize: 20,
+    color: '#193773',
+    fontWeight: 'bold',
+  },
+  modalValue:{
+    fontWeight: 'normal',
+    color: '#00000',
   },
 });
 

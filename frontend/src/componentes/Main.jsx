@@ -1,7 +1,10 @@
 import React, { useEffect, useState} from "react";
 import Constants from 'expo-constants';
-import { SafeAreaView, StyleSheet, TextInput, Text, View, Image, Button, TouchableOpacity } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View, Image, Button, 
+    TouchableOpacity, Animated, Easing } from "react-native";
 import { setGlobal, getGlobal } from '../components/context/user';
+import { DatosVentas } from "../api";
+
 
 import { progressBar1, award, Bronce, Plata, Oro, bright } from "../../assets";
 
@@ -15,12 +18,14 @@ const Main = () => {
     function formatNumber(number){
         return new Intl.NumberFormat().format(number);
     };
-    let meta = 35000000;
-    let meta2 = 48000000;
-    let record = 55000000;
-    //const[meta, setMeta] =useState(38000000);
-    //const[meta2, setMeta2] =useState(48000000);
-    //const[record, setRecord] =useState(50000000);
+
+    //let meta = 35000000;
+    //let meta2 = 48000000;
+    //let record = 55000000;
+    let rotateValue = new Animated.Value(0);
+    const[meta, setMeta] =useState(0);
+    const[meta2, setMeta2] =useState(0);
+    const[record, setRecord] =useState(0);
     const[ventTotales, setVentTotales] = useState(null);
     const[progress, setProgress] = useState(null);
     const[progress2, setProgress2] = useState(null);
@@ -28,6 +33,41 @@ const Main = () => {
     const[rank, setRank] = useState(null);
     const vendedor = getGlobal('Name');
     const [mVisible, setMVisible] = useState(false);
+    const [llamaDatos, setLlamaDatos] = useState([]);
+    const rot = rotateValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['0deg', '360deg']
+    })
+    const animation = Animated.timing(rotateValue, {
+        toValue: 1,
+        duration: 3000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+    });
+
+    Animated.loop(animation).start();
+
+    useEffect(() =>{
+        asinc()
+    },[])
+
+    const asinc = async() => {
+        const jsjs = await DatosVentas(getGlobal('User'))
+        console.log(jsjs);
+        setMeta(jsjs[0]["Meta"]);
+        setMeta2(jsjs[0]["Meta2"]);
+        if((jsjs[0]["record"]) < 52000000){
+            setRecord(52000000);
+        }else{
+            setRecord(jsjs[0]["record"]);
+        }
+    }
+
+    useEffect(()=>{
+        return () =>{
+            animation.stop();
+        }
+    },[]);
 
     useEffect(()=>{
         setProgress((ventTotales)/(meta2));
@@ -69,10 +109,16 @@ const Main = () => {
                         <Text style={styles.vendedorText}>{vendedor.slice(1,vendedor.length-1)}</Text>
                     }
                 </View>
-                <View style={{ position: 'relative', flex: 1, }}>
+                <View style={{ position: 'relative', flex: 1, /*backgroundColor: 'red'*/}}>
                     <TouchableOpacity onPress={()=>{setMVisible(true)}}>
                         <Image style={ styles.awardImg } source={ award }/>
-                        <Image style={ styles.brightImg } source={ bright }/>
+                        <Animated.Image style={[
+                                styles.awardImg, 
+                                styles.brightImg,
+                                {transform: [{rotate: rot}]} 
+                            ]} 
+                            source={ bright }
+                        />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -119,7 +165,7 @@ const Main = () => {
                 color="#193773"
                 accessibilityLabel="prueba"
             />
-            <Record modalVisible={mVisible} setModalVisible={setMVisible}/>
+            <Record modalVisible={mVisible} setModalVisible={setMVisible} rec={formatNumber(record)}/>
         </SafeAreaView>
     )
 }
@@ -162,21 +208,18 @@ const styles = StyleSheet.create({
         fontSize: 20,
         color: '#00000'
     },
-    brightImg: {
-        position: 'absolute',
-        top: -18,
-        width: '125%',
-        height: '170%',
-        resizeMode: 'contain',
-        zIndex: 1,
-    },
     awardImg: {
         position: 'relative',
-        width: '130%',
-        height: '100%',
+        width: '115%',
+        height: '115%',
         resizeMode: 'contain',
         zIndex: 2,
     },
+    brightImg: {
+        position: 'absolute',
+        zIndex: 1,
+    },
+    
 
 })
 

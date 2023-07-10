@@ -47,7 +47,13 @@ export const consecutivos = async(parametros) => {
     }
 }
 
-/*export const consPrefactura = async(nuevoConsecutivo) => {
-    const res = await fetch(`${API}/consecutivoPrefactura/${nuevoConsecutivo}`, {method: 'POST'})
-    return res
-}*/
+
+export const DatosVentas = async(searchUser) => {
+    try {
+        const res = await fetch(`${API}/DatosProgreso/${searchUser}`, {method: 'GET'})
+        return await res.json()
+    }catch(error) {
+        console.log(error)
+    }
+}
+
