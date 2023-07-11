@@ -40,7 +40,7 @@ const Main = () => {
     })
     const animation = Animated.timing(rotateValue, {
         toValue: 1,
-        duration: 3000,
+        duration: 6000,
         easing: Easing.linear,
         useNativeDriver: true,
     });
@@ -52,14 +52,15 @@ const Main = () => {
     },[])
 
     const asinc = async() => {
-        const jsjs = await DatosVentas(getGlobal('User'))
-        console.log(jsjs);
-        setMeta(jsjs[0]["Meta"]);
-        setMeta2(jsjs[0]["Meta2"]);
-        if((jsjs[0]["record"]) < 52000000){
+        const datos = await DatosVentas(getGlobal('User'))
+        setMeta(datos[0]["Meta"]);
+        setMeta2(datos[0]["Meta2"]);
+        setVentTotales(datos[0]["VentasMes"])
+        console.log(datos);
+        if((datos[0]["record"]) < 52000000){
             setRecord(52000000);
         }else{
-            setRecord(jsjs[0]["record"]);
+            setRecord(datos[0]["record"]);
         }
     }
 

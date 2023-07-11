@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
+//import { LinearGradient } from 'expo-linear-gradient';
 
 const TProgressBar = ({ pct, color, m1, m2, valorMeta, valorMeta2 }) => {
 
@@ -29,6 +30,12 @@ const TProgressBar = ({ pct, color, m1, m2, valorMeta, valorMeta2 }) => {
     backgroundColor: '#193773',
     transform: [{ rotate: '168deg' }],
     zIndex: 2,
+  }
+  const shad = {
+    position: 'absolute',
+    top: -94,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+    zIndex: 1,
   }
   const bar1 = {
     position: 'absolute',
@@ -61,13 +68,10 @@ const TProgressBar = ({ pct, color, m1, m2, valorMeta, valorMeta2 }) => {
     <View style={{position: 'relative'}}>
       <View style={square}>
         <View style={jsjs}/>
+        <View style={[jsjs, shad]}/>
         <View style={progressBar}/>
         <View style={bar1}/>
-        <View style={[bar1, bar2]}>
-          <Text>
-            {valorMeta2}
-          </Text>
-        </View>
+        <View style={[bar1, bar2]}/>
       </View>
       <Text style={etiq}>
         {valorMeta}
