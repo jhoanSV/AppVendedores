@@ -33,10 +33,10 @@ const LogIn = () => {
     if(valor.length === 1){
       const usuario = JSON.stringify(valor[0]["Cod"])
       const cargo = JSON.stringify(valor[0]["Cargo"])
-      const name = JSON.stringify(valor[0]["Nombre"])
+      const Nombre = JSON.stringify(valor[0]["Nombre"])
       setUser(usuario)
       navigation.navigate('Main')
-      setGlobal({ User : usuario, Position: cargo, Name: name})
+      setGlobal({ User : usuario, Position: cargo, Name: Nombre})
       console.log(usuario + " " + cargo)
       setCargando(false)
     } else {

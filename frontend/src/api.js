@@ -71,6 +71,10 @@ export const pedidosEnviados = async(CodVendedor) => {
 export const DetallePedido = async(NPedido) => {
     try {
         const res = await fetch(`${API}/DetallePedidoVendedor/${NPedido}`, {method: 'GET'})
+
+export const DatosVentas = async(searchUser) => {
+    try {
+        const res = await fetch(`${API}/DatosProgreso/${searchUser}`, {method: 'GET'})
         return await res.json()
     }catch(error) {
         console.log(error)
