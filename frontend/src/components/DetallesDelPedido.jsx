@@ -17,7 +17,7 @@ const windowHeight = Dimensions.get('window').height;
 function DetallesDelPedido({ navigation, route }) {
     const [refreshing, setrefreshing] = useState(false)
     const [Pedido, setPedido] = useState([]);
-    Const [permisos, setPermisos] = useState(false);
+    const [permisos, setPermisos] = useState(false);
 
     const permissions = () => {
         if(getGlobal('Position')==='Asesor comercial'){

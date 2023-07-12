@@ -1,4 +1,4 @@
-const API = 'http://192.168.1.107:3000/tasks';
+const API = 'http://192.168.1.114:3000/tasks';
 /*44.209.105.117:80/tasks*/
 export const getTasks = async() => {
     try {
@@ -71,6 +71,11 @@ export const pedidosEnviados = async(CodVendedor) => {
 export const DetallePedido = async(NPedido) => {
     try {
         const res = await fetch(`${API}/DetallePedidoVendedor/${NPedido}`, {method: 'GET'})
+        return await res.json()
+    }catch(error){
+        console.log(error)
+    }
+}
 
 export const DatosVentas = async(searchUser) => {
     try {
