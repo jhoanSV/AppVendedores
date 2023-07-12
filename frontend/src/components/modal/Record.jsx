@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   },
   modalValue:{
     fontWeight: 'normal',
-    color: '#00000',
+    color: 'black',
   },
 });
 

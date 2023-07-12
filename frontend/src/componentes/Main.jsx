@@ -78,7 +78,7 @@ const Main = () => {
 
     const check = () =>{
         if ((progress*100) < ((meta/meta2)*100)){
-            setRank('');
+            setRank(0);
             setColorBar('#FF0000');
         }else if((progress*100) < 100){
             setRank(Bronce);
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
     },
     ventasValor: {
         fontSize: 20,
-        color: '#00000'
+        color: 'black'
     },
     awardImg: {
         position: 'relative',
