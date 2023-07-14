@@ -10,6 +10,7 @@ import { progressBar1, award, Bronce, Plata, Oro, bright } from "../../assets";
 
 import TProgressBar from '../components/TProgressBar';
 import Record from "../components/modal/Record";
+import { useIsFocused } from "@react-navigation/native";
 
 
 
@@ -31,9 +32,10 @@ const Main = () => {
     const[progress2, setProgress2] = useState(null);
     const[colorBar, setColorBar] = useState(null);
     const[rank, setRank] = useState(null);
+    const[showR, setShowR] = useState(false)
     const vendedor = getGlobal('Name');
     const [mVisible, setMVisible] = useState(false);
-    const [llamaDatos, setLlamaDatos] = useState([]);
+    
     const rot = rotateValue.interpolate({
         inputRange: [0, 1],
         outputRange: ['0deg', '360deg']
@@ -45,11 +47,18 @@ const Main = () => {
         useNativeDriver: true,
     });
 
+    const isFocused = useIsFocused()
+
     Animated.loop(animation).start();
 
     useEffect(() =>{
+        Animated.loop(animation).start();
         asinc()
-    },[])
+        return () =>{
+            animation.stop();
+            console.log("para");
+        }
+    },[isFocused])
 
     const asinc = async() => {
         const datos = await DatosVentas(getGlobal('User'))
@@ -65,45 +74,44 @@ const Main = () => {
     }
 
     useEffect(()=>{
-        return () =>{
-            animation.stop();
-        }
-    },[]);
-
-    useEffect(()=>{
-        setProgress((ventTotales)/(meta2));
+        setProgress(((ventTotales)/(meta2))*100);
         setProgress2((ventTotales)/(record));
         check();
     },[ventTotales, progress, progress2])
 
     const check = () =>{
-        if ((progress*100) < ((meta/meta2)*100)){
-            setRank(0);
+        if ((progress) < ((meta/meta2)*100)){
+            setShowR(false);
             setColorBar('#FF0000');
-        }else if((progress*100) < 100){
+        }else if((progress) < 100){
+            setShowR(true);
             setRank(Bronce);
             setColorBar('#FAB400');
-        }else if((progress*100) < (record/meta2)*100){
+        }else if((progress) < (record/meta2)*100){
+            setShowR(true);
             setRank(Plata);
             setColorBar('#1DD200');
         }else{
+            setShowR(true);
             setRank(Oro);
             setColorBar('yellow');
         }
     }    
     
-    const newVenta = () =>{
+    /*const newVenta = () =>{
         setVentTotales(ventTotales + 1000000);
     }
     const quitVenta = () =>{
         setVentTotales(ventTotales - 1000000);
-    }
+    }*/
 
     return (
         <SafeAreaView style={ { flexGrow: 1, padding: 15}}>
             <View style={ {width: '100%', aspectRatio: 6, flexDirection: 'row', alignContent: 'space-between'}}>
                 <View style={{ flex: 1}}>
-                    <Image style={{ width: '86%', height: '85%',resizeMode: 'contain' }} source={ rank }/>
+                    {showR &&
+                        <Image style={{ width: '86%', height: '85%',resizeMode: 'contain' }} source={ rank }/>
+                    }
                 </View>
                 <View style={{ flex: 1, alignSelf: "center" }}>
                     {vendedor &&
@@ -126,15 +134,17 @@ const Main = () => {
             <View style={{ width: '100%', aspectRatio: (1710/580)}}>
                 <Image style={{ flex: 1, width: '100%', resizeMode: 'contain'}} source={ progressBar1 }/>
                 <View style={ styles.proBarTextContainer}>
-                    <Text style={styles.progressBarText}>
-                        {parseInt(progress*100)}%
-                    </Text>
+                    {progress !== null && (
+                        <Text style={styles.progressBarText}>
+                            {(parseInt(progress))}%
+                        </Text>
+                    )}
                 </View>
                 <Text style={{position: 'absolute', left: '31%', top: '30%', fontWeight: 'bold', fontSize: 16,
                     zIndex: 2, color: 'white',}}>
                     Progreso
                 </Text>
-                <View style={{position: 'absolute', left: '31%', bottom: '20%', width: (63) + '%', height: 54}}>
+                <View style={{position: 'absolute', left: '31%', bottom: '20%', width: (63) + '%', height: (41) + '%'}}>
                     <TProgressBar 
                         pct={progress2}
                         color={colorBar}
@@ -149,7 +159,7 @@ const Main = () => {
                 <Text style={styles.ventasText}> Mis Ventas</Text>
                 <Text style={styles.ventasValor}> $ {formatNumber(ventTotales)}</Text>
             </View>
-            <Button
+            {/*<Button
                 onPress={newVenta}
                 title="añadir venta"
                 color="#193773"
@@ -165,7 +175,7 @@ const Main = () => {
                 title="restar venta"
                 color="#193773"
                 accessibilityLabel="prueba"
-            />
+            />        --------Botones para prueba------------------*/}
             <Record modalVisible={mVisible} setModalVisible={setMVisible} rec={formatNumber(record)}/>
         </SafeAreaView>
     )

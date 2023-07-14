@@ -1,5 +1,5 @@
 import React,{useState, useEffect, useRef, Fragment } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl, FlatList} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl, FlatList, useWindowDimensions} from 'react-native';
 import DetLPedidoItem from '../components/DetLPedidoItem';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { setGlobal, getGlobal } from '../components/context/user';
@@ -15,15 +15,16 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 function DetallesDelPedido({ navigation, route }) {
-    const [refreshing, setrefreshing] = useState(false)
+    //const [refreshing, setrefreshing] = useState(false)
     const [Pedido, setPedido] = useState([]);
     const [permisos, setPermisos] = useState(false);
+    const isFocused = useIsFocused()
 
     const permissions = () => {
-        if(getGlobal('Position')==='Asesor comercial'){
-            setPermisos(false); 
-        } else if(getGlobal('Position')==='Entregas'){
-            setPermisos(true);
+        if((getGlobal('Position').slice(1,-1))==='Asesor comercial'){
+            setPermisos(false);
+        } else if((getGlobal('Position').slice(1,-1))==='Entregas'){
+            setPermisos(true);            
         }
     };
 
@@ -32,12 +33,18 @@ function DetallesDelPedido({ navigation, route }) {
     };
 
     useEffect(() => {
-        buscarPedido()
-    },[]);
+      permissions();
+      buscarPedido();
+    },[isFocused]);
     
     const buscarPedido = async () => {
+      try {
         const ElPedido = await DetallePedido(route.params.NDePedido)
+        //console.log("El pedido:" + ElPedido)
         setPedido(ElPedido)
+      }catch(error){
+        console.log(error)
+      }
     };
 
     const renderItem=({ item })=>{
@@ -59,78 +66,93 @@ function DetallesDelPedido({ navigation, route }) {
           return {backgroundColor: '#DA4404'}
         }
     }
+
+    function MostrarEstado(text){
+        if(text!==""){
+          return text
+        } else {
+          return route.params.Estado
+        }
+    }
     
     return (
-        <View style={[styles.container]}>
-            <View style={[ styles.ContenedorEstado, colorNota(route.params.Estado)]}>
-                <Text style={[styles.subTitle, {color: '#000000'}]}>
-                    Estado: {route.params.Estado}
-                </Text>
-                <View style={{alignItems:'flex-end', flex: 1 }}>
+        <>
+            <View style={[styles.container, { flex: 1 }]}>
+              
+                <View style={[ styles.ContenedorEstado, colorNota(MostrarEstado(route.params.ProcesoDelPedido))]}>
                     <Text style={[styles.subTitle, {color: '#000000'}]}>
-                        {route.params.NDePedido}
+                        Estado: {MostrarEstado(route.params.ProcesoDelPedido)}
                     </Text>
-                </View>
-            </View>
-            <ScrollView 
-                horizontal={true} 
-                refreshControl={<RefreshControl 
-                                refreshing={refreshing} 
-                                onRefresh={()=>actualizar()}/>}>
-                <View style={{flexDirection: 'row'}}>
-                <View style={{flexDirection: 'column'}}>
-                    <View>
-                    <Text style={styles.subTitle}>Empresa:</Text>
-                    <Text style={styles.text}>{route.params.Ferreteria}</Text>
-                    </View>
-                    <View>
-                    <Text style={styles.subTitle}>Dirección:</Text>
-                    <Text style={styles.text}>{route.params.Direccion}</Text>
+                    <View style={{alignItems:'flex-end', flex: 1 }}>
+                        <Text style={[styles.subTitle, {color: '#000000'}]}>
+                            {route.params.NDePedido}
+                        </Text>
                     </View>
                 </View>
-                <View style={{flexDirection: 'column'}}>
-                <View>
-                    <Text style={styles.subTitle}>Ruta:</Text>
-                    <Text style={styles.text}>{route.params.Ruta}</Text>
+                <ScrollView
+                    style = {{flexGrow: 0}} 
+                    horizontal={true} 
+                    refreshControl={
+                      <RefreshControl
+                         //refreshing={refreshing}
+                          onRefresh={()=>/*actualizar()*/console.log("se actualiza prro")}
+                      />}
+                >
+                    <View style={{flexDirection: 'row', flex: 1}}>
+                      <View style={{flexDirection: 'column', flex: 1}}>
+                          <View>
+                            <Text style={styles.subTitle}>Empresa:</Text>
+                            <Text style={styles.text}>{route.params.Ferreteria}</Text>
+                          </View>
+                          <View>
+                            <Text style={styles.subTitle}>Dirección:</Text>
+                            <Text style={styles.text}>{route.params.Direccion}</Text>
+                          </View>
+                      </View>
+                      <View style={{flexDirection: 'column'}}>
+                        <View>
+                            <Text style={styles.subTitle}>Ruta:</Text>
+                            <Text style={styles.text}>{route.params.Ruta}</Text>
+                        </View>
+                        <View>
+                          <Text style={styles.subTitle}>Barrio:</Text>
+                          <Text style={styles.text}>{route.params.Barrio}</Text>
+                        </View>
+                      </View>
                     </View>
-                    <View>
-                    <Text style={styles.subTitle}>Barrio:</Text>
-                    <Text style={styles.text}>{route.params.Barrio}</Text>
-                    </View>
-                </View>
-                </View>
-            </ScrollView>
-
-            <View>
-                <ScrollView horizontal={true}>
-                    <FlatList
-                        data={Pedido}
-                        style={styles.containerL}
-                        renderItem={renderItem}
-                    />
                 </ScrollView>
-            </View>
-        
-            <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
-                
-                <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
-                    <Text style={[styles.subTitle,{right: 0}]}>Total: {formatNumber(route.params.VrFactura)}</Text>
-                </View>
 
-                <View style={{flexDirection: 'row'}}>
-                    <View>
-                        <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>setVisibleAviso(true)}>
-                            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Cancelar</Text>
-                        </TouchableOpacity>
+                <View style={{ flex: 1 }}>
+                    <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
+                        <FlatList
+                            data={Pedido}
+                            style={[styles.containerL, {flex: 1}]}
+                            renderItem={renderItem}
+                        />
+                    </ScrollView>
+                </View>
+            
+                <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+                    
+                    <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
+                        <Text style={[styles.subTitle,{right: 0}]}>Total: {formatNumber(route.params.VrFactura)}</Text>
                     </View>
-                    <View>
-                        <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>verificarAgregarPedido()}>
-                            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
-                        </TouchableOpacity>
-                    </View>
+
+                    {permisos && <View style={{flexDirection: 'row'}}>
+                        <View>
+                            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>setVisibleAviso(true)}>
+                                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entregar</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View>
+                            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>verificarAgregarPedido()}>
+                                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Otro</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>}
                 </View>
             </View>
-        </View>
+        </>
     )
 }
 
@@ -229,10 +251,10 @@ const styles = StyleSheet.create({
     },
   ContenedorEstado: {
     flexDirection: 'row', 
-    ustifyContent: 'space-between',
+    justifyContent: 'space-between',
     },
   containerL: {
-        height: windowHeight*0.49,
+        //height: windowHeight*0.49,
         width: windowWidth,
         margin: 12,
         marginTop: 0,
