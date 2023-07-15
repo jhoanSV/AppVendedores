@@ -66,8 +66,8 @@ const Main = () => {
         setMeta2(datos[0]["Meta2"]);
         setVentTotales(datos[0]["VentasMes"])
         console.log(datos);
-        if((datos[0]["record"]) < 52000000){
-            setRecord(52000000);
+        if((datos[0]["record"]) < 52459200){
+            setRecord(52459200);
         }else{
             setRecord(datos[0]["record"]);
         }
