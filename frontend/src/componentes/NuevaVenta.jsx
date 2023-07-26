@@ -12,6 +12,7 @@ import Warning from '../components/modal/Warning';
 import Loading from '../components/modal/Loading';
 import * as Sharing from 'expo-sharing';
 import { useIsFocused } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -53,11 +54,24 @@ function NuevaVenta({ navigation, route }) {
     actualizar()
   },[isFocused]);
 
+  useEffect(()=> {
+    ObtenerODePedido()
+  },[]);
+  
+  useEffect(()=> {
+    setSuma(sumaTotal())
+  },[pedido]);
 
-  const sendWarning = ( title, warningText, ConfirmationText, SetConfirmation) => {
-    
-    <Warning visible={visibleSendWarning} title={title} warningText={warningText} setMostrar={setVisibleSendWarning} ConfirmationText={ConfirmationText} SetConfirmation={SetConfirmation} />
+  const ObtenerODePedido = async() => {
+    const ODePedido = await SecureStore.getItemAsync('ODePedido');
+    setPedido(JSON.parse(ODePedido))
+  };
+
+  function sendWarning( title, warningText, ConfirmationText, SetConfirmation) {
     setVisibleSendWarning(true);
+    return(
+      <Warning visible={visibleSendWarning} title={title} warningText={warningText} setMostrar={setVisibleSendWarning} ConfirmationText={ConfirmationText} SetConfirmation={SetConfirmation} />
+    )
   };
 
   const actualizar = async () => {
@@ -321,12 +335,13 @@ function NuevaVenta({ navigation, route }) {
       }
     };
 
-    function cancelarPedido(){
+    /*const cancelarPedido = async()=>{
       setPedido([])
       handleSubmit('')
-      setTextDate('')
+      //setTextDate('')
       navigation.navigate('LClientes')
-    };
+      await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
+    };*/
 
     return (
       <Modal transparent visible={visible}>
@@ -386,24 +401,35 @@ function NuevaVenta({ navigation, route }) {
     }
   };
 
-  function cancelarPedido(){
+  /*function cancelarPedido(){
     setPedido([])
     handleSubmit('')
     //setTextDate('')
     navigation.navigate('LClientes')
+  };*/
+
+  const cancelarPedido = async()=>{
+    setPedido([])
+    handleSubmit('')
+    //setTextDate('')
+    navigation.navigate('LClientes')
+    await SecureStore.setItemAsync('ODePedido', JSON.stringify([]));
   };
 
   function sumaTotal(){
     if(pedido.length !== 0){
       return new Intl.NumberFormat().format(pedido.reduce((sum, value) => (typeof value.Cantidad == "number" ? sum + (value.Cantidad*value.PVenta) : sum), 0));
+    } else {
+      return 0
     }
   }; 
   // fin intento de suma
-  const agregarPedido=(objeto)=>{
+  const agregarPedido = async(objeto)=>{
     var index = pedido.map(codigo => codigo.cod).indexOf(objeto.cod);
     if(index === -1) {
       pedido.push(objeto)
-      setSuma(sumaTotal())
+      //setSuma(sumaTotal())
+      await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
     } else if(index !== -1) {
       setVisibleAvisoProducto(true)
       setTimeout(() => {  
@@ -412,41 +438,44 @@ function NuevaVenta({ navigation, route }) {
     }
   };
   
-  const aumentarCantidad=(Cod, paquete)=>{
+  const aumentarCantidad = async(Cod, paquete)=>{
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
       pedido[index].Cantidad = pedido[index].Cantidad + paquete
-      setSuma(sumaTotal());
+      //setSuma(sumaTotal());
+      await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
     }
   };
   
-  const disminuirCantidad=(Cod, paquete)=>{
+  const disminuirCantidad = async(Cod, paquete)=>{
     if(pedido.length !== 0){
       try {
         var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
         pedido[index].Cantidad = pedido[index].Cantidad - paquete
-        setSuma(sumaTotal());
+        //setSuma(sumaTotal());
         if(pedido[index].Cantidad<1){
           pedido.splice(index, 1)
           handleSubmit('')
         }
+        await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido)); 
       } catch (error) {
       console.error(error);
       }
     }
   };
 
-  const modificarCantidad=(Cod,Cantidad,paquete)=>{
+  const modificarCantidad = async(Cod,Cantidad,paquete)=>{
     if(pedido.length !== 0){
       try {
         var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
         var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
         pedido[index].Cantidad = NuevaCantidad
-        setSuma(sumaTotal())
+        //setSuma(sumaTotal())
         if(pedido[index].Cantidad<1){
           pedido.splice(index, 1)
           handleSubmit('')
         }
+        await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
       } catch (error) {
       console.error(error);
       }
@@ -461,7 +490,7 @@ function NuevaVenta({ navigation, route }) {
   const handleSubmit = async(text) => {
     if (text === ''){
       setInput(text)
-      setSuma(sumaTotal())
+      //setSuma(sumaTotal())
       setIsVisible(false)
     } else {
       setInput(text)
