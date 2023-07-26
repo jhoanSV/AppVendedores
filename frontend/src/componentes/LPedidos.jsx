@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react";
 import Constants from 'expo-constants';
 import { SafeAreaView, StyleSheet, TextInput, Text, View, FlatList } from "react-native";
-import { pedidosEnviados } from '../api';
+import { pedidosEnviados, PedidosPorEntregar } from '../api';
 import { getGlobal } from '../components/context/user';
 import LPedidosList from '../components/LPedidosList';
 import Layout from '../components/Layout';
@@ -10,26 +10,36 @@ import { useIsFocused } from '@react-navigation/native';
 import { TouchableOpacity } from "react-native-gesture-handler";
 
 
-const LPedidos = () => {
+const LPedidos = ({route}) => {
     const [orders, setOrders] = useState([]);
     const [searchorder, setSearchOrder] = useState([]);
-    const isFocused = useIsFocused()
+    const isFocused = useIsFocused();
+    const Cerrado = route.params;
     
     useEffect(()=> {
         loadOrders()
       },[isFocused]);
     
     const loadOrders = async() => {
-        const data = await pedidosEnviados(getGlobal('User'));
-        setOrders(data);
-        setSearchOrder(data)
-    }
+        if(JSON.stringify(Cerrado) === JSON.stringify([]) && (getGlobal('Position').slice(1,-1)) ==='Asesor comercial'){
+            const data = await pedidosEnviados(getGlobal('User'));
+            setOrders(data);
+            setSearchOrder(data);
+        } else if((JSON.stringify(Cerrado) === JSON.stringify([]) && (getGlobal('Position').slice(1,-1)) ==='Entregas')){
+            const data = await PedidosPorEntregar(getGlobal('User'));
+            setOrders(data);
+            setSearchOrder(data);
+        } else if(JSON.stringify(Cerrado) !== JSON.stringify([])){
+            setOrders(Cerrado);
+            setSearchOrder(Cerrado);
+        }
+    };
 
     const BuscarOder = async(text) => {
         const data = orders
         const filtro = data.filter((data) => data.NDePedido.toString().includes(text)||data.Ferreteria.toLowerCase().includes(text) || data.Estado.toLowerCase().includes(text))
         setSearchOrder(filtro)
-    }
+    };
     
     return (
     

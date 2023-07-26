@@ -1,9 +1,9 @@
 import React, { useEffect, useState} from "react";
 import Constants from 'expo-constants';
 import { SafeAreaView, StyleSheet, Text, View, Image, Button, 
-    TouchableOpacity, Animated, Easing } from "react-native";
+    TouchableOpacity, Animated, Easing, Dimensions } from "react-native";
 import { setGlobal, getGlobal } from '../components/context/user';
-import { DatosVentas } from "../api";
+import { DatosVentas, pedidosCerrados } from "../api";
 
 
 import { progressBar1, award, Bronce, Plata, Oro, bright } from "../../assets";
@@ -11,8 +11,10 @@ import { progressBar1, award, Bronce, Plata, Oro, bright } from "../../assets";
 import TProgressBar from '../components/TProgressBar';
 import Record from "../components/modal/Record";
 import { useIsFocused } from "@react-navigation/native";
+import { useNavigation } from '@react-navigation/native';
 
-
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const Main = () => {
 
@@ -35,6 +37,8 @@ const Main = () => {
     const[showR, setShowR] = useState(false)
     const vendedor = getGlobal('Name');
     const [mVisible, setMVisible] = useState(false);
+    const navigation = useNavigation()
+    const [pCerrados, setPCerrados] = useState([]);
     
     const rot = rotateValue.interpolate({
         inputRange: [0, 1],
@@ -50,6 +54,11 @@ const Main = () => {
     const isFocused = useIsFocused()
 
     Animated.loop(animation).start();
+
+    const LCerradas = async()=> {
+        const datos = await pedidosCerrados(getGlobal('User'))
+        setPCerrados(datos)
+    }
 
     useEffect(() =>{
         Animated.loop(animation).start();
@@ -104,7 +113,15 @@ const Main = () => {
     const quitVenta = () =>{
         setVentTotales(ventTotales - 1000000);
     }*/
-
+    const FacturasCerradas = () =>{
+        LCerradas()
+        if(pCerrados!=={}){
+            navigation.navigate('LPedidos', pCerrados)
+            //console.log(pCerrados)
+        } else if(pCerrados==={}){
+            console.log("Esta vacia la lista de los cerrados")
+        }
+    }
     return (
         <SafeAreaView style={ { flexGrow: 1, padding: 15}}>
             <View style={ {width: '100%', aspectRatio: 6, flexDirection: 'row', alignContent: 'space-between'}}>
@@ -155,10 +172,12 @@ const Main = () => {
                     />
                 </View>
             </View>
-            <View style={styles.containerVentas} >
-                <Text style={styles.ventasText}> Mis Ventas</Text>
-                <Text style={styles.ventasValor}> $ {formatNumber(ventTotales)}</Text>
-            </View>
+            <TouchableOpacity onPress={()=>FacturasCerradas()}>
+                <View style={styles.containerVentas} >
+                    <Text style={styles.ventasText}> Mis Ventas</Text>
+                    <Text style={styles.ventasValor}> $ {formatNumber(ventTotales)}</Text>
+                </View>
+            </TouchableOpacity>
             {/*<Button
                 onPress={newVenta}
                 title="añadir venta"
@@ -177,6 +196,9 @@ const Main = () => {
                 accessibilityLabel="prueba"
             />        --------Botones para prueba------------------*/}
             <Record modalVisible={mVisible} setModalVisible={setMVisible} rec={formatNumber(record)}/>
+            {/*<TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#398A1C', right: 0}]} onPress={()=>FacturasCerradas()}>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Facturas cerradas</Text>
+            </TouchableOpacity>*/}
         </SafeAreaView>
     )
 }
@@ -230,7 +252,13 @@ const styles = StyleSheet.create({
         position: 'absolute',
         zIndex: 1,
     },
-    
+    buttonLogin : {
+        borderRadius: 50,
+        margin: 2,
+        bottom: 0,
+        width: windowWidth * 0.91,
+        //alignItems:'center',
+    },
 
 })
 

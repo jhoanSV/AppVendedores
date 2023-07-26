@@ -9,7 +9,7 @@ import Warning from '../components/modal/Warning';
 import Loading from '../components/modal/Loading';
 import * as Sharing from 'expo-sharing';
 import { useIsFocused } from '@react-navigation/native';
-import { DetallePedido } from '../api'
+import { DetallePedido, DetallePedidoCerrado, DetallePedidoEntregas, ActualizarProcesoDelPedido } from '../api'
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -18,12 +18,15 @@ function DetallesDelPedido({ navigation, route }) {
     //const [refreshing, setrefreshing] = useState(false)
     const [Pedido, setPedido] = useState([]);
     const [permisos, setPermisos] = useState(false);
+    const [visible, setVisible] = useState(false);
+    const [tipoDeEntrega, setTipoDeEntrega] = useState(false);
+    const [proDePedido, setProDePedido] = useState('');
     const isFocused = useIsFocused()
 
     const permissions = () => {
         if((getGlobal('Position').slice(1,-1))==='Asesor comercial'){
             setPermisos(false);
-        } else if((getGlobal('Position').slice(1,-1))==='Entregas'){
+        } else if((getGlobal('Position').slice(1,-1))==='Entregas' && route.params.ProcesoDelPedido === 'En ruta'){
             setPermisos(true);            
         }
     };
@@ -38,12 +41,27 @@ function DetallesDelPedido({ navigation, route }) {
     },[isFocused]);
     
     const buscarPedido = async () => {
-      try {
-        const ElPedido = await DetallePedido(route.params.NDePedido)
-        //console.log("El pedido:" + ElPedido)
-        setPedido(ElPedido)
-      }catch(error){
-        console.log(error)
+      if (permisos === false && MostrarEstado(route.params.ProcesoDelPedido) !== 'Cerrado'){
+        try {
+          const ElPedido = await DetallePedido(route.params.NDePedido)
+          setPedido(ElPedido)
+        }catch(error){
+          console.log(error)
+        }
+      } else if (permisos === false && MostrarEstado(route.params.ProcesoDelPedido) === 'Cerrado') {
+        try {
+          const ElPedido = await DetallePedidoCerrado(route.params.NDePedido)
+          setPedido(ElPedido)
+        }catch(error){
+          console.log(error)
+        }
+      } else if (permisos === true) {
+        try {
+          const ElPedido = await DetallePedidoEntregas(route.params.NDePedido)
+          setPedido(ElPedido)
+        }catch(error){
+          console.log(error)
+        }
       }
     };
 
@@ -64,6 +82,8 @@ function DetallesDelPedido({ navigation, route }) {
           return {backgroundColor: '#4DBE25'}
         } else if (text === 'No entregado') {
           return {backgroundColor: '#DA4404'}
+        } else if (text === 'Cerrado') {
+          return {backgroundColor: '#398A1C'}
         }
     }
 
@@ -74,53 +94,117 @@ function DetallesDelPedido({ navigation, route }) {
           return route.params.Estado
         }
     }
+
+    const CuadroDeEntrega = (valor) =>{
+      setTipoDeEntrega(valor)
+      if (valor==true){
+        setProDePedido('Entregado')
+      } else if (valor==false){
+        setProDePedido('No entregado')
+      }
+      setVisible(true)
+    }
+
+    const VerificarEntregarPedido = ({visible,children}) => {
+      const [inputNotasV, setInputNotasV ] = useState('')
+      const [visiblevCargando, setVisiblevCargando] = useState(false);
+      
+      const EntregarPedido = async(text) => {
+        setVisiblevCargando(true)
+        await ActualizarProcesoDelPedido({
+          "NotaEntrega": inputNotasV,
+          "ProcesoDelPedido": proDePedido,
+          "NDepedido": route.params.NDePedido
+        })
+        setVisiblevCargando(false)
+        setVisible(false)
+        navigation.navigate('LPedidos', [])
+      }
+
+      function Estilo (){
+        if (tipoDeEntrega == true){
+          return ({backgroundColor: '#193773'})
+        } else if (tipoDeEntrega == false){
+          return ({backgroundColor: '#D6320E'})
+        }
+      }
+      return (
+        <View>
+          <Loading visible={visiblevCargando} mensaje={'Entregando...'}></Loading>
+          <Modal transparent visible={visible}>
+            <View style={[styles.ModalBackground]}>
+              <View style={[styles.contenedorModal]}>
+                <View style={[{flexDirection: 'row', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}, Estilo()]}>
+                  <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Notas del pedido</Text>
+                  <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setVisible(false)}>
+                    <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
+                  </TouchableOpacity>
+                </View>
+                <TextInput
+                  multiline={true}
+                  maxLength={200}
+                  style={[styles.TextNotasV]}
+                  placeholder="Notas de entrega"
+                  value={inputNotasV}
+                  onChangeText={text=> setInputNotasV(text)}
+                  textAlignVertical="top"
+                  textAlign="left"
+                />
+                <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: '98%'}, Estilo()]} onPress={()=>EntregarPedido()}>
+                  <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Completar entrega</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </View>
+      );
+    };
     
     return (
         <>
             <View style={[styles.container, { flex: 1 }]}>
-              
-                <View style={[ styles.ContenedorEstado, colorNota(MostrarEstado(route.params.ProcesoDelPedido))]}>
-                    <Text style={[styles.subTitle, {color: '#000000'}]}>
-                        Estado: {MostrarEstado(route.params.ProcesoDelPedido)}
-                    </Text>
-                    <View style={{alignItems:'flex-end', flex: 1 }}>
-                        <Text style={[styles.subTitle, {color: '#000000'}]}>
-                            {route.params.NDePedido}
-                        </Text>
+              <View style={[ styles.ContenedorEstado, colorNota(MostrarEstado(route.params.ProcesoDelPedido))]}>
+                  <Text style={[styles.subTitle, {color: '#000000'}]}>
+                      Estado: {MostrarEstado(route.params.ProcesoDelPedido)}
+                  </Text>
+                  <View style={{alignItems:'flex-end', flex: 1 }}>
+                      <Text style={[styles.subTitle, {color: '#000000'}]}>
+                          {route.params.NDePedido}
+                      </Text>
+                  </View>
+              </View>
+              <ScrollView
+                style = {{flexGrow: 0}} 
+                horizontal={true} 
+                refreshControl={
+                  <RefreshControl
+                      //refreshing={refreshing}
+                      onRefresh={()=>/*actualizar()*/console.log("se actualiza perro")}
+                  />}
+              >
+                <View style={{flexDirection: 'row', flex: 1}}>
+                  <View style={{flexDirection: 'column', flex: 1}}>
+                      <View>
+                        <Text style={styles.subTitle}>Empresa:</Text>
+                        <Text style={styles.text}>{route.params.Ferreteria}</Text>
+                      </View>
+                      <View>
+                        <Text style={styles.subTitle}>Dirección:</Text>
+                        <Text style={styles.text}>{route.params.Direccion}</Text>
+                      </View>
+                  </View>
+                  <View style={{flexDirection: 'column'}}>
+                    <View>
+                        <Text style={styles.subTitle}>Ruta:</Text>
+                        <Text style={styles.text}>{route.params.Ruta}</Text>
                     </View>
+                    <View>
+                      <Text style={styles.subTitle}>Barrio:</Text>
+                      <Text style={styles.text}>{route.params.Barrio}</Text>
+                    </View>
+                  </View>
                 </View>
-                <ScrollView
-                    style = {{flexGrow: 0}} 
-                    horizontal={true} 
-                    refreshControl={
-                      <RefreshControl
-                         //refreshing={refreshing}
-                          onRefresh={()=>/*actualizar()*/console.log("se actualiza prro")}
-                      />}
-                >
-                    <View style={{flexDirection: 'row', flex: 1}}>
-                      <View style={{flexDirection: 'column', flex: 1}}>
-                          <View>
-                            <Text style={styles.subTitle}>Empresa:</Text>
-                            <Text style={styles.text}>{route.params.Ferreteria}</Text>
-                          </View>
-                          <View>
-                            <Text style={styles.subTitle}>Dirección:</Text>
-                            <Text style={styles.text}>{route.params.Direccion}</Text>
-                          </View>
-                      </View>
-                      <View style={{flexDirection: 'column'}}>
-                        <View>
-                            <Text style={styles.subTitle}>Ruta:</Text>
-                            <Text style={styles.text}>{route.params.Ruta}</Text>
-                        </View>
-                        <View>
-                          <Text style={styles.subTitle}>Barrio:</Text>
-                          <Text style={styles.text}>{route.params.Barrio}</Text>
-                        </View>
-                      </View>
-                    </View>
-                </ScrollView>
+              </ScrollView>
 
                 <View style={{ flex: 1 }}>
                     <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
@@ -131,22 +215,24 @@ function DetallesDelPedido({ navigation, route }) {
                         />
                     </ScrollView>
                 </View>
-            
+                
+                <VerificarEntregarPedido visible={visible}></VerificarEntregarPedido>
+                
                 <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
                     
                     <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
                         <Text style={[styles.subTitle,{right: 0}]}>Total: {formatNumber(route.params.VrFactura)}</Text>
                     </View>
-
+                    
                     {permisos && <View style={{flexDirection: 'row'}}>
                         <View>
-                            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>setVisibleAviso(true)}>
-                                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entregar</Text>
+                            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>CuadroDeEntrega(false)}>
+                                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>No entregado</Text>
                             </TouchableOpacity>
                         </View>
                         <View>
-                            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>verificarAgregarPedido()}>
-                                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Otro</Text>
+                            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>CuadroDeEntrega(true)}>
+                                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entregar</Text>
                             </TouchableOpacity>
                         </View>
                     </View>}
@@ -263,6 +349,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffff',
         borderColor: '#F2CB05',
         borderWidth: 1,
+    },
+    TextNotasV: {
+      backgroundColor: '#FFFF',
+      width: '97%',
+      height: '65%',
+      borderWidth: 2,
+      borderRadius: 10,
+      borderColor: '#F2CB05',
+      margin: 3,
+      padding: 4
     }
 });
 

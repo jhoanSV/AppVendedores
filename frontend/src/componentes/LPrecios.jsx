@@ -51,8 +51,8 @@ const LPrecios = () => {
           <Text style={[styles.text, {width: 80, margin: 5}]}>Cod</Text>
           <Text style={[styles.text, {width: 400, margin: 5}]}>Descripción</Text>
           <Text style={[styles.text, {width: 95, margin: 5}]}>Empaque</Text>
-          <Text style={[styles.text, {width: 200, margin: 5}]}>Sub categoria</Text>
           <Text style={[styles.text, {width: 100, margin: 5}]}>V. Unitario</Text>
+          <Text style={[styles.text, {width: 200, margin: 5}]}>Sub categoria</Text>
           <Text style={[styles.text, {margin: 5}]}>Nota</Text>
         </View>
         <TaskList tasks={tasks}/>

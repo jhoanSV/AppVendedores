@@ -19,15 +19,16 @@ const windowHeight = Dimensions.get('window').height;
 function NuevaVenta({ navigation, route }) {
   const viewRef = useRef();
   const [input, setInput] = useState('');
+  //const [inputNotasV, setInputNotasV] = useState('');
   const [pedido, setPedido] = useState([]);
   const [visible, setVisible] = useState(false);
   const [visibleAviso, setVisibleAviso] = useState(false);
   const [visibleAvisoProducto, setVisibleAvisoProducto] = useState(false);
   const [visibleEnvioExitoso, setVisibleEnvioExitoso]= useState(false);
-  const [date, setDate] = useState(new Date());
-  const [show, setShow] = useState(false);
+  //const [date, setDate] = useState(new Date());
+  //const [show, setShow] = useState(false);
   const [mode, setMode] = useState('date');
-  const [textDate, setTextDate] = useState('');
+  //const [textDate, setTextDate] = useState('');
   const [avisoRojo, setAvisoRojo] = useState(false);
   const [notaRojo, setNotaRojo] = useState('');
   const [visiblevCargando, setVisiblevCargando] = useState(false);
@@ -39,7 +40,7 @@ function NuevaVenta({ navigation, route }) {
   const [isVisible, setIsVisible] = React.useState(false);
   const [visibleSendWarning, setVisibleSendWarning] = useState(false);
   const isFocused = useIsFocused()
-  const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
+  //const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
   const [confirmar, setConfirmar] = useState({
     "NPedido": "NpreFactura",
     "Cliente": "route.params.Ferreteria",
@@ -85,12 +86,12 @@ function NuevaVenta({ navigation, route }) {
     }
   };
 
-  const showMode = (currentMode) => {
+  /*const showMode = (currentMode) => {
     setShow(true);
     setMode(currentMode);
-  };
+  };*/
 
-  const enviarPedido = async ()=>{
+  /*const enviarPedido = async ()=>{
       if (textDate === ''){
         setAvisoRojo(true)
         setTimeout(() => {  
@@ -163,7 +164,7 @@ function NuevaVenta({ navigation, route }) {
         }
       }
     
-  };
+  };*/
 
   const ModalConfirmacion = ({visible, children}) => {
     return (
@@ -200,7 +201,7 @@ function NuevaVenta({ navigation, route }) {
     );
   };
 
-  const onChange = (event, selectedDate) => {
+  /*const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(false); //Platform.OS === 'android'
     setDate(currentDate)
@@ -209,7 +210,7 @@ function NuevaVenta({ navigation, route }) {
     let EDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
     setTextDate(fDate)
     setFechaEnvioAviso(EDate)
-  };
+  };*/
 
   const ModalEnvioExitoso = ({visible, children}) => {
     return (
@@ -225,6 +226,108 @@ function NuevaVenta({ navigation, route }) {
 
   const ModalPopUpEnviarPedido = ({visible, children}) =>{
     const [showModal, setShowModal] = useState(visible);
+    const [showDate, setShowDate] = useState(false);
+    const [show, setShow] = useState(false);
+    const [inputNotasV, setInputNotasV] = useState('');
+    const [date, setDate] = useState(new Date());
+    const [textDate, setTextDate] = useState('');
+    const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
+    const showMode = (currentMode) => {
+      setShow(true);
+      setMode(currentMode);
+    };
+
+    const onChange = (event, selectedDate) => {
+      const currentDate = selectedDate || date;
+      setShow(false); //Platform.OS === 'android'
+      setDate(currentDate)
+      let tempDate = new Date(currentDate);
+      let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth()+1) + '-' + tempDate.getDate();
+      let EDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
+      setTextDate(fDate)
+      setFechaEnvioAviso(EDate)
+    };
+
+    const enviarPedido = async ()=>{
+      if (textDate === ''){
+        setAvisoRojo(true)
+        setTimeout(() => {  
+          setAvisoRojo(false)
+        }, 2000);
+      } else {
+        try {
+          setVisiblevCargando(true)
+          let aTablaDeIngresados = '';
+          let hoy = new Date(Date.now());
+          let hoyDate = hoy.getFullYear() + '-' + (hoy.getMonth()+1) + '-' + hoy.getDate();
+          let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
+          const dias = [
+            'domingo',
+            'lunes',
+            'martes',
+            'miércoles',
+            'jueves',
+            'viernes',
+            'sábado',
+          ];
+          const numeroDia = hoy.getDay();
+          const numeroDiaSeleccionado = new Date(date).getDay()
+          const nombreDia = dias[numeroDia];
+          const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
+          let N = await consecutivos({
+              "Columna": "NDePedido",
+              "Tabla": "tabladeestados"
+          });
+          let NpreFactura = N[0]["consecutivo"]
+          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ','  + '\'' + 0 + '\'' + ','  + '\'' + inputNotasV + '\'' + ','  + '\'' + '' + '\'' +')';
+          pedido.map((pedido, index) => {
+            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','                         
+          })
+          
+            aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)
+            await aTablas({
+              "tabla": "tabladeestados",
+              "cadenaDeInsercion": aEstados
+            });
+            await aTablas({
+              "tabla": "tabladeingresados",
+              "cadenaDeInsercion": aTablaDeIngresados
+            });
+            setTextDate('')
+            setVisibleEnvioExitoso(true)
+            setVisiblevCargando(false)
+            setTimeout(() => {  
+              setVisibleEnvioExitoso(false)
+              setVisible(false)
+              cancelarPedido()
+              setRecordatorio(true)
+            }, 2000);
+              setConfirmar({
+              "NPedido": NpreFactura,
+              "Cliente": route.params.Ferreteria,
+              "Valor": sumaTotal().replace(/,/g, ''),
+              "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
+              "FechaHasta": "O a mas tardar un día habil despúes"
+            })
+        }catch (error) {
+          setVisiblevCargando(false)
+          setNotaRojo('Error al enviar')
+          setAvisoRojo(true)
+          setTimeout(() => {  
+            setAvisoRojo(false)
+          }, 2000);
+          console.log(error)
+        }
+      }
+    };
+
+    function cancelarPedido(){
+      setPedido([])
+      handleSubmit('')
+      setTextDate('')
+      navigation.navigate('LClientes')
+    };
+
     return (
       <Modal transparent visible={visible}>
         <View style={[styles.ModalBackground]}>
@@ -235,11 +338,12 @@ function NuevaVenta({ navigation, route }) {
                 <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.text]}>Fecha de entrega:</Text>
-              <TouchableOpacity onPress={()=>showMode('date')}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  'black'}]}>Fecha</Text>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  'black'}]}>{textDate}</Text>
-              </TouchableOpacity>
+            <TouchableOpacity onPress={()=>showMode('date')}>
+              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={[styles.subTitle, {margin: 0,}]}>Fecha de entrega:</Text>
+                <Text style={[styles.subTitle, {textAlign: 'right', color:  'black', margin: 0, position: 'relative'}]}>{textDate}</Text>
+              </View>
+            </TouchableOpacity>
             {show && (<DateTimePicker
               testID='dateTimePicker'
               //open={show}
@@ -249,7 +353,17 @@ function NuevaVenta({ navigation, route }) {
               //display='default'
               onChange={onChange}
             />)}
-            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>enviarPedido()}>
+            <TextInput
+              multiline={true}
+              maxLength={200}
+              style={[styles.TextNotasV]}
+              placeholder="Notas de ventas"
+              value={inputNotasV}
+              onChangeText={text=> setInputNotasV(text)}
+              textAlignVertical="top"
+              textAlign="left"
+            />
+            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: '98%', backgroundColor: '#193773'}]} onPress={()=>enviarPedido()}>
               <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Enviar pedido</Text>
             </TouchableOpacity>
           </View>
@@ -275,7 +389,7 @@ function NuevaVenta({ navigation, route }) {
   function cancelarPedido(){
     setPedido([])
     handleSubmit('')
-    setTextDate('')
+    //setTextDate('')
     navigation.navigate('LClientes')
   };
 
@@ -362,7 +476,7 @@ function NuevaVenta({ navigation, route }) {
       return styles.input
     }
   }
-  function seachDesplegable (){
+  /*function seachDesplegable (){
     if(input !== ''){
       return (
         <ScrollView horizontal={true} style={styles.container2}>
@@ -372,7 +486,7 @@ function NuevaVenta({ navigation, route }) {
     } else {
       return
     }
-  }
+  }*/
   return (
     <View style={styles.container}>
       <ScrollView 
@@ -521,7 +635,7 @@ const styles = StyleSheet.create({
   },
   contenedorModal: {
     backgroundColor: '#FFFF',
-    width: 300,
+    width: '90%',//windowWidth * 0.90,//300,
     height: 300,
   },
   logo: {
@@ -530,8 +644,8 @@ const styles = StyleSheet.create({
     height: 270,
   },
   container2: {
-    height: windowHeight* 0.13, //90,
-    width: windowWidth * 0.94,//320,
+    height: '13%',//windowHeight* 0.13, //90,
+    width: '94%',//windowWidth * 0.94,//320,
     margin: 12,
     marginTop: 0,
     borderWidth: 0,
@@ -541,7 +655,17 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderBottomRightRadius: 20,
     borderBottomLeftRadius: 20,
-}
+  },
+  TextNotasV: {
+    backgroundColor: '#FFFF',
+    width: '97%',
+    height: '55%',
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: '#F2CB05',
+    margin: 3,
+    padding: 4
+  }
 });
 
 export default NuevaVenta;
