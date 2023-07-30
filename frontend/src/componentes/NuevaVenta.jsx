@@ -63,8 +63,12 @@ function NuevaVenta({ navigation, route }) {
   },[pedido]);
 
   const ObtenerODePedido = async() => {
-    const ODePedido = await SecureStore.getItemAsync('ODePedido');
-    setPedido(JSON.parse(ODePedido))
+    try {
+      const ODePedido = await SecureStore.getItemAsync('ODePedido');
+      setPedido(JSON.parse(ODePedido))
+    }catch(error) {
+      console.log(error)
+    }
   };
 
   function sendWarning( title, warningText, ConfirmationText, SetConfirmation) {
