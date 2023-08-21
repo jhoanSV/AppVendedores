@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getTasks, ValidarDatos, BuscarClientesTodos, aTablas, consecutivos, DatosProgreso, PedidosEnviados, DetalleDelPedidoVendedor, PedidosCerrados, PedidosPorEntregar, DetallePedidoEntregas, ActualizarProcesoDelPedido } from '../controllers/tasks';
+import { getTasks, ValidarDatos, BuscarClientesTodos, aTablas, consecutivos, DatosProgreso, PedidosEnviados, DetalleDelPedidoVendedor, PedidosCerrados, PedidosPorEntregar, DetallePedidoEntregas, ActualizarProcesoDelPedido, DetallePedidoCerrado } from '../controllers/tasks';
 
 
 const router = Router();
@@ -68,5 +68,7 @@ router.get('/tasks/PedidosPorEntregar/:cod', PedidosPorEntregar)
 router.get('/tasks/DetallePedidoEntregas/:cod', DetallePedidoEntregas)
 
 router.post('/tasks/ActualizarProcesoDelPedido', ActualizarProcesoDelPedido)
+
+router.get('/tasks/DetallePedidoCerrado/:cod', DetallePedidoCerrado)
 
 export default router

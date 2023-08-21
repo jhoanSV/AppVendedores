@@ -45,6 +45,7 @@ function DetallesDelPedido({ navigation, route }) {
         try {
           const ElPedido = await DetallePedido(route.params.NDePedido)
           setPedido(ElPedido)
+          console.log(ElPedido)
         }catch(error){
           console.log(error)
         }
@@ -52,6 +53,7 @@ function DetallesDelPedido({ navigation, route }) {
         try {
           const ElPedido = await DetallePedidoCerrado(route.params.NDePedido)
           setPedido(ElPedido)
+          console.log('Entro a cerrados')
         }catch(error){
           console.log(error)
         }
@@ -59,6 +61,7 @@ function DetallesDelPedido({ navigation, route }) {
         try {
           const ElPedido = await DetallePedidoEntregas(route.params.NDePedido)
           setPedido(ElPedido)
+          console.log('Entro a entregas')
         }catch(error){
           console.log(error)
         }

@@ -1,5 +1,5 @@
 import React,{useState, useEffect, useRef, Fragment } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl, FlatList, KeyboardAvoidingView} from 'react-native';
 import { getTasks, consecutivos } from '../api';
 import DesTaskList from '../components/DesTaskList';
 import PedidoList from '../components/PedidoList';
@@ -13,6 +13,7 @@ import Loading from '../components/modal/Loading';
 import * as Sharing from 'expo-sharing';
 import { useIsFocused } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
+import PedidoItem from '../components/PedidoItem';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -65,7 +66,13 @@ function NuevaVenta({ navigation, route }) {
   const ObtenerODePedido = async() => {
     try {
       const ODePedido = await SecureStore.getItemAsync('ODePedido');
+      if (!ODePedido) {
+        // If ODePedido doesn't exist, initialize it as an empty array []
+        ODePedido = [];
+      }
       setPedido(JSON.parse(ODePedido))
+      //setSuma(sumaTotal())
+      //console.log(JSON.parse(ODePedido))
     }catch(error) {
       console.log(error)
     }
@@ -103,86 +110,6 @@ function NuevaVenta({ navigation, route }) {
       console.error(errors);
     }
   };
-
-  /*const showMode = (currentMode) => {
-    setShow(true);
-    setMode(currentMode);
-  };*/
-
-  /*const enviarPedido = async ()=>{
-      if (textDate === ''){
-        setAvisoRojo(true)
-        setTimeout(() => {  
-          setAvisoRojo(false)
-        }, 2000);
-      } else {
-        try {
-          setVisiblevCargando(true)
-          let aTablaDeIngresados = '';
-          let hoy = new Date(Date.now());
-          let hoyDate = hoy.getFullYear() + '-' + (hoy.getMonth()+1) + '-' + hoy.getDate();
-          let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
-          const dias = [
-            'domingo',
-            'lunes',
-            'martes',
-            'miércoles',
-            'jueves',
-            'viernes',
-            'sábado',
-          ];
-          const numeroDia = hoy.getDay();
-          const numeroDiaSeleccionado = new Date(date).getDay()
-          const nombreDia = dias[numeroDia];
-          const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
-          let N = await consecutivos({
-              "Columna": "NDePedido",
-              "Tabla": "tabladeestados"
-          });
-          let NpreFactura = N[0]["consecutivo"]
-          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ')';
-          pedido.map((pedido, index) => {
-            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','                         
-          })
-          
-            aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)
-            await aTablas({
-              "tabla": "tabladeestados",
-              "cadenaDeInsercion": aEstados
-            });
-            await aTablas({
-              "tabla": "tabladeingresados",
-              "cadenaDeInsercion": aTablaDeIngresados
-            });
-            setTextDate('')
-            setVisibleEnvioExitoso(true)
-            setVisiblevCargando(false)
-            setTimeout(() => {  
-              setVisibleEnvioExitoso(false)
-              setVisible(false)
-              cancelarPedido()
-              setRecordatorio(true)
-            }, 2000);
-              setConfirmar({
-              "NPedido": NpreFactura,
-              "Cliente": route.params.Ferreteria,
-              "Valor": sumaTotal().replace(/,/g, ''),
-              "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
-              "FechaHasta": "O a mas tardar un día habil despúes"
-            })
-        }catch (error) {
-          setVisiblevCargando(false)
-          setNotaRojo('Error al enviar')
-          setAvisoRojo(true)
-          setTimeout(() => {  
-            setAvisoRojo(false)
-          }, 2000);
-          console.log(error)
-
-        }
-      }
-    
-  };*/
 
   const ModalConfirmacion = ({visible, children}) => {
     return (
@@ -432,7 +359,7 @@ function NuevaVenta({ navigation, route }) {
     var index = pedido.map(codigo => codigo.cod).indexOf(objeto.cod);
     if(index === -1) {
       pedido.push(objeto)
-      //setSuma(sumaTotal())
+      setSuma(sumaTotal())
       await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
     } else if(index !== -1) {
       setVisibleAvisoProducto(true)
@@ -446,7 +373,7 @@ function NuevaVenta({ navigation, route }) {
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
       pedido[index].Cantidad = pedido[index].Cantidad + paquete
-      //setSuma(sumaTotal());
+      setSuma(sumaTotal());
       await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
     }
   };
@@ -456,7 +383,7 @@ function NuevaVenta({ navigation, route }) {
       try {
         var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
         pedido[index].Cantidad = pedido[index].Cantidad - paquete
-        //setSuma(sumaTotal());
+        setSuma(sumaTotal());
         if(pedido[index].Cantidad<1){
           pedido.splice(index, 1)
           handleSubmit('')
@@ -474,7 +401,6 @@ function NuevaVenta({ navigation, route }) {
         var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
         var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
         pedido[index].Cantidad = NuevaCantidad
-        //setSuma(sumaTotal())
         if(pedido[index].Cantidad<1){
           pedido.splice(index, 1)
           handleSubmit('')
@@ -509,20 +435,15 @@ function NuevaVenta({ navigation, route }) {
       return styles.input
     }
   }
-  /*function seachDesplegable (){
-    if(input !== ''){
-      return (
-        <ScrollView horizontal={true} style={styles.container2}>
-          <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
-        </ScrollView>
-        )
-    } else {
-      return
-    }
-  }*/
+
+  const renderItem=({ item })=>{
+    return <PedidoItem item={ item } aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad} />
+  } 
+
   return (
-    <View style={styles.container}>
-      <ScrollView 
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={false}>
+      <ScrollView
+        style = {{flexGrow: 0}}
         horizontal={true} 
         refreshControl={<RefreshControl 
                           refreshing={refreshing} 
@@ -561,23 +482,34 @@ function NuevaVenta({ navigation, route }) {
           <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
         </ScrollView>
       )}
-      <View>
+      {/*<View>
         <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
+      </View>*/}
+      <View style = {{ flex: 1 }}>
+        <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
+          <FlatList
+            data={pedido}
+            style={[styles.containerL, {flex: 1}]}
+            renderItem={renderItem}
+          />
+        </ScrollView>
       </View>
 
-      <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
-        <Text style={[styles.subTitle,{right: 0}]}>Total: {suma}</Text>
-      </View>
-      <View style={{flexDirection: 'row'}}>
-        <View>
-          <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>setVisibleAviso(true)}>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Cancelar</Text>
-          </TouchableOpacity>
+      <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+        <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
+          <Text style={[styles.subTitle,{right: 0}]}>Total: {suma}</Text>
         </View>
-        <View>
-          <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>verificarAgregarPedido()}>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
-          </TouchableOpacity>
+        <View style={{flexDirection: 'row'}}>
+          <View>
+            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>setVisibleAviso(true)}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>verificarAgregarPedido()}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
       <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
@@ -591,7 +523,7 @@ function NuevaVenta({ navigation, route }) {
       <Loading visible={visiblevCargando} mensaje={'Enviando...'}></Loading>
       
       <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
-    </View>
+    </KeyboardAvoidingView>
 
   )
 }
@@ -698,7 +630,18 @@ const styles = StyleSheet.create({
     borderColor: '#F2CB05',
     margin: 3,
     padding: 4
-  }
+  },
+  containerL: {
+    //height: windowHeight*0.49,
+    width: windowWidth,
+    margin: 12,
+    marginTop: 0,
+    borderWidth: 0,
+    padding: 0,
+    backgroundColor: '#ffff',
+    borderColor: '#F2CB05',
+    borderWidth: 1,
+},
 });
 
 export default NuevaVenta;

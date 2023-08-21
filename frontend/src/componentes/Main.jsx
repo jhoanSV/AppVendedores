@@ -12,6 +12,7 @@ import TProgressBar from '../components/TProgressBar';
 import Record from "../components/modal/Record";
 import { useIsFocused } from "@react-navigation/native";
 import { useNavigation } from '@react-navigation/native';
+import Loading from '../components/modal/Loading';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -39,6 +40,7 @@ const Main = () => {
     const [mVisible, setMVisible] = useState(false);
     const navigation = useNavigation()
     const [pCerrados, setPCerrados] = useState([]);
+    const [cargando, setCargando] = useState(false);
     
     const rot = rotateValue.interpolate({
         inputRange: [0, 1],
@@ -113,14 +115,16 @@ const Main = () => {
     const quitVenta = () =>{
         setVentTotales(ventTotales - 1000000);
     }*/
-    const FacturasCerradas = () =>{
-        LCerradas()
+    const FacturasCerradas = async() =>{
+        setCargando(true)
+        await LCerradas()
         if(pCerrados!=={}){
             navigation.navigate('LPedidos', pCerrados)
             //console.log(pCerrados)
         } else if(pCerrados==={}){
             console.log("Esta vacia la lista de los cerrados")
         }
+        setCargando(false)
     }
     return (
         <SafeAreaView style={ { flexGrow: 1, padding: 15}}>
@@ -196,9 +200,7 @@ const Main = () => {
                 accessibilityLabel="prueba"
             />        --------Botones para prueba------------------*/}
             <Record modalVisible={mVisible} setModalVisible={setMVisible} rec={formatNumber(record)}/>
-            {/*<TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#398A1C', right: 0}]} onPress={()=>FacturasCerradas()}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Facturas cerradas</Text>
-            </TouchableOpacity>*/}
+            <Loading visible={cargando} mensaje={'Cargando...'}/>
         </SafeAreaView>
     )
 }
