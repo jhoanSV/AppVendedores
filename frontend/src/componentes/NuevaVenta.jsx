@@ -1,5 +1,5 @@
 import React,{useState, useEffect, useRef, Fragment } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl, FlatList, KeyboardAvoidingView} from 'react-native';
 import { getTasks, consecutivos } from '../api';
 import DesTaskList from '../components/DesTaskList';
 import PedidoList from '../components/PedidoList';
@@ -12,6 +12,8 @@ import Warning from '../components/modal/Warning';
 import Loading from '../components/modal/Loading';
 import * as Sharing from 'expo-sharing';
 import { useIsFocused } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
+import PedidoItem from '../components/PedidoItem';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -19,15 +21,16 @@ const windowHeight = Dimensions.get('window').height;
 function NuevaVenta({ navigation, route }) {
   const viewRef = useRef();
   const [input, setInput] = useState('');
+  //const [inputNotasV, setInputNotasV] = useState('');
   const [pedido, setPedido] = useState([]);
   const [visible, setVisible] = useState(false);
   const [visibleAviso, setVisibleAviso] = useState(false);
   const [visibleAvisoProducto, setVisibleAvisoProducto] = useState(false);
   const [visibleEnvioExitoso, setVisibleEnvioExitoso]= useState(false);
-  const [date, setDate] = useState(new Date());
-  const [show, setShow] = useState(false);
+  //const [date, setDate] = useState(new Date());
+  //const [show, setShow] = useState(false);
   const [mode, setMode] = useState('date');
-  const [textDate, setTextDate] = useState('');
+  //const [textDate, setTextDate] = useState('');
   const [avisoRojo, setAvisoRojo] = useState(false);
   const [notaRojo, setNotaRojo] = useState('');
   const [visiblevCargando, setVisiblevCargando] = useState(false);
@@ -39,7 +42,7 @@ function NuevaVenta({ navigation, route }) {
   const [isVisible, setIsVisible] = React.useState(false);
   const [visibleSendWarning, setVisibleSendWarning] = useState(false);
   const isFocused = useIsFocused()
-  const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
+  //const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
   const [confirmar, setConfirmar] = useState({
     "NPedido": "NpreFactura",
     "Cliente": "route.params.Ferreteria",
@@ -52,11 +55,34 @@ function NuevaVenta({ navigation, route }) {
     actualizar()
   },[isFocused]);
 
+  useEffect(()=> {
+    ObtenerODePedido()
+  },[]);
+  
+  useEffect(()=> {
+    setSuma(sumaTotal())
+  },[pedido]);
 
-  const sendWarning = ( title, warningText, ConfirmationText, SetConfirmation) => {
-    
-    <Warning visible={visibleSendWarning} title={title} warningText={warningText} setMostrar={setVisibleSendWarning} ConfirmationText={ConfirmationText} SetConfirmation={SetConfirmation} />
+  const ObtenerODePedido = async() => {
+    try {
+      const ODePedido = await SecureStore.getItemAsync('ODePedido');
+      if (!ODePedido) {
+        // If ODePedido doesn't exist, initialize it as an empty array []
+        ODePedido = [];
+      }
+      setPedido(JSON.parse(ODePedido))
+      //setSuma(sumaTotal())
+      //console.log(JSON.parse(ODePedido))
+    }catch(error) {
+      console.log(error)
+    }
+  };
+
+  function sendWarning( title, warningText, ConfirmationText, SetConfirmation) {
     setVisibleSendWarning(true);
+    return(
+      <Warning visible={visibleSendWarning} title={title} warningText={warningText} setMostrar={setVisibleSendWarning} ConfirmationText={ConfirmationText} SetConfirmation={SetConfirmation} />
+    )
   };
 
   const actualizar = async () => {
@@ -83,86 +109,6 @@ function NuevaVenta({ navigation, route }) {
     } catch (errors) { 
       console.error(errors);
     }
-  };
-
-  const showMode = (currentMode) => {
-    setShow(true);
-    setMode(currentMode);
-  };
-
-  const enviarPedido = async ()=>{
-      if (textDate === ''){
-        setAvisoRojo(true)
-        setTimeout(() => {  
-          setAvisoRojo(false)
-        }, 2000);
-      } else {
-        try {
-          setVisiblevCargando(true)
-          let aTablaDeIngresados = '';
-          let hoy = new Date(Date.now());
-          let hoyDate = hoy.getFullYear() + '-' + (hoy.getMonth()+1) + '-' + hoy.getDate();
-          let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
-          const dias = [
-            'domingo',
-            'lunes',
-            'martes',
-            'miércoles',
-            'jueves',
-            'viernes',
-            'sábado',
-          ];
-          const numeroDia = hoy.getDay();
-          const numeroDiaSeleccionado = new Date(date).getDay()
-          const nombreDia = dias[numeroDia];
-          const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
-          let N = await consecutivos({
-              "Columna": "NDePedido",
-              "Tabla": "tabladeestados"
-          });
-          let NpreFactura = N[0]["consecutivo"]
-          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ')';
-          pedido.map((pedido, index) => {
-            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','                         
-          })
-          
-            aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)
-            await aTablas({
-              "tabla": "tabladeestados",
-              "cadenaDeInsercion": aEstados
-            });
-            await aTablas({
-              "tabla": "tabladeingresados",
-              "cadenaDeInsercion": aTablaDeIngresados
-            });
-            setTextDate('')
-            setVisibleEnvioExitoso(true)
-            setVisiblevCargando(false)
-            setTimeout(() => {  
-              setVisibleEnvioExitoso(false)
-              setVisible(false)
-              cancelarPedido()
-              setRecordatorio(true)
-            }, 2000);
-              setConfirmar({
-              "NPedido": NpreFactura,
-              "Cliente": route.params.Ferreteria,
-              "Valor": sumaTotal().replace(/,/g, ''),
-              "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
-              "FechaHasta": "O a mas tardar un día habil despúes"
-            })
-        }catch (error) {
-          setVisiblevCargando(false)
-          setNotaRojo('Error al enviar')
-          setAvisoRojo(true)
-          setTimeout(() => {  
-            setAvisoRojo(false)
-          }, 2000);
-          console.log(error)
-
-        }
-      }
-    
   };
 
   const ModalConfirmacion = ({visible, children}) => {
@@ -200,7 +146,7 @@ function NuevaVenta({ navigation, route }) {
     );
   };
 
-  const onChange = (event, selectedDate) => {
+  /*const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(false); //Platform.OS === 'android'
     setDate(currentDate)
@@ -209,7 +155,7 @@ function NuevaVenta({ navigation, route }) {
     let EDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
     setTextDate(fDate)
     setFechaEnvioAviso(EDate)
-  };
+  };*/
 
   const ModalEnvioExitoso = ({visible, children}) => {
     return (
@@ -225,6 +171,109 @@ function NuevaVenta({ navigation, route }) {
 
   const ModalPopUpEnviarPedido = ({visible, children}) =>{
     const [showModal, setShowModal] = useState(visible);
+    const [showDate, setShowDate] = useState(false);
+    const [show, setShow] = useState(false);
+    const [inputNotasV, setInputNotasV] = useState('');
+    const [date, setDate] = useState(new Date());
+    const [textDate, setTextDate] = useState('');
+    const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
+    const showMode = (currentMode) => {
+      setShow(true);
+      setMode(currentMode);
+    };
+
+    const onChange = (event, selectedDate) => {
+      const currentDate = selectedDate || date;
+      setShow(false); //Platform.OS === 'android'
+      setDate(currentDate)
+      let tempDate = new Date(currentDate);
+      let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth()+1) + '-' + tempDate.getDate();
+      let EDate = tempDate.getDate() + '/' + (tempDate.getMonth()+1) + '/' + tempDate.getFullYear();
+      setTextDate(fDate)
+      setFechaEnvioAviso(EDate)
+    };
+
+    const enviarPedido = async ()=>{
+      if (textDate === ''){
+        setAvisoRojo(true)
+        setTimeout(() => {  
+          setAvisoRojo(false)
+        }, 2000);
+      } else {
+        try {
+          setVisiblevCargando(true)
+          let aTablaDeIngresados = '';
+          let hoy = new Date(Date.now());
+          let hoyDate = hoy.getFullYear() + '-' + (hoy.getMonth()+1) + '-' + hoy.getDate();
+          let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
+          const dias = [
+            'domingo',
+            'lunes',
+            'martes',
+            'miércoles',
+            'jueves',
+            'viernes',
+            'sábado',
+          ];
+          const numeroDia = hoy.getDay();
+          const numeroDiaSeleccionado = new Date(date).getDay()
+          const nombreDia = dias[numeroDia];
+          const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
+          let N = await consecutivos({
+              "Columna": "NDePedido",
+              "Tabla": "tabladeestados"
+          });
+          let NpreFactura = N[0]["consecutivo"]
+          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ','  + '\'' + 0 + '\'' + ','  + '\'' + inputNotasV + '\'' + ','  + '\'' + '' + '\'' +')';
+          pedido.map((pedido, index) => {
+            aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','                         
+          })
+          
+            aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)
+            await aTablas({
+              "tabla": "tabladeestados",
+              "cadenaDeInsercion": aEstados
+            });
+            await aTablas({
+              "tabla": "tabladeingresados",
+              "cadenaDeInsercion": aTablaDeIngresados
+            });
+            setTextDate('')
+            setVisibleEnvioExitoso(true)
+            setVisiblevCargando(false)
+            setTimeout(() => {  
+              setVisibleEnvioExitoso(false)
+              setVisible(false)
+              cancelarPedido()
+              setRecordatorio(true)
+            }, 2000);
+              setConfirmar({
+              "NPedido": NpreFactura,
+              "Cliente": route.params.Ferreteria,
+              "Valor": sumaTotal().replace(/,/g, ''),
+              "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
+              "FechaHasta": "O a mas tardar un día habil despúes"
+            })
+        }catch (error) {
+          setVisiblevCargando(false)
+          setNotaRojo('Error al enviar')
+          setAvisoRojo(true)
+          setTimeout(() => {  
+            setAvisoRojo(false)
+          }, 2000);
+          console.log(error)
+        }
+      }
+    };
+
+    /*const cancelarPedido = async()=>{
+      setPedido([])
+      handleSubmit('')
+      //setTextDate('')
+      navigation.navigate('LClientes')
+      await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
+    };*/
+
     return (
       <Modal transparent visible={visible}>
         <View style={[styles.ModalBackground]}>
@@ -235,11 +284,12 @@ function NuevaVenta({ navigation, route }) {
                 <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.text]}>Fecha de entrega:</Text>
-              <TouchableOpacity onPress={()=>showMode('date')}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  'black'}]}>Fecha</Text>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  'black'}]}>{textDate}</Text>
-              </TouchableOpacity>
+            <TouchableOpacity onPress={()=>showMode('date')}>
+              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={[styles.subTitle, {margin: 0,}]}>Fecha de entrega:</Text>
+                <Text style={[styles.subTitle, {textAlign: 'right', color:  'black', margin: 0, position: 'relative'}]}>{textDate}</Text>
+              </View>
+            </TouchableOpacity>
             {show && (<DateTimePicker
               testID='dateTimePicker'
               //open={show}
@@ -249,7 +299,17 @@ function NuevaVenta({ navigation, route }) {
               //display='default'
               onChange={onChange}
             />)}
-            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>enviarPedido()}>
+            <TextInput
+              multiline={true}
+              maxLength={200}
+              style={[styles.TextNotasV]}
+              placeholder="Notas de ventas"
+              value={inputNotasV}
+              onChangeText={text=> setInputNotasV(text)}
+              textAlignVertical="top"
+              textAlign="left"
+            />
+            <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: '98%', backgroundColor: '#193773'}]} onPress={()=>enviarPedido()}>
               <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Enviar pedido</Text>
             </TouchableOpacity>
           </View>
@@ -272,24 +332,35 @@ function NuevaVenta({ navigation, route }) {
     }
   };
 
-  function cancelarPedido(){
+  /*function cancelarPedido(){
     setPedido([])
     handleSubmit('')
-    setTextDate('')
+    //setTextDate('')
     navigation.navigate('LClientes')
+  };*/
+
+  const cancelarPedido = async()=>{
+    setPedido([])
+    handleSubmit('')
+    //setTextDate('')
+    navigation.navigate('LClientes')
+    await SecureStore.setItemAsync('ODePedido', JSON.stringify([]));
   };
 
   function sumaTotal(){
     if(pedido.length !== 0){
       return new Intl.NumberFormat().format(pedido.reduce((sum, value) => (typeof value.Cantidad == "number" ? sum + (value.Cantidad*value.PVenta) : sum), 0));
+    } else {
+      return 0
     }
   }; 
   // fin intento de suma
-  const agregarPedido=(objeto)=>{
+  const agregarPedido = async(objeto)=>{
     var index = pedido.map(codigo => codigo.cod).indexOf(objeto.cod);
     if(index === -1) {
       pedido.push(objeto)
       setSuma(sumaTotal())
+      await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
     } else if(index !== -1) {
       setVisibleAvisoProducto(true)
       setTimeout(() => {  
@@ -298,15 +369,16 @@ function NuevaVenta({ navigation, route }) {
     }
   };
   
-  const aumentarCantidad=(Cod, paquete)=>{
+  const aumentarCantidad = async(Cod, paquete)=>{
     if(pedido.length !== 0){
       var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
       pedido[index].Cantidad = pedido[index].Cantidad + paquete
       setSuma(sumaTotal());
+      await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
     }
   };
   
-  const disminuirCantidad=(Cod, paquete)=>{
+  const disminuirCantidad = async(Cod, paquete)=>{
     if(pedido.length !== 0){
       try {
         var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
@@ -316,23 +388,24 @@ function NuevaVenta({ navigation, route }) {
           pedido.splice(index, 1)
           handleSubmit('')
         }
+        await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido)); 
       } catch (error) {
       console.error(error);
       }
     }
   };
 
-  const modificarCantidad=(Cod,Cantidad,paquete)=>{
+  const modificarCantidad = async(Cod,Cantidad,paquete)=>{
     if(pedido.length !== 0){
       try {
         var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
         var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
         pedido[index].Cantidad = NuevaCantidad
-        setSuma(sumaTotal())
         if(pedido[index].Cantidad<1){
           pedido.splice(index, 1)
           handleSubmit('')
         }
+        await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
       } catch (error) {
       console.error(error);
       }
@@ -347,7 +420,7 @@ function NuevaVenta({ navigation, route }) {
   const handleSubmit = async(text) => {
     if (text === ''){
       setInput(text)
-      setSuma(sumaTotal())
+      //setSuma(sumaTotal())
       setIsVisible(false)
     } else {
       setInput(text)
@@ -362,20 +435,15 @@ function NuevaVenta({ navigation, route }) {
       return styles.input
     }
   }
-  function seachDesplegable (){
-    if(input !== ''){
-      return (
-        <ScrollView horizontal={true} style={styles.container2}>
-          <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
-        </ScrollView>
-        )
-    } else {
-      return
-    }
-  }
+
+  const renderItem=({ item })=>{
+    return <PedidoItem item={ item } aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad} />
+  } 
+
   return (
-    <View style={styles.container}>
-      <ScrollView 
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={false}>
+      <ScrollView
+        style = {{flexGrow: 0}}
         horizontal={true} 
         refreshControl={<RefreshControl 
                           refreshing={refreshing} 
@@ -414,23 +482,34 @@ function NuevaVenta({ navigation, route }) {
           <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
         </ScrollView>
       )}
-      <View>
+      {/*<View>
         <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
+      </View>*/}
+      <View style = {{ flex: 1 }}>
+        <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
+          <FlatList
+            data={pedido}
+            style={[styles.containerL, {flex: 1}]}
+            renderItem={renderItem}
+          />
+        </ScrollView>
       </View>
 
-      <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
-        <Text style={[styles.subTitle,{right: 0}]}>Total: {suma}</Text>
-      </View>
-      <View style={{flexDirection: 'row'}}>
-        <View>
-          <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>setVisibleAviso(true)}>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Cancelar</Text>
-          </TouchableOpacity>
+      <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+        <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
+          <Text style={[styles.subTitle,{right: 0}]}>Total: {suma}</Text>
         </View>
-        <View>
-          <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>verificarAgregarPedido()}>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
-          </TouchableOpacity>
+        <View style={{flexDirection: 'row'}}>
+          <View>
+            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>setVisibleAviso(true)}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>verificarAgregarPedido()}>
+              <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
       <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
@@ -444,7 +523,7 @@ function NuevaVenta({ navigation, route }) {
       <Loading visible={visiblevCargando} mensaje={'Enviando...'}></Loading>
       
       <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
-    </View>
+    </KeyboardAvoidingView>
 
   )
 }
@@ -521,7 +600,7 @@ const styles = StyleSheet.create({
   },
   contenedorModal: {
     backgroundColor: '#FFFF',
-    width: 300,
+    width: '90%',//windowWidth * 0.90,//300,
     height: 300,
   },
   logo: {
@@ -530,8 +609,8 @@ const styles = StyleSheet.create({
     height: 270,
   },
   container2: {
-    height: windowHeight* 0.13, //90,
-    width: windowWidth * 0.94,//320,
+    height: '13%',//windowHeight* 0.13, //90,
+    width: '94%',//windowWidth * 0.94,//320,
     margin: 12,
     marginTop: 0,
     borderWidth: 0,
@@ -541,7 +620,28 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderBottomRightRadius: 20,
     borderBottomLeftRadius: 20,
-}
+  },
+  TextNotasV: {
+    backgroundColor: '#FFFF',
+    width: '97%',
+    height: '55%',
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: '#F2CB05',
+    margin: 3,
+    padding: 4
+  },
+  containerL: {
+    //height: windowHeight*0.49,
+    width: windowWidth,
+    margin: 12,
+    marginTop: 0,
+    borderWidth: 0,
+    padding: 0,
+    backgroundColor: '#ffff',
+    borderColor: '#F2CB05',
+    borderWidth: 1,
+},
 });
 
 export default NuevaVenta;

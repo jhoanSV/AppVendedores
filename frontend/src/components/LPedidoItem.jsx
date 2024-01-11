@@ -35,6 +35,8 @@ const LPedidoItem = ({ task }) => {
       return {backgroundColor: '#4DBE25' }
     } else if (text === 'No entregado') {
       return {backgroundColor: '#DA4404' }
+    } else if (text === 'Cerrado') {
+      return {backgroundColor: '#398A1C'}
     }
   }
 

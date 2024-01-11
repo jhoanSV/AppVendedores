@@ -107,7 +107,7 @@ export function DrawerNavigation(){
 }
 
 const MenuItems = ({ navigation }) =>{
-    
+    const vacio = []
     return (
         <DrawerContentScrollView 
             style={styles.container}
@@ -130,7 +130,7 @@ const MenuItems = ({ navigation }) =>{
             />
             <MenuButtonItem 
                 text = "Lista de pedidos"
-                onPress={() => navigation.navigate('LPedidos')}
+                onPress={() => navigation.navigate('LPedidos', vacio)}
                 icon = "list"
             />
         </DrawerContentScrollView>
