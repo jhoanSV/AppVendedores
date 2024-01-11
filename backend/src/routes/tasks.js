@@ -1,5 +1,20 @@
 import { Router } from 'express';
-import { getTasks, ValidarDatos, BuscarClientesTodos, aTablas, consecutivos, DatosProgreso, PedidosEnviados, DetalleDelPedidoVendedor, PedidosCerrados, PedidosPorEntregar, DetallePedidoEntregas, ActualizarProcesoDelPedido, DetallePedidoCerrado } from '../controllers/tasks';
+import { getTasks, 
+        ValidarDatos, 
+        BuscarClientesTodos, 
+        aTablas, 
+        consecutivos, 
+        DatosProgreso, 
+        PedidosEnviados, 
+        DetalleDelPedidoVendedor, 
+        PedidosCerrados, 
+        PedidosPorEntregar, 
+        DetallePedidoEntregas, 
+        ActualizarProcesoDelPedido, 
+        DetallePedidoCerrado,
+        ProductDataForNotLoggedInClient, 
+        ProductDataForLoggedInClient,
+        ListOfAlias} from '../controllers/tasks';
 
 
 const router = Router();
@@ -70,5 +85,13 @@ router.get('/tasks/DetallePedidoEntregas/:cod', DetallePedidoEntregas)
 router.post('/tasks/ActualizarProcesoDelPedido', ActualizarProcesoDelPedido)
 
 router.get('/tasks/DetallePedidoCerrado/:cod', DetallePedidoCerrado)
+
+router.get('/tasks/proNotLoggedUser', ProductDataForNotLoggedInClient)
+
+router.get('/tasks/proLoggedInUser', ProductDataForLoggedInClient)
+
+router.get('/tasks/TAlias', ListOfAlias)
+
+
 
 export default router

@@ -144,3 +144,74 @@ export const DetallePedidoCerrado = async(req, res) => {
     }
 };
 
+export const ProductDataForNotLoggedInClient = async(req, res) => {
+    /*Return the whole list of product only with the necessary information for not logged in user*/
+    try {
+        const connection = await connect()
+        const [rows] = await connection.query("SELECT Cod, Descripcion, EsUnidadOpaquete, SubCategoria FROM productos");
+        res.json(rows)
+        connection.end()
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+export const ProductDataForLoggedInClient = async(req, res) => {
+    /*Return the whole list of product only with the necessary information for logged in user*/
+    try {
+        const connection = await connect()
+        const [rows] = await connection.query("SELECT Cod, Descripcion, EsUnidadOpaquete, SubCategoria, PVenta, Iva FROM productos");
+        res.json(rows)
+        connection.end()
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+export const ListOfAlias = async(req, res) => {
+    /*Return list of alias of the products*/
+    try {
+        const connection = await connect()
+        const [rows] = await connection.query("SELECT Cod, Alias FROM Alias");
+        res.json(rows)
+        connection.end()
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+//It's an intent for check if the data of connection is correct
+export const checkLogInData = async (req, res) => {
+    /*Check if the data of connection is correct, and if it's then return the data of the user.*/
+    try {
+      const connection = await connect();  // Assuming you have a connect function
+      const [rows] = await connection.query("SELECT Cod, Ferreteria, Contacto, Direccion, Telefono, Cel, Email, Password FROM clientes WHERE Email = ?", [req.body.EmailUser]);
+      connection.end();
+  
+      // Check if the password matches with the password that the user gave
+      if (rows.length > 0) {
+        const dbPassword = rows[0].Password;  // Use index 0 to access the first row
+        bcrypt.compare(req.body.password, dbPassword, (err, result) => {
+          if (err) {
+            // Handle error
+            console.error(err);
+            res.status(500).json({ error: 'Internal Server Error' });
+          } else if (result) {
+            // Passwords match
+            res.json(rows[0].pop);
+            console.log(rows[0].pop)
+          } else {
+            // Passwords do not match
+            console.log('Password is incorrect');
+            res.status(401).json({ error: 'Unauthorized' });
+          }
+        });
+      } else {
+        // No user found with the provided email
+        res.status(404).json({ error: 'User not found' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
