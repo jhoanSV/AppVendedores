@@ -168,6 +168,18 @@ export const ProductDataForLoggedInClient = async(req, res) => {
     }
 };
 
+export const ListOfAlias = async(req, res) => {
+    /*Return list of alias of the products*/
+    try {
+        const connection = await connect()
+        const [rows] = await connection.query("SELECT Cod, Alias FROM Alias");
+        res.json(rows)
+        connection.end()
+    } catch (error) {
+        console.log(error)
+    }
+};
+
 //It's an intent for check if the data of connection is correct
 export const checkLogInData = async (req, res) => {
     /*Check if the data of connection is correct, and if it's then return the data of the user.*/
