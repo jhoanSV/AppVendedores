@@ -23,21 +23,21 @@ const TasksItem = ({ task }) => {
   }
   function colorNota(text){
     if(text === 'AGOTADO'){
-      const obj = {color: '#D6320E' }
+      const obj = {backgroundColor: '#D6320E' }
       return obj;
     }
   }
   const navigation = useNavigation()
   return (
     <TouchableOpacity onPress={() => navigation.navigate('DetalleProducto', {cod: task.cod, Descripcion: task.Descripcion, UnidadOpaquete: task.UnidadOpaquete, EsUnidadOpaquete: task.EsUnidadOpaquete,SubCategoria: task.SubCategoria,  PVenta: task.PVenta + (task.PVenta*porcent), Nota: task.Nota})}>
-    <View style={styles.itemContainer}>
+    <View style={[styles.itemContainer, colorNota(task.Nota)]}>
         <Text style={[styles.itemText, {width: 80}]}>{task.cod}</Text>
         <Text style={[styles.itemText, {width: 400}]}>{task.Descripcion}</Text>
-        <Text style={[styles.itemText, {width: 55}]}>{task.UnidadOpaquete}</Text>
-        <Text style={[styles.itemText, {width: 40}]}>{task.EsUnidadOpaquete}</Text>
-        <Text style={[styles.itemText, {width: 200}]}>{task.SubCategoria}</Text>
+        <Text style={[styles.itemText, {width: 95}]}>{task.EsUnidadOpaquete}</Text>
+        
         <Text style={[styles.itemText, {width: 100}]}>$ {formatNumber(task.PVenta + (task.PVenta*porcent))}</Text>
-        <Text style={[styles.itemText, colorNota(task.Nota)]}>{task.Nota}</Text>
+        <Text style={[styles.itemText, {width: 200}]}>{task.SubCategoria}</Text>
+        <Text style={[styles.itemText]}>{task.Nota}</Text>
     </View>
     </TouchableOpacity>
   )

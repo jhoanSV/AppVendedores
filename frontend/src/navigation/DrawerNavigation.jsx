@@ -6,7 +6,9 @@ import LClientes from '../componentes/LClientes';
 import DetalleProducto from '../componentes/DetalleProducto';
 import DetalleCliente from '../componentes/DetalleCliente';
 import LogIn from '../componentes/LogIn';
+import LPedidos from '../componentes/LPedidos';
 import NuevaVenta from '../componentes/NuevaVenta';
+import DetallesDelPedido from '../components/DetallesDelPedido';
 
 import { Text, StyleSheet, Icon } from 'react-native';
 import MenuButtonItem from '../components/MenuButtonItem';
@@ -82,12 +84,30 @@ export function DrawerNavigation(){
                     headerStyle: {backgroundColor: '#193773'},
                     headerTitleStyle: {color: '#FFFF'},
             }}/>
+            <Drawer.Screen
+                name="LPedidos" 
+                component={ LPedidos }
+                //icon = "home"
+                options={{
+                    title: 'Lista de pedidos',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+            }}/>
+            <Drawer.Screen
+                name="DetallesDelPedido" 
+                component={ DetallesDelPedido }
+                //icon = "home"
+                options={{
+                    title: 'Detalles del Pedido',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+            }}/>
         </Drawer.Navigator>
     )
 }
 
 const MenuItems = ({ navigation }) =>{
-    
+    const vacio = []
     return (
         <DrawerContentScrollView 
             style={styles.container}
@@ -106,6 +126,11 @@ const MenuItems = ({ navigation }) =>{
             <MenuButtonItem 
                 text = "Lista de clientes"
                 onPress={() => navigation.navigate('LClientes')}
+                icon = "list"
+            />
+            <MenuButtonItem 
+                text = "Lista de pedidos"
+                onPress={() => navigation.navigate('LPedidos', vacio)}
                 icon = "list"
             />
         </DrawerContentScrollView>

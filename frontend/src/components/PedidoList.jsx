@@ -15,13 +15,13 @@ const PedidoList =({ Pedido, aumentarCantidad, disminuirCantidad, modificarCanti
         <FlatList
           data={Pedido}
           renderItem={renderItem}
-          style={styles.container}
+          style={[styles.containerL, {flex: 1}]}
         />
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
+    containerL: {
         height: windowHeight*0.49,//320,
         width: windowWidth * 0.94,//320,
         margin: 12,
