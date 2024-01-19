@@ -8,13 +8,14 @@ import { getTasks,
         PedidosEnviados, 
         DetalleDelPedidoVendedor, 
         PedidosCerrados, 
-        PedidosPorEntregar, 
+        PedidosPorEntregar,
         DetallePedidoEntregas, 
         ActualizarProcesoDelPedido, 
         DetallePedidoCerrado,
-        ProductDataForNotLoggedInClient, 
-        ProductDataForLoggedInClient,
-        ListOfAlias} from '../controllers/tasks';
+        ListOfAlias,
+        ProductDataWeb,
+        checkLogInData
+        } from '../controllers/tasks';
 
 
 const router = Router();
@@ -86,12 +87,10 @@ router.post('/tasks/ActualizarProcesoDelPedido', ActualizarProcesoDelPedido)
 
 router.get('/tasks/DetallePedidoCerrado/:cod', DetallePedidoCerrado)
 
-router.get('/tasks/proNotLoggedUser', ProductDataForNotLoggedInClient)
-
-router.get('/tasks/proLoggedInUser', ProductDataForLoggedInClient)
-
 router.get('/tasks/TAlias', ListOfAlias)
 
+router.get('/tasks/productsdataweb', ProductDataWeb)
 
+router.get('/tasks/login', checkLogInData)
 
 export default router

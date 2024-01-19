@@ -134,7 +134,7 @@ function NuevaVenta({ navigation, route }) {
               <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
               <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaDesde}</Text>
               <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaHasta}</Text>
-              <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.FERRESIERRA.COM</Text>
+              <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.SIVAR.COM.CO</Text>
             </View>
             </Fragment>
             <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>shareImage()}>
@@ -224,7 +224,7 @@ function NuevaVenta({ navigation, route }) {
               "Tabla": "tabladeestados"
           });
           let NpreFactura = N[0]["consecutivo"]
-          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ','  + '\'' + 0 + '\'' + ','  + '\'' + inputNotasV + '\'' + ','  + '\'' + '' + '\'' +')';
+          const aEstados = '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + route.params.Cod + '\'' + ',' + '\'' + hoyDate + ' ' + hora + '\'' + ',' + '\'' +'Contado' + '\'' +','  + '\'' +'Ingresado' + '\'' +','  + '\'' + hoyDate + ' ' + hora + '\'' + ','  + '\'' + textDate + '\'' + ','  + '\'' + '' + '\'' +','  + '\'' + getGlobal('User') +  '\'' + ',' + '0' + ','  + '\'' + textDate + '\'' + ','  + '\'' + 0 + '\'' + ','  + '\'' + inputNotasV + '\'' + ','  + '\'' + '' + '\'' +', 0 )';
           pedido.map((pedido, index) => {
             aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','                         
           })

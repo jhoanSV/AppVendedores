@@ -144,25 +144,23 @@ export const DetallePedidoCerrado = async(req, res) => {
     }
 };
 
-export const ProductDataForNotLoggedInClient = async(req, res) => {
-    /*Return the whole list of product only with the necessary information for not logged in user*/
-    try {
-        const connection = await connect()
-        const [rows] = await connection.query("SELECT Cod, Descripcion, EsUnidadOpaquete, SubCategoria FROM productos");
-        res.json(rows)
-        connection.end()
-    } catch (error) {
-        console.log(error)
-    }
-};
 
-export const ProductDataForLoggedInClient = async(req, res) => {
-    /*Return the whole list of product only with the necessary information for logged in user*/
+//Todo: create just one quiery to send the product data if the client is logged in or not
+export const ProductDataWeb = async(req, res) => {
+    /*Return the whole list of product only with the necessary information deppending on if the user is logged in or not */
     try {
-        const connection = await connect()
-        const [rows] = await connection.query("SELECT Cod, Descripcion, EsUnidadOpaquete, SubCategoria, PVenta, Iva FROM productos");
-        res.json(rows)
-        connection.end()
+        if (req.body.logged == true) {
+            const connection = await connect()
+            const [rows] = await connection.query("SELECT p.cod, p.Descripcion, p.EsUnidadOpaquete, (SELECT (SELECT Categoria FROM categoria WHERE IDCategoria = sub.IDCategoria) AS Categoria FROM subcategorias sub WHERE IDSubCategoria = p.subcategoria) AS Categoria, p.PVenta, p.Iva, p.Agotado, p.Detalle FROM productos AS p");
+            res.json(rows)
+            connection.end()
+            }
+        else {
+            const connection = await connect()
+            const [rows] = await connection.query("SELECT p.cod, p.Descripcion, p.EsUnidadOpaquete, (SELECT (SELECT Categoria FROM categoria WHERE IDCategoria = sub.IDCategoria) AS Categoria FROM subcategorias sub WHERE IDSubCategoria = p.subcategoria) AS Categoria, '0' as PVenta, '0' as Iva, p.Agotado, p.Detalle FROM productos AS p");
+            res.json(rows)
+            connection.end()
+        }
     } catch (error) {
         console.log(error)
     }
@@ -180,7 +178,7 @@ export const ListOfAlias = async(req, res) => {
     }
 };
 
-//It's an intent for check if the data of connection is correct
+//Todo: Function for checking if the data of connection is correct.
 export const checkLogInData = async (req, res) => {
     /*Check if the data of connection is correct, and if it's then return the data of the user.*/
     try {
