@@ -129,7 +129,7 @@ export const ActualizarProcesoDelPedido = async(req, res) => {
         const connection = await connect()
         const [rows] = await connection.query("UPDATE tabladeestados SET NotaEntrega = ?, ProcesoDelPedido = ? WHERE NDepedido =  ?", [req.body.NotaEntrega, req.body.ProcesoDelPedido, req.body.NDepedido]);
         res.json(rows)
-    connection.end()
+        connection.end()
     } catch (error) {
         console.log(error)
     }
@@ -191,7 +191,7 @@ export const checkLogInData = async (req, res) => {
       // Check if the password matches with the password that the user gave
       if (rows.length > 0) {
         const dbPassword = rows[0].Contraseña;  // Use index 0 to access the first row
-        console.log(dbPassword);
+        //console.log(dbPassword);
         bcrypt.compare(req.body.Password, dbPassword, function(err, result) {
           if (err) {
             // Handle error
@@ -199,20 +199,88 @@ export const checkLogInData = async (req, res) => {
             res.status(500).json({ error: 'Internal Server Error' });
           } else if (result) {
             // Passwords match
-            res.json(rows[0].pop);
-            console.log(rows[0].pop)
+            delete rows[0].Contraseña
+            res.json(rows[0]);
+            //console.log(rows[0])
           } else {
             // Passwords do not match
             console.log('Password is incorrect');
             res.status(401).json({ error: 'Unauthorized' });
           }
+          //connection.end();
         });
       } else {
         // No user found with the provided email
         res.status(404).json({ error: 'User not found' });
       }
     } catch (error) {
-      console.error(error);
+      console.error('entro en este' & error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   };
+
+
+//Todo: Function for changind the password.
+export const changePassword = async (req, res) => {
+    /*Check if the data of connection is correct, and if it's then hash the new password and change it into the database.*/
+    try {
+      const connection = await connect(); // Assuming you have a connect function
+      const [rows] = await connection.query("SELECT Contraseña FROM clientes WHERE Cod = ?", [req.body.CodUser]);
+      connection.end();
+  
+      // Check if the password matches with the password that the user gave
+      if (rows.length > 0) {
+        const dbPassword = rows[0].Contraseña; // Use index 0 to access the first row
+        //console.log(dbPassword);
+  
+        try {
+          const result = await new Promise((resolve, reject) => {
+            bcrypt.compare(req.body.Password, dbPassword, function (err, result) {
+              if (err) {
+                reject(err);
+              } else {
+                resolve(result);
+              }
+            });
+          });
+  
+          if (result) {
+            // Passwords match
+            //delete rows[0].Contraseña;
+            // To hash the new password
+            const plainPassword = req.body.NewPassword;
+            const hashedPassword = await new Promise((resolve, reject) => {
+              bcrypt.hash(plainPassword, 10, function (err, hashedPassword) {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve(hashedPassword);
+                }
+              });
+            });
+  
+            const connection = await connect();
+            const [upRows] = await connection.query("UPDATE clientes SET Contraseña = ? WHERE Cod =  ?", [hashedPassword, req.body.CodUser]);
+            res.json(upRows);
+            connection.end();
+            
+          } else {
+            // Passwords do not match
+            console.log('Password is incorrect');
+            res.status(401).json({ error: 'Unauthorized' });
+          }
+        } catch (err) {
+          // Handle errors from bcrypt operations
+          console.error(err);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      } else {
+        // No user found with the provided email
+        res.status(404).json({ error: 'User not found' });
+      }
+    } catch (error) {
+      console.error('entro en este' & error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+  

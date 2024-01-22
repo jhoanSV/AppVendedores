@@ -14,7 +14,8 @@ import { getTasks,
         DetallePedidoCerrado,
         ListOfAlias,
         ProductDataWeb,
-        checkLogInData
+        checkLogInData,
+        changePassword
         } from '../controllers/tasks';
 
 
@@ -92,5 +93,7 @@ router.get('/tasks/TAlias', ListOfAlias)
 router.get('/tasks/productsdataweb', ProductDataWeb)
 
 router.get('/tasks/login', checkLogInData)
+
+router.get('/tasks/Changepassword', changePassword)
 
 export default router
