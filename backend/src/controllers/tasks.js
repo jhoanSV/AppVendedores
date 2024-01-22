@@ -1,4 +1,6 @@
 import { connect } from "../database";
+const bcrypt = require('bcryptjs');
+
 
 export const getTasks = async(req, res) => {
     try {
@@ -183,13 +185,14 @@ export const checkLogInData = async (req, res) => {
     /*Check if the data of connection is correct, and if it's then return the data of the user.*/
     try {
       const connection = await connect();  // Assuming you have a connect function
-      const [rows] = await connection.query("SELECT Cod, Ferreteria, Contacto, Direccion, Telefono, Cel, Email, Password FROM clientes WHERE Email = ?", [req.body.EmailUser]);
+      const [rows] = await connection.query("SELECT Cod, Ferreteria, Contacto, Direccion, Telefono, Cel, Email, Contraseña FROM clientes WHERE Email = ?", [req.body.EmailUser]);
       connection.end();
-  
+      
       // Check if the password matches with the password that the user gave
       if (rows.length > 0) {
-        const dbPassword = rows[0].Password;  // Use index 0 to access the first row
-        bcrypt.compare(req.body.password, dbPassword, (err, result) => {
+        const dbPassword = rows[0].Contraseña;  // Use index 0 to access the first row
+        console.log(dbPassword);
+        bcrypt.compare(req.body.Password, dbPassword, function(err, result) {
           if (err) {
             // Handle error
             console.error(err);
