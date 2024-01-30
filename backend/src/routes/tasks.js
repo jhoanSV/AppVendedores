@@ -15,7 +15,8 @@ import { getTasks,
         ListOfAlias,
         ProductDataWeb,
         checkLogInData,
-        changePassword
+        changePassword,
+        BottonCaroucel
         } from '../controllers/tasks';
 
 
@@ -88,12 +89,16 @@ router.post('/tasks/ActualizarProcesoDelPedido', ActualizarProcesoDelPedido)
 
 router.get('/tasks/DetallePedidoCerrado/:cod', DetallePedidoCerrado)
 
+
+//Routes for the webpage
+router.get('/tasks/login', checkLogInData)
+
+router.get('/tasks/Changepassword', changePassword)
+
 router.get('/tasks/TAlias', ListOfAlias)
 
 router.get('/tasks/productsdataweb', ProductDataWeb)
 
-router.get('/tasks/login', checkLogInData)
-
-router.get('/tasks/Changepassword', changePassword)
+router.get('/tasks/BottonCaroucel', BottonCaroucel)
 
 export default router

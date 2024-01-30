@@ -153,13 +153,60 @@ export const ProductDataWeb = async(req, res) => {
     try {
         if (req.body.logged == true) {
             const connection = await connect()
-            const [rows] = await connection.query("SELECT p.cod, p.Descripcion, p.EsUnidadOpaquete, (SELECT (SELECT Categoria FROM categoria WHERE IDCategoria = sub.IDCategoria) AS Categoria FROM subcategorias sub WHERE IDSubCategoria = p.subcategoria) AS Categoria, p.PVenta, p.Iva, p.Agotado, p.Detalle FROM productos AS p");
+            const [rows] = await connection.query(`SELECT
+                                                      p.cod,
+                                                      p.Descripcion,
+                                                      p.EsUnidadOpaquete,
+                                                      c.Categoria,
+                                                      p.PVenta,
+                                                      p.Iva,
+                                                      p.Agotado,
+                                                      p.Detalle,
+                                                      (0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) + 0.5 * COUNT(sa.Codigo) / 6 + 0.2 * IFNULL(SUM(sa.Cantidad * (sa.VrUnitario - sa.Costo)), 0)) / 1000 AS Score,
+                                                      ROW_NUMBER() OVER (PARTITION BY c.Categoria ORDER BY (((0.3 * IFNULL((p.PVenta-p.PCosto)/p.PVenta *100,0) + 0.5 * COUNT(sa.Codigo)/6 + 0.2 * IFNULL(SUM(sa.Cantidad*(sa.VrUnitario-sa.Costo)),0))/1000)) DESC) AS row_num
+                                                  FROM
+                                                      productos AS p
+                                                  JOIN
+                                                      salidas AS sa ON p.Cod = sa.Codigo
+                                                  JOIN
+                                                      subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
+                                                  JOIN
+                                                      categoria AS c ON sub.IDCategoria = c.IDCategoria
+                                                  WHERE
+                                                      sa.NDePedido <> '0'
+                                                      AND DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m')
+                                                  GROUP BY
+                                                      p.cod`);
             res.json(rows)
             connection.end()
             }
         else {
             const connection = await connect()
-            const [rows] = await connection.query("SELECT p.cod, p.Descripcion, p.EsUnidadOpaquete, (SELECT (SELECT Categoria FROM categoria WHERE IDCategoria = sub.IDCategoria) AS Categoria FROM subcategorias sub WHERE IDSubCategoria = p.subcategoria) AS Categoria, '0' as PVenta, '0' as Iva, p.Agotado, p.Detalle FROM productos AS p");
+            const [rows] = await connection.query(`SELECT
+                                                      p.cod,
+                                                      p.Descripcion,
+                                                      p.EsUnidadOpaquete,
+                                                      c.Categoria,
+                                                      0 as PVenta,
+                                                      0 as Iva,
+                                                      p.Agotado,
+                                                      p.Detalle,
+                                                      (0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
+                                                      0.5 * COUNT(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Codigo END) / 6 +
+                                                      0.2 * IFNULL(SUM(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) END), 0)) / 1000 AS Score,
+                                                      ROW_NUMBER() OVER (PARTITION BY c.Categoria ORDER BY ((0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
+                                                      0.5 * COUNT(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Codigo END) / 6 +
+                                                      0.2 * IFNULL(SUM(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) END), 0)) / 1000) DESC) AS row_num
+                                                  FROM
+                                                      productos AS p
+                                                  LEFT JOIN
+                                                      salidas AS sa ON p.Cod = sa.Codigo
+                                                  JOIN
+                                                      subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
+                                                  JOIN
+                                                      categoria AS c ON sub.IDCategoria = c.IDCategoria
+                                                  GROUP BY
+                                                      p.cod;`);
             res.json(rows)
             connection.end()
         }
@@ -284,3 +331,99 @@ export const changePassword = async (req, res) => {
     }
   };
   
+//Todo: select the first five best productos of each category
+export const BottonCaroucel = async(req, res) => {
+  /*Return list of the first five best productos of each category*/
+  try {
+    if (req.body.logged == true) {
+      const connection = await connect()
+      const [rows] = await connection.query(`WITH ranked_products AS (
+                                                  SELECT
+                                                      p.cod,
+                                                      p.Descripcion,
+                                                      p.EsUnidadOpaquete,
+                                                      c.Categoria,
+                                                      p.PVenta,
+                                                      p.Iva,
+                                                      p.Agotado,
+                                                      p.Detalle,
+                                                      (0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) + 0.5 * COUNT(sa.Codigo) / 6 + 0.2 * IFNULL(SUM(sa.Cantidad * (sa.VrUnitario - sa.Costo)), 0)) / 1000 AS Score,
+                                                      ROW_NUMBER() OVER (PARTITION BY c.Categoria ORDER BY (((0.3 * IFNULL((p.PVenta-p.PCosto)/p.PVenta *100,0) + 0.5 * COUNT(sa.Codigo)/6 + 0.2 * IFNULL(SUM(sa.Cantidad*(sa.VrUnitario-sa.Costo)),0))/1000)) DESC) AS row_num
+                                                  FROM
+                                                      productos AS p
+                                                  JOIN
+                                                      salidas AS sa ON p.Cod = sa.Codigo
+                                                  JOIN
+                                                      subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
+                                                  JOIN
+                                                      categoria AS c ON sub.IDCategoria = c.IDCategoria
+                                                  WHERE
+                                                      sa.NDePedido <> '0'
+                                                      AND DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m')
+                                                      AND (
+                                                      NOT EXISTS (SELECT 1 FROM salidas WHERE NDePedido <> '0' AND NDePedido IN (SELECT NDePedido FROM tabladeestados WHERE CodCliente = ?))
+                                                      OR p.cod IN (SELECT Codigo FROM salidas WHERE NDePedido <> '0' AND NDePedido IN (SELECT NDePedido FROM tabladeestados WHERE CodCliente = ?))
+                                                  )
+                                                  GROUP BY
+                                                      p.cod
+                                                )
+                                                SELECT
+                                                  Cod,
+                                                  Descripcion,
+                                                  Categoria,
+                                                  PVenta,
+                                                  Iva,
+                                                  Agotado,
+                                                  Detalle,
+                                                  Score
+                                                FROM
+                                                  ranked_products
+                                                WHERE
+                                                  row_num <= 5;`,[req.body.CodUser,req.body.CodUser]);
+      res.json(rows)
+      connection.end()
+    }
+    else {
+      const connection = await connect()
+      const [rows] = await connection.query(`WITH ranked_products AS (
+                                                SELECT p.cod, 
+                                              p.Descripcion,
+                                              p.EsUnidadOpaquete,
+                                              (SELECT Categoria FROM categoria WHERE IDCategoria = sub.IDCategoria) AS Categoria,
+                                              p.PVenta,
+                                              p.Iva,
+                                              p.Agotado,
+                                              p.Detalle,
+                                              (0.3 * IFNULL((p.PVenta-p.PCosto)/p.PVenta *100,0) + 0.5 * COUNT(sa.Codigo)/6 + 0.2 * IFNULL(SUM(sa.Cantidad*(sa.VrUnitario-sa.Costo)),0))/1000 AS Score,
+                                              ROW_NUMBER() OVER (PARTITION BY (SELECT Categoria FROM categoria WHERE IDCategoria = sub.IDCategoria) ORDER BY ((0.3 * IFNULL((p.PVenta-p.PCosto)/p.PVenta *100,0) + 0.5 * COUNT(sa.Codigo)/6 + 0.2 * IFNULL(SUM(sa.Cantidad*(sa.VrUnitario-sa.Costo)),0))/1000) DESC) AS row_num
+                                              FROM 
+                                                productos AS p
+                                              JOIN
+                                                salidas AS sa ON p.Cod = sa.Codigo 
+                                              JOIN 
+                                                subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
+                                              WHERE
+                                                sa.NDePedido <> '0' AND DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m')
+                                              GROUP BY 
+                                                sa.Codigo
+                                            )
+                                            SELECT
+                                                Cod,
+                                                Descripcion,
+                                                Categoria,
+                                                PVenta,
+                                                Iva,
+                                                Agotado,
+                                                Detalle,
+                                                Score
+                                            FROM
+                                                ranked_products
+                                            WHERE
+                                                row_num <= 5;`);
+      res.json(rows)
+      connection.end()
+    }
+  } catch (error) {
+      console.log(error)
+  }
+};

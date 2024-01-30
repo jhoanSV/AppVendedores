@@ -58,3 +58,43 @@ GET {{api}}/PedidosEnviados/9
 
 ###
 GET {{api}}/DetallePedidoVendedor/7500
+
+###
+GET {{api}}/productsdataweb/true
+
+###
+GET  {{api}}/productsdataweb
+Content-Type: application/json
+
+{
+    "logged": false
+}
+
+###
+GET  {{api}}/login
+Content-Type: application/json
+
+{
+    "EmailUser": "Pruebausuario1@gmail.com",
+    "Password": "1234567"
+}
+
+
+###
+GET  {{api}}/Changepassword
+Content-Type: application/json
+
+{
+    "CodUser": "493",
+    "Password": "123456789",
+    "NewPassword": "123456789"
+}
+
+###
+GET  {{api}}/BottonCaroucel
+Content-Type: application/json
+
+{
+    "logged": false,
+    "CodUser": "494"
+}
