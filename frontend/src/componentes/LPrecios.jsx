@@ -50,7 +50,16 @@ const LPrecios = () => {
     const uniqueAliasProducts = [...new Set(aliasProducts.map((item) => item.cod))];
     // Combine the unique cod values from TFiltro1 and aliasProducts
     const filtro = [...new Set([...TFiltro1, ...uniqueAliasProducts])];
-    setTasks(filtro);
+
+    // Convert the json into an array of objects to reorder by score
+    const dataArray = filtro.entries(jsonData).map(([key, value]) => ({ key, ...value }));
+
+    // Order the array deppending on the score
+    dataArray.sort((a, b) => b.Score - a.Scote);
+
+    // Convert the array into a json object
+    const sortedJson = JSON.stringify(dataArray);
+    setTasks(sortedJson);
   };
 
   useEffect(()=> {

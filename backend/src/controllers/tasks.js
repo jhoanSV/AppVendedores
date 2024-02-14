@@ -219,7 +219,18 @@ export const ListOfAlias = async(req, res) => {
     /*Return list of alias of the products*/
     try {
         const connection = await connect()
-        const [rows] = await connection.query("SELECT Cod, Alias FROM Alias");
+        const [rows] = await connection.query(`SELECT 
+                                                al.Cod,
+                                                al.Alias,
+                                                ca.Categoria
+                                              FROM
+                                                alias AS al
+                                              JOIN
+                                                productos AS pro ON al.Cod = pro.Cod
+                                              JOIN
+                                                subcategorias AS sc ON sc.IDSubCategoria = pro.SubCategoria
+                                              JOIN
+                                                categoria AS ca ON ca.IDCategoria = sc.IDCategoria `);
         res.json(rows)
         connection.end()
     } catch (error) {
@@ -308,7 +319,8 @@ export const changePassword = async (req, res) => {
   
             const connection = await connect();
             const [upRows] = await connection.query("UPDATE clientes SET Contraseña = ? WHERE Cod =  ?", [hashedPassword, req.body.CodUser]);
-            res.json(upRows);
+            //res.json(upRows);
+            res.status(200).json({ authorization: 'Authorized'})
             connection.end();
             
           } else {
