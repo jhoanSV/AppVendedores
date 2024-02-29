@@ -1,7 +1,8 @@
-const API = 'http://192.168.1.102:3000/tasks';
+const API = 'http://192.168.1.111:3000/tasks';
 /*44.209.105.117:80/tasks*/
 export const getTasks = async() => {
     try {
+        
         const res = await fetch(API)
         return await res.json()
     }catch(error) {
@@ -128,6 +129,20 @@ export const ActualizarProcesoDelPedido = async(DatosActualizar) => {
             method: 'POST',
             headers: { Accept: 'application/json','Content-Type': 'application/json'},
             body: JSON.stringify(DatosActualizar)
+        })
+        return await res.json()
+    }catch(error) {
+        console.log(error)
+    }
+}
+
+
+export const SubirPedido = async(sale) => {
+    try {
+        const res = await fetch(`${API}/SendSale`,{
+            method: 'POST',
+            headers: { Accept: 'application/json','Content-Type': 'application/json'},
+            body: JSON.stringify(sale)
         })
         return await res.json()
     }catch(error) {

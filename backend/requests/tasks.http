@@ -63,7 +63,7 @@ GET {{api}}/DetallePedidoVendedor/7500
 GET {{api}}/productsdataweb/true
 
 ###
-GET  {{api}}/productsdataweb
+POST  {{api}}/productsdataweb
 Content-Type: application/json
 
 {
@@ -97,4 +97,19 @@ Content-Type: application/json
 {
     "logged": false,
     "CodUser": "494"
+}
+
+###
+POST  {{api}}/SendSale
+Content-Type: application/json
+
+{
+    "CodCliente": "493",
+    "FechaFactura": "2024-02-20 00:00:00",
+    "FechaDeEstado": "2024-02-20 00:00:00",
+    "FechaDeEntrega": "2024-02-23",
+    "FechaVencimiento" : "2024-02-23",
+    "NotaVenta": "",
+    "VECommerce": "0",
+    "TIngresados": "12,CIT05,950;6,SP136,3500"
 }

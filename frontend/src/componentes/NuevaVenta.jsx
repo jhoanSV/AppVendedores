@@ -1,6 +1,18 @@
 import React,{useState, useEffect, useRef, Fragment } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl, FlatList, KeyboardAvoidingView} from 'react-native';
-import { getTasks, consecutivos } from '../api';
+import { View,
+        Text,
+        StyleSheet,
+        ScrollView,
+        TouchableOpacity,
+        TextInput,
+        Modal,
+        Image,
+        Dimensions,
+        RefreshControl,
+        FlatList,
+        KeyboardAvoidingView,
+        Platform} from 'react-native';
+import { getTasks, consecutivos, SubirPedido } from '../api';
 import DesTaskList from '../components/DesTaskList';
 import PedidoList from '../components/PedidoList';
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -14,6 +26,7 @@ import * as Sharing from 'expo-sharing';
 import { useIsFocused } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import PedidoItem from '../components/PedidoItem';
+import PopUpMenu from '../components/PopUpMenu';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -219,7 +232,7 @@ function NuevaVenta({ navigation, route }) {
           const numeroDiaSeleccionado = new Date(date).getDay()
           const nombreDia = dias[numeroDia];
           const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
-          let N = await consecutivos({
+          /*let N = await consecutivos({
               "Columna": "NDePedido",
               "Tabla": "tabladeestados"
           });
@@ -228,16 +241,31 @@ function NuevaVenta({ navigation, route }) {
           pedido.map((pedido, index) => {
             aTablaDeIngresados = aTablaDeIngresados + '(' + '\'' + NpreFactura + '\'' + ',' + '\'' + pedido.Cantidad + '\'' +',' + '\'' + pedido.cod +  '\'' + ',' + '\'' + pedido.PVenta + '\'' + ',' + '\'' + pedido.Costo +  '\'' + ')'  + ','                         
           })
-          
-            aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)
-            await aTablas({
+          aTablaDeIngresados = aTablaDeIngresados.slice(0, -1)*/
+          //For the new function of send order
+          pedido.map((pedido, index) => {
+            aTablaDeIngresados = aTablaDeIngresados + ';' + pedido.Cantidad + ',' + pedido.cod + ',' + pedido.PVenta                       
+          })
+          console.log(aTablaDeIngresados)
+            /*await aTablas({
               "tabla": "tabladeestados",
               "cadenaDeInsercion": aEstados
             });
             await aTablas({
               "tabla": "tabladeingresados",
               "cadenaDeInsercion": aTablaDeIngresados
+            });*/
+            await SubirPedido({
+              "CodCliente": route.params.Cod,
+              "FechaFactura": hoyDate + ' ' + hora,
+              "FechaDeEstado": hoyDate + ' ' + hora,
+              "FechaDeEntrega": textDate,
+              "FechaVencimiento" : textDate,
+              "NotaVenta": inputNotasV,
+              "VECommerce": "0",
+              "TIngresados": aTablaDeIngresados
             });
+
             setTextDate('')
             setVisibleEnvioExitoso(true)
             setVisiblevCargando(false)
@@ -441,7 +469,9 @@ function NuevaVenta({ navigation, route }) {
   } 
 
   return (
+    <>
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={false}>
+      {/*<PopUpMenu tasks={['Regla']} actions={[()=>navigation.navigate('Ruler')]}/>*/}
       <ScrollView
         style = {{flexGrow: 0}}
         horizontal={true} 
@@ -513,7 +543,7 @@ function NuevaVenta({ navigation, route }) {
         </View>
       </View>
       <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
-            
+
       <Warning visible={visibleAviso} title={'Cancelar pedido'} warningText={'¿Esta seguro que desea cancelar este pedido?'} setMostrar={setVisibleAviso} ConfirmationText={'Cancelar pedido'} SetConfirmation={cancelarPedido} />
       <Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto} ConfirmationText={'Entendido'} SetConfirmation={setVisibleAvisoProducto}/>
       <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo} ConfirmationText={'Entendido'} SetConfirmation={()=>{}} />
@@ -524,14 +554,15 @@ function NuevaVenta({ navigation, route }) {
       
       <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
     </KeyboardAvoidingView>
-
+    </>
   )
 }
 
 const styles = StyleSheet.create({
   container : {
-    //padding: 10,
-    paddingBottom: 10
+    paddingBottom: 10,
+    position: 'relative',
+    zIndex: 1,
   },
   subTitle: {
     fontSize: 20, 

@@ -21,20 +21,37 @@ const TasksItem = ({ task }) => {
   function formatNumber(number){
     return new Intl.NumberFormat().format(number);
   }
-  function colorNota(text){
+  
+  /*function colorNota(text){
     if(text === 'AGOTADO'){
       const obj = {backgroundColor: '#D6320E' }
       return obj;
     }
+  }*/
+
+  function colorNota(){
+    if(task.Agotado === 1 ){
+      const obj = {backgroundColor: '#D6320E' }
+      return obj;
+    }
   }
+
+
   const navigation = useNavigation()
   return (
-    <TouchableOpacity onPress={() => navigation.navigate('DetalleProducto', {cod: task.cod, Descripcion: task.Descripcion, UnidadOpaquete: task.UnidadOpaquete, EsUnidadOpaquete: task.EsUnidadOpaquete,SubCategoria: task.SubCategoria,  PVenta: task.PVenta + (task.PVenta*porcent), Nota: task.Nota})}>
+    <TouchableOpacity onPress={() => navigation.navigate('DetalleProducto', {cod: task.cod,
+                                                                            Descripcion: task.Descripcion,
+                                                                            Agotado: task.Agotado,
+                                                                            UnidadOpaquete: task.UnidadOpaquete,
+                                                                            EsUnidadOpaquete: task.EsUnidadOpaquete,
+                                                                            SubCategoria: task.SubCategoria,
+                                                                            PVenta: task.PVenta + (task.PVenta*porcent),
+                                                                            Nota: task.Nota,
+                                                                            Detalle: task.Detalle })}>
     <View style={[styles.itemContainer, colorNota(task.Nota)]}>
         <Text style={[styles.itemText, {width: 80}]}>{task.cod}</Text>
         <Text style={[styles.itemText, {width: 400}]}>{task.Descripcion}</Text>
         <Text style={[styles.itemText, {width: 95}]}>{task.EsUnidadOpaquete}</Text>
-        
         <Text style={[styles.itemText, {width: 100}]}>$ {formatNumber(task.PVenta + (task.PVenta*porcent))}</Text>
         <Text style={[styles.itemText, {width: 200}]}>{task.SubCategoria}</Text>
         <Text style={[styles.itemText]}>{task.Nota}</Text>

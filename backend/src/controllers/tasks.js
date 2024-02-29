@@ -5,7 +5,20 @@ const bcrypt = require('bcryptjs');
 export const getTasks = async(req, res) => {
     try {
         const connection = await connect()
-        const [rows] = await connection.query("SELECT p.cod, p.Descripcion, p.EsUnidadOpaquete, (SELECT SubCategoria FROM subcategorias WHERE IDSubCategoria = p.subcategoria) AS SubCategoria, p.PVenta, p.Nota, p.PCosto FROM productos AS p");
+        const [rows] = await connection.query(`SELECT
+                                                p.cod,
+                                                p.Descripcion,
+                                                p.EsUnidadOpaquete,
+                                                subc.SubCategoria,
+                                                p.PCosto,
+                                                p.PVenta,
+                                                p.Agotado,
+                                                p.Nota,
+                                                p.Detalle
+                                              FROM
+                                                productos AS p
+                                              JOIN
+                                                subcategorias AS subc ON subc.IDSubCategoria = p.subcategoria`);
         res.json(rows)
         connection.end()
       } catch (error) {
@@ -382,6 +395,7 @@ export const BottonCaroucel = async(req, res) => {
                                                 SELECT
                                                   Cod,
                                                   Descripcion,
+                                                  EsUnidadOpaquete,
                                                   Categoria,
                                                   PVenta,
                                                   Iva,
@@ -422,6 +436,7 @@ export const BottonCaroucel = async(req, res) => {
                                             SELECT
                                                 Cod,
                                                 Descripcion,
+                                                EsUnidadOpaquete,
                                                 Categoria,
                                                 PVenta,
                                                 Iva,
@@ -437,5 +452,109 @@ export const BottonCaroucel = async(req, res) => {
     }
   } catch (error) {
       console.log(error)
+  }
+
+
+};
+
+
+/*export const SendSale = async(req, res) => {
+  try {
+    const { TIngresados } = req.body;  
+    const connection = await connect()
+    const [TeRows] = await connection.query(`INSERT INTO tabladeestados ( SELECT MAX(NDePedido) + 1,
+                                                                                  ?
+                                                                                  From tabladeestados)`, [req.body.TEstados]);
+    //res.json(TeRows)
+    connection.end()
+    //
+    const [NDePedido] = await connection.query("Select MAX(NDePedido) - 1 FROM tabladeestados");
+    connection.end()
+    
+    // Split the TIngresados string by semicolon
+    const ingresadosArray = TIngresados.split(';');
+
+    // Create an array to hold the modified strings
+    const modifiedArray = ingresadosArray.map(ingresado => {
+      // Prepend MAX(NDePedido) - 1 to each string
+      return `(${NDePedido[0]}, ${ingresado.trim()}),`;
+    });
+    console.log(modifiedArray)
+
+
+    const [aTIngresados] = await connection.query(`INSERT INTO tabladeingresados VALUES ${modifiedArray}`);
+    connection.end()
+    res.json(aTIngresados)
+  } catch (error) {
+      console.log(error)
+  }
+};*/
+
+
+
+export const SendSale = async (req, res) => {
+  try {
+    const { TIngresados } = req.body;
+    const connection = await connect();
+
+    // Insert new estado
+    const [rows] = await connection.query(
+      `INSERT INTO tabladeestados (SELECT MAX(te.NDePedido) + 1,
+                                          ?,
+                                          ?,
+                                          'Contado',
+                                          'Ingresado',
+                                          ?,
+                                          ?,
+                                          '',
+                                          cli.CodVendedor,
+                                          cli.Iva,
+                                          ?,
+                                          '',
+                                          ?,
+                                          '',
+                                          ?
+                                          FROM
+                                            tabladeestados AS te
+                                          JOIN
+                                            clientes as cli
+                                          ON cli.Cod = ?)`,
+      [req.body.CodCliente,
+       req.body.FechaFactura,
+       req.body.FechaDeEstado,
+       req.body.FechaDeEntrega,
+       req.body.FechaVencimiento,
+       req.body.NotaVenta,
+       req.body.VECommerce,
+       req.body.CodCliente
+      ]
+    );
+
+    // Get the new NDePedido
+    const [NDePedidoRows] = await connection.query("SELECT MAX(NDePedido) AS NDePedido FROM tabladeestados");
+    const NDePedido = NDePedidoRows[0].NDePedido;
+
+    // Split the input string by semicolon to get individual entries
+    const entries = TIngresados.split(';');
+
+    // Iterate through each entry and construct the SQL statement
+    const formattedEntries = entries.map(entry => {
+        // Split the entry by commas to get individual elements
+        const [quantity, cod, price] = entry.split(',');
+        // Construct the SQL statement for each entry
+        return `SELECT '${NDePedido}', '${quantity}', '${cod}', '${price}', PCosto FROM productos WHERE cod = '${cod}'`;
+    });
+
+    // Join the formatted entries with UNION ALL
+    const finalQuery = formattedEntries.join('\nUNION ALL\n');
+    // Insert ingresados
+    await connection.query(`INSERT INTO tabladeingresados (NDePedido, Cantidad, Codigo, VrUnitario, Costo) ${finalQuery}`);
+    // Close the connection
+    connection.end();
+
+    res.json({ success: true });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 };

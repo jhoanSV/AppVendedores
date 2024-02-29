@@ -9,6 +9,8 @@ import LogIn from '../componentes/LogIn';
 import LPedidos from '../componentes/LPedidos';
 import NuevaVenta from '../componentes/NuevaVenta';
 import DetallesDelPedido from '../components/DetallesDelPedido';
+import Ruler from '../components/Ruler';
+
 
 import { Text, StyleSheet, Icon } from 'react-native';
 import MenuButtonItem from '../components/MenuButtonItem';
@@ -99,6 +101,15 @@ export function DrawerNavigation(){
                 //icon = "home"
                 options={{
                     title: 'Detalles del Pedido',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+            }}/>
+            <Drawer.Screen
+                name="Ruler" 
+                component={ Ruler }
+                //icon = "home"
+                options={{
+                    title: 'Regla',
                     headerStyle: {backgroundColor: '#193773'},
                     headerTitleStyle: {color: '#FFFF'},
             }}/>

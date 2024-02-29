@@ -28,40 +28,6 @@ const LPrecios = () => {
   };
 
 
-
-  const searchProduct = async (text) => {
-    /*Searh the list of products that includes the text, either because it is in the "products" table or in the "alias" table */
-    const proData = pro; //The whole table "products".
-    const aliasData = alias; //The whole table "alias".
-    // Define a case-insensitive text filter function
-    const filterByText = (item) =>
-      item.cod.toLowerCase().includes(text) ||
-      item.Descripcion.toLowerCase().includes(text) ||
-      item.SubCategoria.toLowerCase().includes(text);
-    // Filter products based on the text
-    const TFiltro1 = proData.filter(filterByText);
-    // Filter aliases based on the text
-    const TFiltro2 = aliasData.filter((item) => item.Alias.toLowerCase().includes(text));
-    // Extract unique cod values from aliasData
-    const CodAlias = [...new Set(TFiltro2.map((item) => item.cod))];
-    // Filter products based on unique cod values
-    const aliasProducts = proData.filter((item) => CodAlias.includes(item.cod));
-    // Extract unique cod values from aliasProducts
-    const uniqueAliasProducts = [...new Set(aliasProducts.map((item) => item.cod))];
-    // Combine the unique cod values from TFiltro1 and aliasProducts
-    const filtro = [...new Set([...TFiltro1, ...uniqueAliasProducts])];
-
-    // Convert the json into an array of objects to reorder by score
-    const dataArray = filtro.entries(jsonData).map(([key, value]) => ({ key, ...value }));
-
-    // Order the array deppending on the score
-    dataArray.sort((a, b) => b.Score - a.Scote);
-
-    // Convert the array into a json object
-    const sortedJson = JSON.stringify(dataArray);
-    setTasks(sortedJson);
-  };
-
   useEffect(()=> {
     loadTasks()
   },[])

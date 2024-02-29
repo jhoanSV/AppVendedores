@@ -1,5 +1,17 @@
 import React,{useState, useEffect, useRef, Fragment } from 'react'
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Image, Dimensions, RefreshControl, FlatList, useWindowDimensions} from 'react-native';
+import { View,
+          Text,
+          StyleSheet,
+          ScrollView,
+          TouchableOpacity,
+          TextInput,
+          Modal,
+          Image,
+          Dimensions,
+          RefreshControl,
+          FlatList,
+          useWindowDimensions} from 'react-native';
+import { Icon } from 'react-native-elements';
 import DetLPedidoItem from '../components/DetLPedidoItem';
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { setGlobal, getGlobal } from '../components/context/user';
@@ -7,21 +19,120 @@ import { CargadoConExito, progress, Logo_color } from "../../assets";
 import { captureRef } from 'react-native-view-shot';
 import Warning from '../components/modal/Warning';
 import Loading from '../components/modal/Loading';
+import PopUpMenu from '../components/PopUpMenu';
 import * as Sharing from 'expo-sharing';
 import { useIsFocused } from '@react-navigation/native';
-import { DetallePedido, DetallePedidoCerrado, DetallePedidoEntregas, ActualizarProcesoDelPedido } from '../api'
+import { DetallePedido,
+          DetallePedidoCerrado,
+          DetallePedidoEntregas,
+          ActualizarProcesoDelPedido } from '../api'
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 function DetallesDelPedido({ navigation, route }) {
     //const [refreshing, setrefreshing] = useState(false)
+    const viewRef = useRef();
     const [Pedido, setPedido] = useState([]);
     const [permisos, setPermisos] = useState(false);
-    const [visible, setVisible] = useState(false);
+    const [recordatorio, setRecordatorio ] = useState(false);
     const [tipoDeEntrega, setTipoDeEntrega] = useState(false);
     const [proDePedido, setProDePedido] = useState('');
     const isFocused = useIsFocused()
+
+
+    const shareImage = async() => {
+      try {
+        const uri = await captureRef(viewRef, {
+          format: 'png',
+          quality: 0.7
+        });
+        Sharing.shareAsync(uri);
+        setTimeout(() => {  
+          setRecordatorio(false)
+        }, 2000);
+      } catch (errors) { 
+        console.error(errors);
+      }
+    };
+
+    const ModalConfirmacion = ({visible, children}) => {
+      const dias = [
+        'domingo',
+        'lunes',
+        'martes',
+        'miércoles',
+        'jueves',
+        'viernes',
+        'sábado',
+      ];
+      const numeroDiaSeleccionado = new Date(route.params.FechaDeEntrega).getDay()
+      const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
+
+      return (
+      <Modal transparent visible={visible}>
+          <View style={[styles.ModalBackground]}>
+            <View style={[styles.contenedorModal, {height: 370,}]} >
+              <View style={[{flexDirection: 'row', backgroundColor: '#193773', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Recordatorio</Text>
+                <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setRecordatorio(false)}>
+                  <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
+                </TouchableOpacity>
+              </View>
+              <Fragment>
+              <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFFF'}} ref={viewRef}>
+                <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
+                <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
+                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {route.params.NDePedido}</Text>
+                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
+                <Text style={[styles.text, {color: '#193773'}]}>{route.params.Ferreteria}</Text>
+                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
+                <Text style={[styles.text, {color: '#193773'}]}>$ {formatNumber(route.params.VrFactura)}</Text>
+                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
+                <Text style={[styles.text, {color: '#193773'}]}>{nombreDiaSeleccionado + ' ' + route.params.FechaDeEntrega.replace(/-/g, "/")}</Text>
+                <Text style={[styles.text, {color: '#193773'}]}>O a mas tardar un día habil despúes</Text>
+                <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.SIVAR.COM.CO</Text>
+              </View>
+              </Fragment>
+              <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>shareImage()}>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Compartir</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      );
+    };
+
+    /*const PopUpMenu = ({ tasks, actions }) => {
+      const [show, setShow] = useState(false);
+    
+      const renderItem = ({ item, index }) => {
+        return (
+          <TouchableOpacity onPress={() => {
+            actions[index](); // Execute the corresponding action
+            setShow(false); // Hide the popup menu
+          }}>
+            <Text style={styles.text}>{item}</Text>
+          </TouchableOpacity>
+        );
+      };
+    
+      return (
+        <>
+          <TouchableOpacity style={styles.IconMenu} onPress={() => setShow(!show)}>
+            <Icon name='more' color='#ffffff'/>
+          </TouchableOpacity>
+          {show && (
+            <FlatList
+              style={styles.containerMenu}
+              data={tasks}
+              renderItem={renderItem}
+              keyExtractor={(item, index) => index.toString()}
+            />
+          )}
+        </>
+      );
+    };*/
 
     const permissions = () => {
         if((getGlobal('Position').slice(1,-1))==='Asesor comercial'){
@@ -108,7 +219,7 @@ function DetallesDelPedido({ navigation, route }) {
       setVisible(true)
     }
 
-    const VerificarEntregarPedido = ({visible,children}) => {
+    /*const VerificarEntregarPedido = ({visible,children}) => {
       const [inputNotasV, setInputNotasV ] = useState('')
       const [visiblevCargando, setVisiblevCargando] = useState(false);
       
@@ -161,11 +272,12 @@ function DetallesDelPedido({ navigation, route }) {
           </Modal>
         </View>
       );
-    };
+    };*/
     
     return (
         <>
             <View style={[styles.container, { flex: 1 }]}>
+              <PopUpMenu tasks={['Reenviar ticket']} actions={[()=>setRecordatorio(true)]}/>
               <View style={[ styles.ContenedorEstado, colorNota(MostrarEstado(route.params.ProcesoDelPedido))]}>
                   <Text style={[styles.subTitle, {color: '#000000'}]}>
                       Estado: {MostrarEstado(route.params.ProcesoDelPedido)}
@@ -219,7 +331,7 @@ function DetallesDelPedido({ navigation, route }) {
                     </ScrollView>
                 </View>
                 
-                <VerificarEntregarPedido visible={visible}></VerificarEntregarPedido>
+                <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
                 
                 <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
                     
@@ -248,7 +360,8 @@ function DetallesDelPedido({ navigation, route }) {
 const styles = StyleSheet.create({
   container : {
     //padding: 10,
-    paddingBottom: 10
+    paddingBottom: 10,
+    position: 'relative',
   },
   subTitle: {
     fontSize: 20, 
@@ -362,7 +475,26 @@ const styles = StyleSheet.create({
       borderColor: '#F2CB05',
       margin: 3,
       padding: 4
-    }
+    },
+    /*containerMenu: {
+      width: windowWidth/2.7,
+      position: 'absolute',
+      right: 0,
+      margin: 0,
+      marginTop: 0,
+      borderWidth: 0,
+      padding: 0,
+      backgroundColor: '#ffff',
+      borderColor: '#F2CB05',
+      borderWidth: 1,
+      zIndex: 5,
+    },
+    IconMenu: {
+      position: 'absolute',
+      right: '5%',
+      top: '-6.5%',
+      zIndex: 5,
+    }*/
 });
 
 export default DetallesDelPedido;

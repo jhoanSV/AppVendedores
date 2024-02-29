@@ -19,7 +19,7 @@ const DesTasksItem = ({ agregarPedido, item, handleSubmit }) => {
 const porcent = cargo(getGlobal('Position').slice(1, -1))
   
   const AlPedido= ()=>{
-    if(item.Nota !== 'AGOTADO'){
+    if(item.Agotado !== 1 ){
       agregarPedido({cod: item.cod, Descripcion: item.Descripcion, UnidadOpaquete: item.UnidadOpaquete, EsUnidadOpaquete: item.EsUnidadOpaquete, SubCategoria: item.SubCategoria, PVenta: item.PVenta + (item.PVenta * porcent), Cantidad: item.EsUnidadOpaquete, Costo: item.PCosto, Nota: item.Nota});
       handleSubmit('')
     }
@@ -27,8 +27,8 @@ const porcent = cargo(getGlobal('Position').slice(1, -1))
   function formatNumber(number){
     return new Intl.NumberFormat().format(number);
   }
-  function colorNota(text){
-    if(text === 'AGOTADO'){
+  function colorNota(){
+    if(item.Agotado === 1){
       const obj = {color: '#D6320E' }
       return obj;
     }
@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderBottomColor: 'black', 
         borderBottomWidth: 1,
-        
     },
     itemText: {
         flexDirection: 'row',
