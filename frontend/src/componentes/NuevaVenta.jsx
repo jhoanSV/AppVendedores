@@ -27,6 +27,8 @@ import { useIsFocused } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import PedidoItem from '../components/PedidoItem';
 import PopUpMenu from '../components/PopUpMenu';
+import QRCuboLector from '../components/QRCubeLector'
+
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -471,7 +473,7 @@ function NuevaVenta({ navigation, route }) {
   return (
     <>
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={false}>
-      {/*<PopUpMenu tasks={['Regla']} actions={[()=>navigation.navigate('Ruler')]}/>*/}
+      <PopUpMenu tasks={['Regla', 'QR Cubo']} actions={[()=>navigation.navigate('Ruler'), ()=>navigation.navigate('QRCubeLector')]}/>
       <ScrollView
         style = {{flexGrow: 0}}
         horizontal={true} 

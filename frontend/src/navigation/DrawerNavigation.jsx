@@ -10,7 +10,7 @@ import LPedidos from '../componentes/LPedidos';
 import NuevaVenta from '../componentes/NuevaVenta';
 import DetallesDelPedido from '../components/DetallesDelPedido';
 import Ruler from '../components/Ruler';
-
+import QRCubeLector from '../components/QRCubeLector';
 
 import { Text, StyleSheet, Icon } from 'react-native';
 import MenuButtonItem from '../components/MenuButtonItem';
@@ -110,6 +110,15 @@ export function DrawerNavigation(){
                 //icon = "home"
                 options={{
                     title: 'Regla',
+                    headerStyle: {backgroundColor: '#193773'},
+                    headerTitleStyle: {color: '#FFFF'},
+            }}/>
+            <Drawer.Screen
+                name="QRCubeLector" 
+                component={ QRCubeLector }
+                //icon = "home"
+                options={{
+                    title: 'Cubo QR',
                     headerStyle: {backgroundColor: '#193773'},
                     headerTitleStyle: {color: '#FFFF'},
             }}/>
