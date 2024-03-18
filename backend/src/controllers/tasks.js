@@ -164,19 +164,30 @@ export const DetallePedidoCerrado = async(req, res) => {
 export const ProductDataWeb = async(req, res) => {
     /*Return the whole list of product only with the necessary information deppending on if the user is logged in or not */
     try {
-        if (req.body.logged == true) {
+        //if (req.body.logged == true) {
             const connection = await connect()
             const [rows] = await connection.query(`SELECT
-                                                      p.cod,
+                                                      p.Cod,
                                                       p.Descripcion,
                                                       p.EsUnidadOpaquete,
                                                       c.Categoria,
                                                       p.PVenta,
                                                       p.Iva,
                                                       p.Agotado,
-                                                      p.Detalle,
-                                                      (0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) + 0.5 * COUNT(sa.Codigo) / 6 + 0.2 * IFNULL(SUM(sa.Cantidad * (sa.VrUnitario - sa.Costo)), 0)) / 1000 AS Score,
-                                                      ROW_NUMBER() OVER (PARTITION BY c.Categoria ORDER BY (((0.3 * IFNULL((p.PVenta-p.PCosto)/p.PVenta *100,0) + 0.5 * COUNT(sa.Codigo)/6 + 0.2 * IFNULL(SUM(sa.Cantidad*(sa.VrUnitario-sa.Costo)),0))/1000)) DESC) AS row_num
+       	                                              p.Detalle,
+                                                      (
+                                                          0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
+                                                          0.5 * (
+                                                              -- Calculate the ratio of specific codes for a given @Cliente over all codes in the date range
+                                                              COUNT(CASE 
+                                                                  WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.Codigo IS NOT NULL AND sa.CodCliente = ? THEN sa.Codigo
+                                                              END) / (SELECT COUNT(sa.Codigo) FROM salidas AS sa WHERE DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.CodCliente = ?)
+                                                          ) / 6 +
+                                                          0.2 * IFNULL(
+                                                              SUM(CASE 
+                                                                  WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.Codigo IS NOT NULL AND sa.CodCliente = ? THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) 
+                                                              END), 0)
+                                                      ) / 1000 AS Score
                                                   FROM
                                                       productos AS p
                                                   JOIN
@@ -186,43 +197,50 @@ export const ProductDataWeb = async(req, res) => {
                                                   JOIN
                                                       categoria AS c ON sub.IDCategoria = c.IDCategoria
                                                   WHERE
-                                                      sa.NDePedido <> '0'
-                                                      AND DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m')
-                                                  GROUP BY
-                                                      p.cod`);
-            res.json(rows)
-            connection.end()
-            }
-        else {
-            const connection = await connect()
-            const [rows] = await connection.query(`SELECT
-                                                      p.cod,
+                                                      sa.NDePedido <> '0' AND sa.CodCliente = ?
+                                                  GROUP BY p.Cod
+                                                  
+                                                  UNION ALL
+                                                  
+                                                  -- Results for sa.CodCliente <> @Cliente
+                                                  SELECT
+                                                      p.Cod,
                                                       p.Descripcion,
                                                       p.EsUnidadOpaquete,
                                                       c.Categoria,
-                                                      0 as PVenta,
-                                                      0 as Iva,
+                                                      CASE WHEN ? = '' THEN 0 ELSE p.PVenta END AS PVenta,
+                                                      CASE WHEN ? = '' THEN 0 ELSE p.Iva END AS PVenta,
                                                       p.Agotado,
-                                                      p.Detalle,
-                                                      (0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
-                                                      0.5 * COUNT(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Codigo END) / 6 +
-                                                      0.2 * IFNULL(SUM(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) END), 0)) / 1000 AS Score,
-                                                      ROW_NUMBER() OVER (PARTITION BY c.Categoria ORDER BY ((0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
-                                                      0.5 * COUNT(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Codigo END) / 6 +
-                                                      0.2 * IFNULL(SUM(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) END), 0)) / 1000) DESC) AS row_num
+       	                                              p.Detalle,
+                                                      (
+                                                          0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
+                                                          0.5 * (
+                                                              -- Calculate the ratio of specific codes for all codes in the date range
+                                                              COUNT(CASE 
+                                                                  WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.Codigo IS NOT NULL AND sa.CodCliente = @Cliente THEN sa.Codigo
+                                                      END) / (SELECT COUNT(sa.Codigo) FROM salidas AS sa WHERE DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m'))
+                                                      ) / 6 +
+                                                          0.2 * IFNULL(
+                                                              SUM(CASE 
+                                                                  WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.Codigo IS NOT NULL AND sa.CodCliente = @Cliente THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) 
+                                                              END), 0)
+                                                    ) / 1000 AS Score
                                                   FROM
                                                       productos AS p
-                                                  LEFT JOIN
+                                                  JOIN
                                                       salidas AS sa ON p.Cod = sa.Codigo
                                                   JOIN
                                                       subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
                                                   JOIN
                                                       categoria AS c ON sub.IDCategoria = c.IDCategoria
+                                                  WHERE
+                                                      sa.NDePedido <> '0' AND sa.CodCliente <> ?
                                                   GROUP BY
-                                                      p.cod;`);
+                                                      p.Cod
+                                                  ORDER BY
+                                                      Score DESC;`,[req.body.CodUser,req.body.CodUser,req.body.CodUser,req.body.CodUser,req.body.CodUser,req.body.CodUser,req.body.CodUser]);
             res.json(rows)
             connection.end()
-        }
     } catch (error) {
         console.log(error)
     }
@@ -364,7 +382,7 @@ export const BottonCaroucel = async(req, res) => {
       const connection = await connect()
       const [rows] = await connection.query(`WITH ranked_products AS (
                                                   SELECT
-                                                      p.cod,
+                                                      p.Cod,
                                                       p.Descripcion,
                                                       p.EsUnidadOpaquete,
                                                       c.Categoria,
@@ -456,40 +474,6 @@ export const BottonCaroucel = async(req, res) => {
 
 
 };
-
-
-/*export const SendSale = async(req, res) => {
-  try {
-    const { TIngresados } = req.body;  
-    const connection = await connect()
-    const [TeRows] = await connection.query(`INSERT INTO tabladeestados ( SELECT MAX(NDePedido) + 1,
-                                                                                  ?
-                                                                                  From tabladeestados)`, [req.body.TEstados]);
-    //res.json(TeRows)
-    connection.end()
-    //
-    const [NDePedido] = await connection.query("Select MAX(NDePedido) - 1 FROM tabladeestados");
-    connection.end()
-    
-    // Split the TIngresados string by semicolon
-    const ingresadosArray = TIngresados.split(';');
-
-    // Create an array to hold the modified strings
-    const modifiedArray = ingresadosArray.map(ingresado => {
-      // Prepend MAX(NDePedido) - 1 to each string
-      return `(${NDePedido[0]}, ${ingresado.trim()}),`;
-    });
-    console.log(modifiedArray)
-
-
-    const [aTIngresados] = await connection.query(`INSERT INTO tabladeingresados VALUES ${modifiedArray}`);
-    connection.end()
-    res.json(aTIngresados)
-  } catch (error) {
-      console.log(error)
-  }
-};*/
-
 
 
 export const SendSale = async (req, res) => {

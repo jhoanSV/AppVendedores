@@ -25,7 +25,11 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "sierra.app"
+      "package": "sierra.app",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -45,6 +49,7 @@
           "recordAudioAndroid": true
         }
       ]
-    ]
+    ],
+    "owner": "ferresistribucionessierra"
   }
 }

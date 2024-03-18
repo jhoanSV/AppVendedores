@@ -1,9 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-import { RNCamera } from 'react-native-camera';
+import { RNCamera } from 'react-native-vision-camera';
 import Svg, { Circle } from 'react-native-svg';
 
 const QRCubeLector = () => {
+  
+  const [hasCameraPermission, setHasCameraPermission] = useState(null)
   const cameraRef = useRef(null);
   const [qrCoordinates, setQrCoordinates] = useState(null);
 
@@ -12,6 +14,14 @@ const QRCubeLector = () => {
     const { origin, size } = bounds;
     setQrCoordinates({ x: origin.x, y: origin.y, width: size.width, height: size.height });
   };
+
+
+  useEffect(() => {(
+    async () => {
+      const { status } = await RNCamera.requestPermissionsAsync();
+      setHasCameraPermission(status === 'granted');
+    })();
+  },[]);
 
   return (
     <View style={styles.container}>
