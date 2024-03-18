@@ -162,70 +162,88 @@ export const DetallePedidoCerrado = async(req, res) => {
 
 //Todo: create just one quiery to send the product data if the client is logged in or not
 export const ProductDataWeb = async(req, res) => {
-    /*Return the whole list of product only with the necessary information deppending on if the user is logged in or not */
-    try {
-        if (req.body.logged == true) {
-            const connection = await connect()
-            const [rows] = await connection.query(`SELECT
-                                                      p.cod,
-                                                      p.Descripcion,
-                                                      p.EsUnidadOpaquete,
-                                                      c.Categoria,
-                                                      p.PVenta,
-                                                      p.Iva,
-                                                      p.Agotado,
-                                                      p.Detalle,
-                                                      (0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) + 0.5 * COUNT(sa.Codigo) / 6 + 0.2 * IFNULL(SUM(sa.Cantidad * (sa.VrUnitario - sa.Costo)), 0)) / 1000 AS Score,
-                                                      ROW_NUMBER() OVER (PARTITION BY c.Categoria ORDER BY (((0.3 * IFNULL((p.PVenta-p.PCosto)/p.PVenta *100,0) + 0.5 * COUNT(sa.Codigo)/6 + 0.2 * IFNULL(SUM(sa.Cantidad*(sa.VrUnitario-sa.Costo)),0))/1000)) DESC) AS row_num
-                                                  FROM
-                                                      productos AS p
-                                                  JOIN
-                                                      salidas AS sa ON p.Cod = sa.Codigo
-                                                  JOIN
-                                                      subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
-                                                  JOIN
-                                                      categoria AS c ON sub.IDCategoria = c.IDCategoria
-                                                  WHERE
-                                                      sa.NDePedido <> '0'
-                                                      AND DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m')
-                                                  GROUP BY
-                                                      p.cod`);
-            res.json(rows)
-            connection.end()
-            }
-        else {
-            const connection = await connect()
-            const [rows] = await connection.query(`SELECT
-                                                      p.cod,
-                                                      p.Descripcion,
-                                                      p.EsUnidadOpaquete,
-                                                      c.Categoria,
-                                                      0 as PVenta,
-                                                      0 as Iva,
-                                                      p.Agotado,
-                                                      p.Detalle,
-                                                      (0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
-                                                      0.5 * COUNT(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Codigo END) / 6 +
-                                                      0.2 * IFNULL(SUM(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) END), 0)) / 1000 AS Score,
-                                                      ROW_NUMBER() OVER (PARTITION BY c.Categoria ORDER BY ((0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
-                                                      0.5 * COUNT(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Codigo END) / 6 +
-                                                      0.2 * IFNULL(SUM(CASE WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) END), 0)) / 1000) DESC) AS row_num
-                                                  FROM
-                                                      productos AS p
-                                                  LEFT JOIN
-                                                      salidas AS sa ON p.Cod = sa.Codigo
-                                                  JOIN
-                                                      subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
-                                                  JOIN
-                                                      categoria AS c ON sub.IDCategoria = c.IDCategoria
-                                                  GROUP BY
-                                                      p.cod;`);
-            res.json(rows)
-            connection.end()
-        }
-    } catch (error) {
-        console.log(error)
-    }
+  /*Return the whole list of product only with the necessary information deppending on if the user is logged in or not */
+  try {
+      //if (req.body.logged == true) {
+          const connection = await connect()
+          const [rows] = await connection.query(`SELECT
+                                                    p.Cod,
+                                                    p.Descripcion,
+                                                    p.EsUnidadOpaquete,
+                                                    c.Categoria,
+                                                    p.PVenta,
+                                                    p.Iva,
+                                                    p.Agotado,
+                                                     p.Detalle,
+                                                    (
+                                                        0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
+                                                        0.5 * (
+                                                            -- Calculate the ratio of specific codes for a given @Cliente over all codes in the date range
+                                                            COUNT(CASE 
+                                                                WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.Codigo IS NOT NULL AND sa.CodCliente = ? THEN sa.Codigo
+                                                            END) / (SELECT COUNT(sa.Codigo) FROM salidas AS sa WHERE DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.CodCliente = ?)
+                                                        ) / 6 +
+                                                        0.2 * IFNULL(
+                                                            SUM(CASE 
+                                                                WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.Codigo IS NOT NULL AND sa.CodCliente = ? THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) 
+                                                            END), 0)
+                                                    ) / 1000 AS Score
+                                                FROM
+                                                    productos AS p
+                                                JOIN
+                                                    salidas AS sa ON p.Cod = sa.Codigo
+                                                JOIN
+                                                    subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
+                                                JOIN
+                                                    categoria AS c ON sub.IDCategoria = c.IDCategoria
+                                                WHERE
+                                                    sa.NDePedido <> '0' AND sa.CodCliente = ?
+                                                GROUP BY p.Cod
+                                                
+                                                UNION ALL
+                                                
+                                                -- Results for sa.CodCliente <> @Cliente
+                                                SELECT
+                                                    p.Cod,
+                                                    p.Descripcion,
+                                                    p.EsUnidadOpaquete,
+                                                    c.Categoria,
+                                                    CASE WHEN ? = '' THEN 0 ELSE p.PVenta END AS PVenta,
+                                                    CASE WHEN ? = '' THEN 0 ELSE p.Iva END AS PVenta,
+                                                    p.Agotado,
+                                                     p.Detalle,
+                                                    (
+                                                        0.3 * IFNULL((p.PVenta - p.PCosto) / p.PVenta * 100, 0) +
+                                                        0.5 * (
+                                                            -- Calculate the ratio of specific codes for all codes in the date range
+                                                            COUNT(CASE 
+                                                                WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.Codigo IS NOT NULL AND sa.CodCliente = @Cliente THEN sa.Codigo
+                                                    END) / (SELECT COUNT(sa.Codigo) FROM salidas AS sa WHERE DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m'))
+                                                    ) / 6 +
+                                                        0.2 * IFNULL(
+                                                            SUM(CASE 
+                                                                WHEN DATE_FORMAT(sa.FechaDeIngreso, '%Y-%m') >= DATE_FORMAT(NOW() - INTERVAL 6 MONTH, '%Y-%m') AND sa.Codigo IS NOT NULL AND sa.CodCliente = @Cliente THEN sa.Cantidad * (sa.VrUnitario - sa.Costo) 
+                                                            END), 0)
+                                                  ) / 1000 AS Score
+                                                FROM
+                                                    productos AS p
+                                                JOIN
+                                                    salidas AS sa ON p.Cod = sa.Codigo
+                                                JOIN
+                                                    subcategorias AS sub ON p.subcategoria = sub.IDSubCategoria
+                                                JOIN
+                                                    categoria AS c ON sub.IDCategoria = c.IDCategoria
+                                                WHERE
+                                                    sa.NDePedido <> '0' AND sa.CodCliente <> ?
+                                                GROUP BY
+                                                    p.Cod
+                                                ORDER BY
+                                                    Score DESC;`,[req.body.CodUser,req.body.CodUser,req.body.CodUser,req.body.CodUser,req.body.CodUser,req.body.CodUser,req.body.CodUser]);
+          res.json(rows)
+          connection.end()
+  } catch (error) {
+      console.log(error)
+  }
 };
 
 export const ListOfAlias = async(req, res) => {
