@@ -375,6 +375,7 @@ export const changePassword = async (req, res) => {
   };
   
 //Todo: select the first five best productos of each category
+//Todo: select the first five best productos of each category
 export const BottonCaroucel = async(req, res) => {
   /*Return list of the first five best productos of each category*/
   try {
@@ -382,7 +383,7 @@ export const BottonCaroucel = async(req, res) => {
       const connection = await connect()
       const [rows] = await connection.query(`WITH ranked_products AS (
                                                   SELECT
-                                                      p.cod,
+                                                      p.Cod,
                                                       p.Descripcion,
                                                       p.EsUnidadOpaquete,
                                                       c.Categoria,
@@ -474,40 +475,6 @@ export const BottonCaroucel = async(req, res) => {
 
 
 };
-
-
-/*export const SendSale = async(req, res) => {
-  try {
-    const { TIngresados } = req.body;  
-    const connection = await connect()
-    const [TeRows] = await connection.query(`INSERT INTO tabladeestados ( SELECT MAX(NDePedido) + 1,
-                                                                                  ?
-                                                                                  From tabladeestados)`, [req.body.TEstados]);
-    //res.json(TeRows)
-    connection.end()
-    //
-    const [NDePedido] = await connection.query("Select MAX(NDePedido) - 1 FROM tabladeestados");
-    connection.end()
-    
-    // Split the TIngresados string by semicolon
-    const ingresadosArray = TIngresados.split(';');
-
-    // Create an array to hold the modified strings
-    const modifiedArray = ingresadosArray.map(ingresado => {
-      // Prepend MAX(NDePedido) - 1 to each string
-      return `(${NDePedido[0]}, ${ingresado.trim()}),`;
-    });
-    console.log(modifiedArray)
-
-
-    const [aTIngresados] = await connection.query(`INSERT INTO tabladeingresados VALUES ${modifiedArray}`);
-    connection.end()
-    res.json(aTIngresados)
-  } catch (error) {
-      console.log(error)
-  }
-};*/
-
 
 
 export const SendSale = async (req, res) => {
