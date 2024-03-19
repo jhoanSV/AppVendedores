@@ -274,7 +274,14 @@ export const checkLogInData = async (req, res) => {
     /*Check if the data of connection is correct, and if it's then return the data of the user.*/
     try {
       const connection = await connect();  // Assuming you have a connect function
-      const [rows] = await connection.query("SELECT Cod, Ferreteria, Contacto, Direccion, Telefono, Cel, Email, Contraseña FROM clientes WHERE Email = ?", [req.body.EmailUser]);
+      const [rows] = await connection.query(`SELECT Cod,
+                                                    Ferreteria,
+                                                    Contacto,
+                                                    Direccion,
+                                                    Telefono,
+                                                    Cel,
+                                                    Email,
+                                                    Contraseña FROM clientes WHERE Email = ?`, [req.body.EmailUser]);
       connection.end();
       
       // Check if the password matches with the password that the user gave
@@ -537,7 +544,7 @@ export const SendSale = async (req, res) => {
     // Close the connection
     connection.end();
 
-    res.json({ success: true });
+    res.json({ success: true, NDePedido: NDePedido});
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal server error' });

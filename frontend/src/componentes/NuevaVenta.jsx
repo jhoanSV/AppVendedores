@@ -255,7 +255,7 @@ function NuevaVenta({ navigation, route }) {
               "tabla": "tabladeingresados",
               "cadenaDeInsercion": aTablaDeIngresados
             });*/
-            await SubirPedido({
+            const NpreFactura = await SubirPedido({
               "CodCliente": route.params.Cod,
               "FechaFactura": hoyDate + ' ' + hora,
               "FechaDeEstado": hoyDate + ' ' + hora,
@@ -273,15 +273,15 @@ function NuevaVenta({ navigation, route }) {
               setVisibleEnvioExitoso(false)
               setVisible(false)
               cancelarPedido()
-              setRecordatorio(true)
-            }, 2000);
               setConfirmar({
-              "NPedido": NpreFactura,
+              "NPedido": NpreFactura["NDePedido"],
               "Cliente": route.params.Ferreteria,
               "Valor": sumaTotal().replace(/,/g, ''),
               "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
               "FechaHasta": "O a mas tardar un día habil despúes"
             })
+              setRecordatorio(true)
+            }, 2000);
         }catch (error) {
           setVisiblevCargando(false)
           setNotaRojo('Error al enviar')
@@ -293,14 +293,6 @@ function NuevaVenta({ navigation, route }) {
         }
       }
     };
-
-    /*const cancelarPedido = async()=>{
-      setPedido([])
-      handleSubmit('')
-      //setTextDate('')
-      navigation.navigate('LClientes')
-      await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
-    };*/
 
     return (
       <Modal transparent visible={visible}>
@@ -429,6 +421,8 @@ function NuevaVenta({ navigation, route }) {
         var index = pedido.map(codigo => codigo.cod).indexOf(Cod);
         var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
         pedido[index].Cantidad = NuevaCantidad
+        setSuma(sumaTotal());
+        console.log("entra a modificar la cantidad", NuevaCantidad, paquete)
         if(pedido[index].Cantidad<1){
           pedido.splice(index, 1)
           handleSubmit('')
@@ -470,7 +464,7 @@ function NuevaVenta({ navigation, route }) {
 
   return (
     <>
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={false}>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={true}>
       {/*<PopUpMenu tasks={['Regla']} actions={[()=>navigation.navigate('Ruler')]}/>*/}
       <ScrollView
         style = {{flexGrow: 0}}

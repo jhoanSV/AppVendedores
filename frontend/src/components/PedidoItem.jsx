@@ -35,6 +35,7 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
       return obj;
     }
   };
+
   function valorTotal(cantidad, Pventa){
     return formatNumber(cantidad*Pventa)
   }
@@ -61,15 +62,15 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
                         backgroundColor: '#D9D9D9'}}
                 placeholder="0"
                 value={input}
-                onChangeText={text=>{setInput(text)}}
-                onEndEditing={text=>{CambiarCantidad(text)}}
+                onChangeText={(text)=>{setInput('' + text)}}
+                onEndEditing={(text)=>{CambiarCantidad('' + text)}}
               />
             </View>
             <View>
               <TouchableOpacity style={styles.botonMasMenos} onPress={()=>{aumentarCantidad(item.cod, item.EsUnidadOpaquete); setInput('' + item.Cantidad)}}>
                 <Text style={{fontSize: 20, fontWeight: 'bold', color: '#FFFF'}}>+</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.botonMasMenos} onPress={()=>{disminuirCantidad(item.cod, item.EsUnidadOpaquete);setInput('' + item.Cantidad)}}>
+              <TouchableOpacity style={styles.botonMasMenos} onPress={()=>{disminuirCantidad(item.cod, item.EsUnidadOpaquete); setInput('' + item.Cantidad)}}>
                 <Text style={{fontSize: 20, fontWeight: 'bold', color: '#FFFF'}}>-</Text>
               </TouchableOpacity>
             </View>
