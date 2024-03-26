@@ -9,7 +9,7 @@ import 'intl/locale-data/jsonp/en';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantidad }) => {
+const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantidad, onTextInputFocus, index }) => {
   const [input, setInput] = useState('' + item.Cantidad);
   function formatNumber(number){
     return new Intl.NumberFormat().format(number);
@@ -64,6 +64,7 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
                 value={input}
                 onChangeText={(text)=>{setInput('' + text)}}
                 onEndEditing={(text)=>{CambiarCantidad('' + text)}}
+                onFocus={() => onTextInputFocus(index)}
               />
             </View>
             <View>

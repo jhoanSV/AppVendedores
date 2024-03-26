@@ -51,7 +51,7 @@ const LPedidoItem = ({ task }) => {
 
   const navigation = useNavigation()
   return (
-    <TouchableOpacity onPress={() => navigation.navigate('DetallesDelPedido', {NDePedido: task.NDePedido, Ferreteria: task.Ferreteria, Direccion: task.Direccion, Barrio: task.Barrio, FechaFactura: task.FechaFactura,  FechaDeEntrega: task.FechaDeEntrega, VrFactura: task.VrFactura, Estado: task.Estado, ProcesoDelPedido: task.ProcesoDelPedido })}>
+    <TouchableOpacity onPress={() => navigation.navigate('DetallesDelPedido', {NDePedido: task.NDePedido, Ferreteria: task.Ferreteria, Direccion: task.Direccion, Barrio: task.Barrio, FechaFactura: task.FechaFactura,  FechaDeEntrega: task.FechaDeEntrega, VrFactura: task.VrFactura, Estado: task.Estado, ProcesoDelPedido: task.ProcesoDelPedido, NotaVenta: task.NotaVenta, NotaEntrega: task.NotaEntrega })}>
       <View style={[styles.itemContainer, colorNota(EstadoDelPedido(task.ProcesoDelPedido))]}>
         <Text style={[styles.itemText, {width: 80}]}>{task.NDePedido}</Text>
         <Text style={[styles.itemText, {width: 300}]}>{task.Ferreteria}</Text>

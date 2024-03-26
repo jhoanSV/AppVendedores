@@ -50,7 +50,7 @@ const PopUpMenu = ({ tasks, actions }) => {
 
   const styles = StyleSheet.create({
     containerMenu: {
-        width: windowWidth/2.7,
+        width: '40%',//windowWidth/2.7,
         position: 'absolute',
         right: 0,
         margin: 0,
@@ -67,6 +67,9 @@ const PopUpMenu = ({ tasks, actions }) => {
         right: '5%',
         top: '-6.5%',
         zIndex: 99,
+      },
+      text: {
+        fontSize: 16,
       }
   })
 

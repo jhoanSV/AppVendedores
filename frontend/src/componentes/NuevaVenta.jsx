@@ -33,6 +33,7 @@ const windowHeight = Dimensions.get('window').height;
 
 function NuevaVenta({ navigation, route }) {
   const viewRef = useRef();
+  const height = windowHeight
   const [input, setInput] = useState('');
   //const [inputNotasV, setInputNotasV] = useState('');
   const [pedido, setPedido] = useState([]);
@@ -422,7 +423,7 @@ function NuevaVenta({ navigation, route }) {
         var NuevaCantidad = Math.ceil(Cantidad/paquete)*paquete
         pedido[index].Cantidad = NuevaCantidad
         setSuma(sumaTotal());
-        console.log("entra a modificar la cantidad", NuevaCantidad, paquete)
+        //console.log("entra a modificar la cantidad", NuevaCantidad, paquete)
         if(pedido[index].Cantidad<1){
           pedido.splice(index, 1)
           handleSubmit('')
@@ -464,11 +465,11 @@ function NuevaVenta({ navigation, route }) {
 
   return (
     <>
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={true}>
+    <KeyboardAvoidingView  keyboardVerticalOffset={0} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={true}>
       {/*<PopUpMenu tasks={['Regla']} actions={[()=>navigation.navigate('Ruler')]}/>*/}
       <ScrollView
         style = {{flexGrow: 0}}
-        horizontal={true} 
+        horizontal={true}
         refreshControl={<RefreshControl 
                           refreshing={refreshing} 
                           onRefresh={()=>actualizar()}/>}>
@@ -499,17 +500,17 @@ function NuevaVenta({ navigation, route }) {
         style={ seachInput() }
         placeholder="Buscar producto..."
         value={input}
-        onChangeText={text=> {handleSubmit(text)}}
+        onChangeText={(text)=> {handleSubmit(text)}}
       />
       {isVisible && (
         <ScrollView horizontal={true} style={styles.container2}>
           <DesTaskList tasks={tasks} agregarPedido={agregarPedido} handleSubmit={handleSubmit}/>
         </ScrollView>
       )}
-      {/*<View>
-        <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
-      </View>*/}
       <View style = {{ flex: 1 }}>
+        <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
+      </View>
+      {/*<View style = {{ flex: 1 }}>
         <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
           <FlatList
             data={pedido}
@@ -517,11 +518,11 @@ function NuevaVenta({ navigation, route }) {
             renderItem={renderItem}
           />
         </ScrollView>
-      </View>
+      </View>*/}
 
-      <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
+      <View style={{flexDirection: 'column', position: 'abolute', top: height*0.01,  bottom: 0, left: 0, right: 0  }}>
         <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
-          <Text style={[styles.subTitle,{right: 0}]}>Total: {suma}</Text>
+          <Text style={[styles.subTitle,{right: 0}]}>Total: $ {suma}</Text>
         </View>
         <View style={{flexDirection: 'row'}}>
           <View>

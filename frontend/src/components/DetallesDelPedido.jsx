@@ -39,7 +39,8 @@ function DetallesDelPedido({ navigation, route }) {
     const [tipoDeEntrega, setTipoDeEntrega] = useState(false);
     const [proDePedido, setProDePedido] = useState('');
     const isFocused = useIsFocused()
-
+    const [notasVentas, setNotasVentas] = useState(false);
+    const [notasEntregas, setNotasEntregas] = useState(false);
 
     const shareImage = async() => {
       try {
@@ -156,7 +157,6 @@ function DetallesDelPedido({ navigation, route }) {
         try {
           const ElPedido = await DetallePedido(route.params.NDePedido)
           setPedido(ElPedido)
-          console.log(ElPedido)
         }catch(error){
           console.log(error)
         }
@@ -277,7 +277,7 @@ function DetallesDelPedido({ navigation, route }) {
     return (
         <>
             <View style={[styles.container, { flex: 1 }]}>
-              <PopUpMenu tasks={['Reenviar ticket']} actions={[()=>setRecordatorio(true)]}/>
+              <PopUpMenu tasks={['Reenviar ticket', 'Notas de venta', 'Notas de entrega']} actions={[()=>setRecordatorio(true), ()=>setNotasVentas(true), ()=>setNotasEntregas(true)]}/>
               <View style={[ styles.ContenedorEstado, colorNota(MostrarEstado(route.params.ProcesoDelPedido))]}>
                   <Text style={[styles.subTitle, {color: '#000000'}]}>
                       Estado: {MostrarEstado(route.params.ProcesoDelPedido)}
@@ -332,7 +332,9 @@ function DetallesDelPedido({ navigation, route }) {
                 </View>
                 
                 <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
-                
+                <Warning visible={notasVentas} title={'Notas de ventas'} warningText={route.params.NotaVenta} setMostrar={setNotasVentas} ConfirmationText={'Entendido'} SetConfirmation={setNotasVentas} ColorHeader={'#193773'} ColorText={'#000000'} />
+                <Warning visible={notasEntregas} title={'Notas de entregas'} warningText={route.params.NotaEntrega} setMostrar={setNotasEntregas} ConfirmationText={'Entendido'} SetConfirmation={setNotasEntregas} ColorHeader={'#193773'} ColorText={'#000000'} />
+
                 <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
                     
                     <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>

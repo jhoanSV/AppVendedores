@@ -1,23 +1,38 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {StyleSheet, Text, View, Modal, TouchableOpacity, Dimensions} from "react-native";
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-export default function Warning({visible, title, warningText, setMostrar, ConfirmationText, SetConfirmation}) {
+export default function Warning({visible, title, warningText, setMostrar, ConfirmationText, SetConfirmation, ColorHeader, ColorText}) {
+  const [colorHeader, setColorHeader] = useState('#D6320E')
+  const [colorText, setColorText] = useState('#D6320E')
+
+  const NewVariables =()=>{
+    if (typeof ColorHeader !== 'undefined' && typeof ColorText !== 'undefined'){
+      setColorHeader(ColorHeader)
+      setColorText(ColorText)
+    }
+  }
+
+  useEffect(() => {
+    NewVariables();
+  }, [ColorHeader, ColorText]); // Run NewVariables whenever ColorHeader or ColorText changes
+
+  
   return (
     <Modal transparent visible={visible}>
         <View style={[styles.ModalBackground]}>
           <View style={[styles.contenedorModal]}>
-            <View style={[{flexDirection: 'row', backgroundColor: '#D6320E', borderBottomColor: '#F2CB05', borderBottomWidth: 6}]}>
+            <View style={[{flexDirection: 'row', backgroundColor: colorHeader, borderBottomColor: '#F2CB05', borderBottomWidth: 6}]}>
               <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>{title}</Text>
               <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setMostrar(false)}>
                 <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
               </TouchableOpacity>
             </View>
-            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#D6320E'}]}>{warningText}</Text>
+            <Text style={[styles.subTitle, {textAlign: 'center', color:  colorText}]}>{warningText}</Text>
             </View>
-            <TouchableOpacity style={[styles.buttonLogin]} onPress={()=>{SetConfirmation(),setMostrar(false)}}>
+            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: colorHeader}]} onPress={()=>{SetConfirmation(),setMostrar(false)}}>
               <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>{ConfirmationText}</Text>
             </TouchableOpacity>
           </View>

@@ -85,7 +85,17 @@ export const DatosProgreso = async(req, res) => {
 export const PedidosEnviados = async(req, res) => {
     try {
         const connection = await connect()
-        const [rows] = await connection.query("SELECT con.NDePedido ,cli.Ferreteria, cli.Direccion, cli.Barrio, con.FechaFactura, con.FechaDeEntrega, con.VrFactura , con.Estado, con.ProcesoDelPedido, con.NotaVenta, con.NotaEntrega FROM clientes  AS cli INNER JOIN (SELECT te.NDePedido, te.CodCliente, DATE_FORMAT(te.FechaFactura, '%d-%m-%Y') AS FechaFactura, DATE_FORMAT(te.FechaDeEntrega, '%d-%m-%Y') AS FechaDeEntrega, SUM(ti.Cantidad*ti.VrUnitario) AS VrFactura , te.Estado, te.ProcesoDelPedido, te.NotaVenta, te.NotaEntrega FROM tabladeestados AS te INNER JOIN tabladeingresados AS ti ON te.NDePedido= ti.NDePedido AND te.Estado <> 'Cerrado' AND te.Estado <> 'Anulado' AND te.CodColaborador = ? GROUP BY te.NDePedido) AS con ON cli.Cod = con.CodCliente", [req.params.cod]);
+        const [rows] = await connection.query(`SELECT con.NDePedido,
+                                                      cli.Ferreteria,
+                                                      cli.Direccion,
+                                                      cli.Barrio,
+                                                      con.FechaFactura,
+                                                      con.FechaDeEntrega,
+                                                      con.VrFactura,
+                                                      con.Estado,
+                                                      con.ProcesoDelPedido,
+                                                      con.NotaVenta,
+                                                      con.NotaEntrega FROM clientes  AS cli INNER JOIN (SELECT te.NDePedido, te.CodCliente, DATE_FORMAT(te.FechaFactura, '%d-%m-%Y') AS FechaFactura, DATE_FORMAT(te.FechaDeEntrega, '%d-%m-%Y') AS FechaDeEntrega, SUM(ti.Cantidad*ti.VrUnitario) AS VrFactura , te.Estado, te.ProcesoDelPedido, te.NotaVenta, te.NotaEntrega FROM tabladeestados AS te INNER JOIN tabladeingresados AS ti ON te.NDePedido= ti.NDePedido AND te.Estado <> 'Cerrado' AND te.Estado <> 'Anulado' AND te.CodColaborador = ? GROUP BY te.NDePedido) AS con ON cli.Cod = con.CodCliente`, [req.params.cod]);
         res.json(rows)
         connection.end()
     } catch (error) {
@@ -274,14 +284,20 @@ export const checkLogInData = async (req, res) => {
     /*Check if the data of connection is correct, and if it's then return the data of the user.*/
     try {
       const connection = await connect();  // Assuming you have a connect function
-      const [rows] = await connection.query(`SELECT Cod,
-                                                    Ferreteria,
-                                                    Contacto,
-                                                    Direccion,
-                                                    Telefono,
-                                                    Cel,
-                                                    Email,
-                                                    Contraseña FROM clientes WHERE Email = ?`, [req.body.EmailUser]);
+      const [rows] = await connection.query(`SELECT Cli.Cod,
+                                                    Cli.Ferreteria,
+                                                    Cli.Contacto,
+                                                    Cli.Direccion,
+                                                    Cli.Telefono,
+                                                    Cli.Cel,
+                                                    Cli.Email,
+                                                    Cli.Contraseña,
+                                                    Co.Nombre As Asesor
+                                              FROM
+                                                    clientes AS Cli
+                                              LEFT JOIN
+                                                    colaboradores AS Co ON Cli.CodVendedor = Co.Cod
+                                              WHERE Cli.Email = ?`, [req.body.EmailUser]);
       connection.end();
       
       // Check if the password matches with the password that the user gave
