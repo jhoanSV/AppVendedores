@@ -18,7 +18,7 @@ export const validateUser = async(validateValueUser) => {
         })
         return await res.json()
     }catch(error) {
-        alert(`error al validar usuario: ${error}`);
+        alert(`error al validar usuario: ${error} ${API}`);
         console.log(error)
     }
 }
