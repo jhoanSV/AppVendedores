@@ -2,7 +2,6 @@ const API = 'http://44.209.105.117:80/tasks';
 /*44.209.105.117:80/tasks*/
 export const getTasks = async() => {
     try {
-        
         const res = await fetch(API)
         return await res.json()
     }catch(error) {
@@ -19,6 +18,7 @@ export const validateUser = async(validateValueUser) => {
         })
         return await res.json()
     }catch(error) {
+        alert(`error al validar usuario: ${error}`);
         console.log(error)
     }
 }

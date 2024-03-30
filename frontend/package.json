@@ -1,11 +1,11 @@
 {
-  "name": "sierraapp",
+  "name": "sivarapp",
   "version": "1.0.1",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
     "expo-secure-store": "~12.8.1",
     "expo-sharing": "~11.10.0",
     "expo-status-bar": "~1.11.1",
+    "expo-system-ui": "~2.9.3",
     "expo-updates": "~0.24.12",
     "intl": "^1.2.5",
     "react": "18.2.0",
@@ -33,7 +34,6 @@
     "react-native-safe-area-context": "^4.8.2",
     "react-native-safe-area-view": "^1.1.1",
     "react-native-screens": "~3.29.0",
-    "react-native-share-image": "^1.1.1",
     "react-native-vector-icons": "^9.2.0",
     "react-native-view-shot": "3.8.0",
     "react-native-web": "~0.19.6",

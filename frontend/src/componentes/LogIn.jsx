@@ -21,6 +21,7 @@ const LogIn = () => {
   const [User, setUser] = useState();
   const [visible, setVisible] = useState(false);
   const [cargando, setCargando] = useState(false);
+  const [unerror, setUnerror] = useState(false);
   const [tasks, setTasks] = useState({
     "Email" : text,
     "Contraseña" : password
@@ -82,6 +83,9 @@ const LogIn = () => {
                         }}/>
                       </View>
                     </View>
+                    {unerror &&
+                      <Text style={styles.inputText}>error al conectar</Text>
+                    }
                     <View style={styles.buttons}>
                       <Button 
                         buttonStyle={[ styles.buttonLogin, {backgroundColor: '#F2CB05'}]} 

@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "SierraApp",
+    "name": "SivarApp",
     "slug": "SierraApp",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -37,10 +37,11 @@
       }
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store", ["expo-updates",
+      {
+        "username": "ferresistribucionessierra"
+      }]
     ],
-    "runtimeVersion": {
-      "policy": "appVersion"
-    }
+    "runtimeVersion": "1.0.1"
   }
 }
