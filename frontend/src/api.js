@@ -1,4 +1,4 @@
-const API = 'http://44.209.105.117:80/tasks';
+const API = 'https://44.209.105.117:80/tasks';
 /*44.209.105.117:80/tasks*/
 export const getTasks = async() => {
     try {
@@ -28,6 +28,7 @@ export const SearClientesTodos = async(searchCliente) => {
         const res = await fetch(`${API}/BuscarClientesTodos/${searchCliente}`, {method: 'GET'})
         return await res.json()
     }catch(error) {
+        alert(`error al buscar clientes: ${error}`);
         console.log(error)
     }
 }

@@ -83,9 +83,7 @@ const LogIn = () => {
                         }}/>
                       </View>
                     </View>
-                    {unerror &&
-                      <Text style={styles.inputText}>error al conectar</Text>
-                    }
+                    <Text style={styles.inputText}>Hola</Text>
                     <View style={styles.buttons}>
                       <Button 
                         buttonStyle={[ styles.buttonLogin, {backgroundColor: '#F2CB05'}]} 
