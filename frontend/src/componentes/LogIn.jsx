@@ -83,7 +83,6 @@ const LogIn = () => {
                         }}/>
                       </View>
                     </View>
-                    <Text style={styles.inputText}>Hola</Text>
                     <View style={styles.buttons}>
                       <Button 
                         buttonStyle={[ styles.buttonLogin, {backgroundColor: '#F2CB05'}]} 

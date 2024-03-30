@@ -40,7 +40,7 @@
       "expo-secure-store", ["expo-updates",
       {
         "username": "ferresistribucionessierra"
-      }]
+      }], [ [ "expo-build-properties", { "android": { "usesCleartextTraffic": true } } ] ]
     ],
     "runtimeVersion": "1.0.1"
   }

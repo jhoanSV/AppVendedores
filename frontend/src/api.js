@@ -1,4 +1,4 @@
-const API = 'https://44.209.105.117:80/tasks';
+const API = 'http://44.209.105.117:80/tasks';
 /*44.209.105.117:80/tasks*/
 export const getTasks = async() => {
     try {
