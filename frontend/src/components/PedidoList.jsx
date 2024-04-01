@@ -38,6 +38,7 @@ const PedidoList =({ Pedido, aumentarCantidad, disminuirCantidad, modificarCanti
           style={[styles.containerL, {flex: 1}]}
           keyExtractor={(item, index) => index.toString()}
           keyboardShouldPersistTaps="handled"
+          removeClippedSubviews={false}
         />
       </ScrollView>
     );
@@ -45,7 +46,7 @@ const PedidoList =({ Pedido, aumentarCantidad, disminuirCantidad, modificarCanti
 
 const styles = StyleSheet.create({
     containerL: {
-        height: windowHeight*0.55,//320,
+        height: '100%',//windowHeight*0.55,//320,
         width: windowWidth * 0.94,//320,
         margin: 12,
         marginTop: 0,

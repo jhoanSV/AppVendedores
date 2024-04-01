@@ -41,6 +41,7 @@ function DetallesDelPedido({ navigation, route }) {
     const isFocused = useIsFocused()
     const [notasVentas, setNotasVentas] = useState(false);
     const [notasEntregas, setNotasEntregas] = useState(false);
+    const [visible, setVisible] = useState(false);
 
     const shareImage = async() => {
       try {
@@ -219,7 +220,7 @@ function DetallesDelPedido({ navigation, route }) {
       setVisible(true)
     }
 
-    /*const VerificarEntregarPedido = ({visible,children}) => {
+    const VerificarEntregarPedido = ({visible,children}) => {
       const [inputNotasV, setInputNotasV ] = useState('')
       const [visiblevCargando, setVisiblevCargando] = useState(false);
       
@@ -272,7 +273,7 @@ function DetallesDelPedido({ navigation, route }) {
           </Modal>
         </View>
       );
-    };*/
+    };
     
     return (
         <>

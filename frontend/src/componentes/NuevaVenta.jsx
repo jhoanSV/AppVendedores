@@ -510,16 +510,6 @@ function NuevaVenta({ navigation, route }) {
       <View style = {{ flex: 1 }}>
         <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
       </View>
-      {/*<View style = {{ flex: 1 }}>
-        <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
-          <FlatList
-            data={pedido}
-            style={[styles.containerL, {flex: 1}]}
-            renderItem={renderItem}
-          />
-        </ScrollView>
-      </View>*/}
-
       <View style={{flexDirection: 'column', position: 'abolute', top: height*0.01,  bottom: 0, left: 0, right: 0  }}>
         <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
           <Text style={[styles.subTitle,{right: 0}]}>Total: $ {suma}</Text>
