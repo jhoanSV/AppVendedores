@@ -321,7 +321,7 @@ function DetallesDelPedido({ navigation, route }) {
                   </View>
                 </View>
               </ScrollView>
-
+              <VerificarEntregarPedido visible={visible}></VerificarEntregarPedido>
                 <View style={{ flex: 1 }}>
                     <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
                         <FlatList
