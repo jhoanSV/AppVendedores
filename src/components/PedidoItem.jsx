@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
-import { View, Text, StyleSheet, TextInput, Dimensions} from 'react-native'
-import { TouchableOpacity, onLongPress } from 'react-native-gesture-handler';
+import { TouchableOpacity, View, Text, StyleSheet, TextInput, Dimensions} from 'react-native'
+import { onLongPress } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 
 import 'intl';
@@ -43,7 +43,15 @@ const PedidoItem = ({ item, aumentarCantidad, disminuirCantidad, modificarCantid
   return (
     <TouchableOpacity>
         <View style={styles.itemContainer}>
-          <TouchableOpacity onPress={() => navigation.navigate('DetalleProducto', {cod: item.cod, Descripcion: item.Descripcion, UnidadOpaquete: item.UnidadOpaquete, EsUnidadOpaquete: item.EsUnidadOpaquete,SubCategoria: item.SubCategoria,  PVenta: item.PVenta, Nota: item.Nota})}>
+          <TouchableOpacity onPress={() => navigation.navigate('DetalleProducto', {cod: item.cod,
+                                                                                   Descripcion: item.Descripcion,
+                                                                                   UnidadOpaquete: item.UnidadOpaquete,
+                                                                                   EsUnidadOpaquete: item.EsUnidadOpaquete,
+                                                                                   SubCategoria: item.SubCategoria,
+                                                                                   PVenta: item.PVenta,
+                                                                                   ImgName: item.ImgName,
+                                                                                   Nota: item.Nota,
+                                                                                   Detalle: item.Detalle})}>
             <View style={{flexDirection: 'column', width: windowWidth*0.67}}>
               <Text style={[styles.itemText, {width: 80, fontWeight: 'bold'}]}>{item.cod}</Text>
               <Text style={[styles.itemText, {width: 200}]}>{item.Descripcion}</Text>

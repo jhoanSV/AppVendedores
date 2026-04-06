@@ -1,7 +1,9 @@
 //const API = 'http://44.209.105.117:80/tasks';
-const API = 'http://192.168.101.15:3100/app';
-const API_INT = 'http://192.168.101.15:5000/int';
+//const API = 'http://192.168.101.15:3100/app';
+//const API_INT = 'http://192.168.101.15:5000/int';
 /*44.209.105.117:80/tasks*/
+const API = 'https://sivar.com.co/app';
+const API_INT = 'https://sivar.com.co/int';
 export const getTasks = async() => {
     try {
         const res = await fetch(API)
@@ -39,20 +41,6 @@ export const getProductDetailAllApi = async(parametros) => {
         console.log(error)
     }
 }
-
-/*export const validateUser = async(validateValueUser) => {
-    try {
-        const res = await fetch(`${API}/validar`,{
-            method: 'POST',
-            headers: { Accept: 'application/json','Content-Type': 'application/json'},
-            body: JSON.stringify(validateValueUser)
-        })
-        return await res.json()
-    }catch(error) {
-        alert(`error al validar usuario: ${error} ${API}`);
-        console.log(error)
-    }
-}*/
 
 export const SearClientesTodos = async(searchCliente) => {
     try {

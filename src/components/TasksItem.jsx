@@ -29,6 +29,7 @@ const TasksItem = ({ task }) => {
                                                                             EsUnidadOpaquete: task.EsUnidadOpaquete,
                                                                             SubCategoria: task.SubCategoria,
                                                                             PVenta: task.PVenta,
+                                                                            ImgName: task.ImgName,
                                                                             Nota: task.Nota,
                                                                             Detalle: task.Detalle })}>
     <View style={[styles.itemContainer, colorNota(task.Nota)]}>

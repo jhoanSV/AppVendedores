@@ -29,6 +29,7 @@ import PedidoItem from '../components/PedidoItem';
 import PopUpMenu from '../components/PopUpMenu';
 import { useTheContext } from '../TheProvider';
 import { formatDateForInput } from '../InternalFunctions';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -61,6 +62,8 @@ function NuevaVenta({ navigation, route }) {
   const [pro, setPro] = React.useState([]);
   const [isVisible, setIsVisible] = React.useState(false);
   const [visibleSendWarning, setVisibleSendWarning] = useState(false);
+  const [inputY, setInputY] = useState(0);
+  //const [inputHeight, setInputHeight] = useState(0);
   const isFocused = useIsFocused()
   //const [FechaEnvioAviso, setFechaEnvioAviso ] = useState('')
   const [confirmar, setConfirmar] = useState({
@@ -140,7 +143,7 @@ function NuevaVenta({ navigation, route }) {
             <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFFF'}} ref={viewRef}>
               <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
               <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
-              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.NPedido}</Text>
+              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.error}</Text>
               <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
               <Text style={[styles.text, {color: '#193773'}]}>{confirmar.Cliente}</Text>
               <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
@@ -260,15 +263,16 @@ function NuevaVenta({ navigation, route }) {
           data.List = newlist
           const NSale = await NewSaleApi(data)
           if (NSale.sucess) {
-              setTextDate('')
-              setVisibleEnvioExitoso(true)
-              setVisiblevCargando(false)
-              setTimeout(() => {  
+            setTextDate('')
+            setVisibleEnvioExitoso(true)
+            setVisiblevCargando(false)
+            console.log('NSale', NSale.error)
+            setTimeout(() => {  
                 setVisibleEnvioExitoso(false)
                 setVisible(false)
                 cancelarPedido()
                 setConfirmar({
-                "NPedido": NSale["NDePedido"],
+                "NPedido": NSale.error,
                 "Cliente": route.params.Ferreteria,
                 "Valor": sumaTotal().replace(/,/g, ''),
                 "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
@@ -546,8 +550,8 @@ function NuevaVenta({ navigation, route }) {
   } 
 
   return (
-    <>
-    <KeyboardAvoidingView  keyboardVerticalOffset={0} behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, {flex: 1}]} enabled={true}>
+    <SafeAreaView style={{ flex: 1 }}>
+    <View  keyboardVerticalOffset={0} behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.container, {flex: 1}]} enabled={true}>
       {/*<PopUpMenu tasks={['Regla']} actions={[()=>navigation.navigate('Ruler')]}/>*/}
       <ScrollView
         style = {{flexGrow: 0}}
@@ -585,7 +589,7 @@ function NuevaVenta({ navigation, route }) {
         onChangeText={(text)=> {handleSubmit(text)}}
       />
       {isVisible && (
-        <ScrollView horizontal={true} style={styles.container2}>
+        <ScrollView horizontal={true} style={[styles.container2]}>
           <DesTaskList
             tasks={tasks|| []}
             agregarPedido={agregarPedido}
@@ -593,10 +597,15 @@ function NuevaVenta({ navigation, route }) {
           />
         </ScrollView>
       )}
-      <View style = {{ flex: 1 }}>
-        <PedidoList Pedido={pedido} aumentarCantidad={aumentarCantidad} disminuirCantidad={disminuirCantidad} modificarCantidad={modificarCantidad}/>
+      <View style = {{ flex: 1, marginBottom: windowHeight * 0.058 + 45 }}>
+        <PedidoList
+          Pedido={pedido}
+          aumentarCantidad={aumentarCantidad}
+          disminuirCantidad={disminuirCantidad}
+          modificarCantidad={modificarCantidad}
+        />
       </View>
-      <View style={{flexDirection: 'column', position: 'abolute', top: height*0.01,  bottom: 0, left: 0, right: 0  }}>
+      <View style={{flexDirection: 'column', position: 'absolute', bottom : 0, left: 0, right: 0, flex: 1}}>
         <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
           <Text style={[styles.subTitle,{right: 0}]}>Total: $ {suma}</Text>
         </View>
@@ -613,8 +622,8 @@ function NuevaVenta({ navigation, route }) {
           </View>
         </View>
       </View>
-      <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
 
+      <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
 
       <Warning 
         visible={visibleWarning}
@@ -638,8 +647,8 @@ function NuevaVenta({ navigation, route }) {
       <Loading visible={visiblevCargando} mensaje={'Enviando...'}></Loading>
       
       <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
-    </KeyboardAvoidingView>
-    </>
+    </View>
+    </SafeAreaView>
   )
 }
 
@@ -725,6 +734,9 @@ const styles = StyleSheet.create({
     height: 270,
   },
   container2: {
+    position: 'absolute',
+    zIndex: 2,
+    top: 194,
     height: '13%',//windowHeight* 0.13, //90,
     width: '94%',//windowWidth * 0.94,//320,
     margin: 12,

@@ -137,7 +137,6 @@ function DetallesDelPedido({ navigation, route }) {
         try {
           const ElPedido = await DetallePedidoCerrado(route.params.NDePedido)
           setPedido(ElPedido)
-          console.log('Entro a cerrados')
         }catch(error){
           console.log(error)
         }
@@ -191,7 +190,7 @@ function DetallesDelPedido({ navigation, route }) {
       }
       setVisible(true)
     }
-
+    
     const VerificarEntregarPedido = ({visible,children}) => {
       const [inputNotasV, setInputNotasV ] = useState('')
       const [visiblevCargando, setVisiblevCargando] = useState(false);

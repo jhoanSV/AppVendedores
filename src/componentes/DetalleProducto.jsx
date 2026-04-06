@@ -70,12 +70,13 @@ function DetalleProducto({ navigation, route }) {
     if (allowed.includes(1) || allowed.includes(7)) {
       const allDet = await getProductDetailAllApi({ Cod: route.params.cod})
       setData(allDet)
+    } else {
+      setData(route.params)
     }
   };
 
   useEffect(()=>{
     allDetail()
-    console.log('allowed', allowed)
   },[route.params]);
 
   useEffect(()=> {

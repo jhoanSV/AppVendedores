@@ -13,7 +13,8 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/7029fd73-cfc9-41d9-8da5-f90b57c9182f"
+      "url": "https://u.expo.dev/7029fd73-cfc9-41d9-8da5-f90b57c9182f",
+      "checkAutomatically": "ON_LOAD"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -26,6 +27,7 @@
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "softwareKeyboardLayoutMode": "pan",
       "package": "sierra.app"
     },
     "web": {
@@ -54,6 +56,8 @@
       ],
       "@react-native-community/datetimepicker"
     ],
-    "runtimeVersion": "1.0.1"
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    }
   }
 }
