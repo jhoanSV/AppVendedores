@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "SivarApp",
+    "slug": "SierraApp",
+    "version": "1.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/7029fd73-cfc9-41d9-8da5-f90b57c9182f",
+      "checkAutomatically": "ON_LOAD"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "sierra.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7029fd73-cfc9-41d9-8da5-f90b57c9182f"
+      }
+    },
+    "plugins": [
+      "expo-secure-store",
+      [
+        "expo-updates",
+        {
+          "username": "ferresistribucionessierra"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ],
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    }
+  }
+}
