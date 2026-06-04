@@ -10,7 +10,8 @@ import { View,
           Dimensions,
           RefreshControl,
           FlatList,
-          useWindowDimensions} from 'react-native';
+          useWindowDimensions,
+          Platform} from 'react-native';
 import { Icon } from 'react-native-elements';
 import DetLPedidoItem from '../components/DetLPedidoItem';
 import DateTimePicker from '@react-native-community/datetimepicker'
@@ -25,8 +26,10 @@ import { useIsFocused } from '@react-navigation/native';
 import { DetallePedido,
           DetallePedidoCerrado,
           DetallePedidoEntregas,
-          ActualizarProcesoDelPedido } from '../api'
+          ActualizarProcesoDelPedido,
+          CustomerDetailApi } from '../api'
 import { useTheContext } from '../TheProvider';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -34,7 +37,7 @@ const windowHeight = Dimensions.get('window').height;
 function DetallesDelPedido({ navigation, route }) {
     //const [refreshing, setrefreshing] = useState(false)
     const viewRef = useRef();
-    const [Pedido, setPedido] = useState([]);
+    const [pedido, setPedido] = useState([]);
     const [permisos, setPermisos] = useState(false);
     const { usD } = useTheContext();
     const [recordatorio, setRecordatorio ] = useState(false);
@@ -44,10 +47,41 @@ function DetallesDelPedido({ navigation, route }) {
     const [notasVentas, setNotasVentas] = useState(false);
     const [notasEntregas, setNotasEntregas] = useState(false);
     const [visible, setVisible] = useState(false);
+    const [sum, setSum] = useState(0);
+    const [dataWarning, setDataWarning] = useState({
+      title: '',
+      warningText: '',
+      setMostrar: ()=> {},
+      ConfirmationText: '',
+      SetConfirmation: ()=> {}
+    });
+
+    /*function sumaTotal(){
+      if(pedido.length !== 0){
+        return pedido.reduce((sum, value) => (typeof value.Cantidad == "number" ? sum + (value.Cantidad * value.VrUnitario) : sum), 0);
+      } else {
+        return 0
+      }
+    };*/
+
+    function sumaTotal(){
+      if(pedido.length !== 0){
+        return pedido.reduce((sum, value) => (sum + (value.Cantidad * value.VrUnitario)), 0);
+      } else {
+        return 0
+      }
+    }; 
     
+    useEffect(()=> {
+      setSum(sumaTotal())
+    },[pedido]);
+
+    const dias = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+    const nombreDia = dias[new Date(route.params.FechaDeEntrega).getDay()];
 
     const shareImage = async() => {
       try {
+        // Esperar a que el layout esté listo
         const uri = await captureRef(viewRef, {
           format: 'png',
           quality: 0.7
@@ -60,6 +94,41 @@ function DetallesDelPedido({ navigation, route }) {
         console.error(errors);
       }
     };
+
+    useEffect(() => {
+      navigation.setOptions({
+        headerRight: () => (
+          <PopUpMenu
+            tasks={['Reenviar ticket', 'Notas de venta', 'Notas de entrega', 'Detalle del cliente']}
+            actions={[
+              () => setRecordatorio(true),
+              () => {
+                  setDataWarning({
+                    title: 'Notas de ventas',
+                    warningText: route.params.NotaVenta,
+                    ConfirmationText: 'Entendido'
+                  })
+                  setNotasVentas(true)
+                },
+              () => {
+                setDataWarning({
+                    title: 'Notas de entregas',
+                    warningText: route.params.NotaEntrega,
+                    ConfirmationText: 'Entendido'
+                  })
+                  setNotasVentas(true)
+                },
+              async() => {
+                const Cliente = await CustomerDetailApi({Cod: route.params.Cod})
+                navigation.navigate('DetalleCliente', Cliente[0])
+              }
+            ]}
+          />
+        ),
+      });
+      permissions();
+      buscarPedido();
+    }, [isFocused]);
 
     const ModalConfirmacion = ({visible, children}) => {
       const dias = [
@@ -75,32 +144,32 @@ function DetallesDelPedido({ navigation, route }) {
       const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
 
       return (
-      <Modal transparent visible={visible}>
+        <Modal transparent visible={visible}>
           <View style={[styles.ModalBackground]}>
             <View style={[styles.contenedorModal, {height: 370,}]} >
               <View style={[{flexDirection: 'row', backgroundColor: '#193773', borderBottomColor: '#F2CB05', borderBottomWidth: 6,}]}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Recordatorio</Text>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFF'}]}>Recordatorio</Text>
                 <TouchableOpacity style={[{position: 'absolute', right: 5}]} onPress={()=>setRecordatorio(false)}>
-                  <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>X</Text>
+                  <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFF'}]}>X</Text>
                 </TouchableOpacity>
               </View>
               <Fragment>
-              <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFFF'}} ref={viewRef}>
-                <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
-                <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
-                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {route.params.NDePedido}</Text>
-                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
-                <Text style={[styles.text, {color: '#193773'}]}>{route.params.Ferreteria}</Text>
-                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
-                <Text style={[styles.text, {color: '#193773'}]}>$ {formatNumber(route.params.VrFactura)}</Text>
-                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
-                <Text style={[styles.text, {color: '#193773'}]}>{nombreDiaSeleccionado + ' ' + route.params.FechaDeEntrega.replace(/-/g, "/")}</Text>
-                <Text style={[styles.text, {color: '#193773'}]}>O a mas tardar un día habil despúes</Text>
-                <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.SIVAR.COM.CO</Text>
-              </View>
+                <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFF'}}>
+                  <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
+                  <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
+                  <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {route.params.NDePedido}</Text>
+                  <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
+                  <Text style={[styles.text, {color: '#193773'}]}>{route.params.Ferreteria}</Text>
+                  <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
+                  <Text style={[styles.text, {color: '#193773'}]}>$ {formatNumber(route.params.VrFactura)}</Text>
+                  <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
+                  <Text style={[styles.text, {color: '#193773'}]}>{nombreDiaSeleccionado + ' ' + route.params.FechaDeEntrega.replace(/-/g, "/")}</Text>
+                  <Text style={[styles.text, {color: '#193773'}]}>O a mas tardar un día habil despúes</Text>
+                  <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.SIVAR.COM.CO</Text>
+                </View>
               </Fragment>
               <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>shareImage()}>
-                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Compartir</Text>
+                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFF'}]}>Compartir</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -109,10 +178,10 @@ function DetallesDelPedido({ navigation, route }) {
     };
 
     const permissions = () => {
-        if(usD.Cargo ==='Asesor comercial'){
-            setPermisos(false);
-        } else if(usD.Cargo==='Entregas' && route.params.ProcesoDelPedido === 'En ruta'){
-            setPermisos(true);
+        if (usD.Cargo==='Entregas' && route.params.ProcesoDelPedido === 'En ruta'){
+          setPermisos(true);
+        } else {
+          setPermisos(false);
         }
     };
 
@@ -123,7 +192,7 @@ function DetallesDelPedido({ navigation, route }) {
     useEffect(() => {
       permissions();
       buscarPedido();
-    },[isFocused]);
+    },[]);
     
     const buscarPedido = async () => {
       if (permisos === false && MostrarEstado(route.params.ProcesoDelPedido) !== 'Cerrado'){
@@ -247,87 +316,109 @@ function DetallesDelPedido({ navigation, route }) {
     };
     
     return (
-        <>
-            <View style={[styles.container, { flex: 1 }]}>
-              <PopUpMenu tasks={['Reenviar ticket', 'Notas de venta', 'Notas de entrega']} actions={[()=>setRecordatorio(true), ()=>setNotasVentas(true), ()=>setNotasEntregas(true)]}/>
-              <View style={[ styles.ContenedorEstado, colorNota(MostrarEstado(route.params.ProcesoDelPedido))]}>
-                  <Text style={[styles.subTitle, {color: '#000000'}]}>
-                      Estado: {MostrarEstado(route.params.ProcesoDelPedido)}
-                  </Text>
-                  <View style={{alignItems:'flex-end', flex: 1 }}>
-                      <Text style={[styles.subTitle, {color: '#000000'}]}>
-                          {route.params.NDePedido}
-                      </Text>
-                  </View>
-              </View>
-              <ScrollView
-                style = {{flexGrow: 0}} 
-                horizontal={true} 
-                refreshControl={
-                  <RefreshControl
-                      //refreshing={refreshing}
-                      onRefresh={()=>/*actualizar()*/console.log("se actualiza perro")}
-                  />}
-              >
-                <View style={{flexDirection: 'row', flex: 1}}>
-                  <View style={{flexDirection: 'column', flex: 1}}>
-                      <View>
-                        <Text style={styles.subTitle}>Empresa:</Text>
-                        <Text style={styles.text}>{route.params.Ferreteria}</Text>
-                      </View>
-                      <View>
-                        <Text style={styles.subTitle}>Dirección:</Text>
-                        <Text style={styles.text}>{route.params.Direccion}</Text>
-                      </View>
-                  </View>
-                  <View style={{flexDirection: 'column'}}>
-                    <View>
-                        <Text style={styles.subTitle}>Ruta:</Text>
-                        <Text style={styles.text}>{route.params.Ruta}</Text>
-                    </View>
-                    <View>
-                      <Text style={styles.subTitle}>Barrio:</Text>
-                      <Text style={styles.text}>{route.params.Barrio}</Text>
-                    </View>
-                  </View>
-                </View>
-              </ScrollView>
-              <VerificarEntregarPedido visible={visible}></VerificarEntregarPedido>
-                <View style={{ flex: 1 }}>
-                    <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
-                        <FlatList
-                            data={Pedido}
-                            style={[styles.containerL, {flex: 1}]}
-                            renderItem={renderItem}
-                        />
-                    </ScrollView>
-                </View>
-                
-                <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
-                <Warning visible={notasVentas} title={'Notas de ventas'} warningText={route.params.NotaVenta} setMostrar={setNotasVentas} ConfirmationText={'Entendido'} SetConfirmation={setNotasVentas} ColorHeader={'#193773'} ColorText={'#000000'} />
-                <Warning visible={notasEntregas} title={'Notas de entregas'} warningText={route.params.NotaEntrega} setMostrar={setNotasEntregas} ConfirmationText={'Entendido'} SetConfirmation={setNotasEntregas} ColorHeader={'#193773'} ColorText={'#000000'} />
-
-                <View style={{flexDirection: 'column', justifyContent: 'flex-end'}}>
-                    
-                    <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
-                        <Text style={[styles.subTitle,{right: 0}]}>Total: {formatNumber(route.params.VrFactura)}</Text>
-                    </View>
-                    
-                    {permisos && <View style={{flexDirection: 'row'}}>
-                        <View>
-                            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>CuadroDeEntrega(false)}>
-                                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>No entregado</Text>
-                            </TouchableOpacity>
-                        </View>
-                        <View>
-                            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>CuadroDeEntrega(true)}>
-                                <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entregar</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>}
+        <SafeAreaView style={{ flex: 1 }}>
+          <View keyboardVerticalOffset={0} behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.container, {flex: 1}]} enabled={true}>
+            <View style={[ styles.ContenedorEstado, colorNota(MostrarEstado(route.params.ProcesoDelPedido))]}>
+                <Text style={[styles.subTitle, {color: '#000000'}]}>
+                    Estado: {MostrarEstado(route.params.ProcesoDelPedido)}
+                </Text>
+                <View style={{alignItems:'flex-end', flex: 1 }}>
+                    <Text style={[styles.subTitle, {color: '#000000'}]}>
+                        {route.params.NDePedido}
+                    </Text>
                 </View>
             </View>
-        </>
+            <ScrollView
+              style = {{flexGrow: 0}} 
+              horizontal={true} 
+              refreshControl={
+                <RefreshControl
+                    //refreshing={refreshing}
+                    onRefresh={()=>/*actualizar()*/console.log("se actualiza perro")}
+                />}
+            >
+              <View style={{flexDirection: 'row', flex: 1}}>
+                <View style={{flexDirection: 'column', flex: 1}}>
+                    <View>
+                      <Text style={styles.subTitle}>Empresa:</Text>
+                      <Text style={styles.text}>{route.params.Ferreteria}</Text>
+                    </View>
+                    <View>
+                      <Text style={styles.subTitle}>Dirección:</Text>
+                      <Text style={styles.text}>{route.params.Direccion}</Text>
+                    </View>
+                </View>
+                <View style={{flexDirection: 'column'}}>
+                  <View>
+                      <Text style={styles.subTitle}>Ruta:</Text>
+                      <Text style={styles.text}>{route.params.Ruta}</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.subTitle}>Barrio:</Text>
+                    <Text style={styles.text}>{route.params.Barrio}</Text>
+                  </View>
+                </View>
+              </View>
+            </ScrollView>
+            <VerificarEntregarPedido visible={visible}></VerificarEntregarPedido>
+
+            {/*Lista de pedidos*/}
+            <View style={{ flex: 1 }}>
+              <ScrollView horizontal={true} style = {{ flexGrow: 1 }}>
+                  <FlatList
+                      data={pedido}
+                      style={[styles.containerL, {flex: 1}]}
+                      renderItem={renderItem}
+                  />
+              </ScrollView>
+            </View>
+              
+            {/*Botones de confirmación*/}
+            <View style={{ flexDirection: 'column' }}>
+                <View style={{backgroundColor:'#F2CB05', height: windowHeight*0.058, alignItems:'flex-end'}}>
+                    <Text style={[styles.subTitle,{right: 0}]}>Total: {formatNumber(sum)}</Text>
+                </View>
+                
+                {permisos && <View style={{flexDirection: 'row'}}>
+                    <View>
+                        <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>CuadroDeEntrega(false)}>
+                            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>No entregado</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View>
+                        <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#193773', right: 0}]} onPress={()=>CuadroDeEntrega(true)}>
+                            <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Entregar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>}
+            </View>
+            {/*Captura del modal*/}
+            <View style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}>
+              <View
+                ref={viewRef}
+                collapsable={false}
+                style={{ width: 350, borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFF'}}
+              >
+                <Image style={{ width: 100, height: 50, marginLeft: 5 }} source={Logo_color} resizeMode='contain' />
+                <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
+                <Text style={[styles.text, { color: '#193773', fontWeight: 'bold' }]}>N° de pedido: {route.params.NDePedido}</Text>
+                <Text style={[styles.text, { color: '#193773', fontWeight: 'bold' }]}>Empresa:</Text>
+                <Text style={[styles.text, { color: '#193773' }]}>{route.params.Ferreteria}</Text>
+                <Text style={[styles.text, { color: '#193773', fontWeight: 'bold' }]}>Valor:</Text>
+                <Text style={[styles.text, { color: '#193773' }]}>$ {formatNumber(route.params.VrFactura)}</Text>
+                <Text style={[styles.text, { color: '#193773', fontWeight: 'bold' }]}>Fecha de entrega:</Text>
+                <Text style={[styles.text, { color: '#193773' }]}>{nombreDia + ' ' + route.params.FechaDeEntrega.replace(/-/g, "/")}</Text>
+                <Text style={[styles.text, { color: '#193773' }]}>O a mas tardar un día habil despúes</Text>
+                <Text style={[styles.subTitle, { color: '#193773', margin: 5, fontWeight: 'bold' }]}>WWW.SIVAR.COM.CO</Text>
+              </View>
+            </View>
+            
+            {/*Modales*/}
+            <ModalConfirmacion visible={recordatorio} />
+            <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
+            <Warning visible={notasVentas} title={dataWarning.title} warningText={dataWarning.warningText} setMostrar={setNotasVentas} ConfirmationText={dataWarning.ConfirmationText} SetConfirmation={setNotasVentas} ColorHeader={'#193773'} ColorText={'#000000'} />
+          </View>
+        </SafeAreaView>
     )
 }
 

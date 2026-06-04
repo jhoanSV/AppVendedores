@@ -1,9 +1,10 @@
 //const API = 'http://44.209.105.117:80/tasks';
-//const API = 'http://192.168.101.15:3100/app';
-//const API_INT = 'http://192.168.101.15:5000/int';
+const API = 'http://192.168.101.17:3100/app'; //My coputer backend app
+const API_INT = 'http://192.168.101.17:5000/int'; //My computer backend intern
 /*44.209.105.117:80/tasks*/
-const API = 'https://sivar.com.co/app';
-const API_INT = 'https://sivar.com.co/int';
+//const API = 'https://sivar.com.co/app';
+//const API_INT = 'https://sivar.com.co/int';
+
 export const getTasks = async() => {
     try {
         const res = await fetch(API)
@@ -42,12 +43,27 @@ export const getProductDetailAllApi = async(parametros) => {
     }
 }
 
+//!Customers
+
 export const SearClientesTodos = async(searchCliente) => {
     try {
         const res = await fetch(`${API}/BuscarClientesTodos/${searchCliente}`, {method: 'GET'})
         return await res.json()
     }catch(error) {
         alert(`error al buscar clientes: ${error}`);
+        console.log(error)
+    }
+}
+
+export const CustomerDetailApi = async(CustomerDetailData) => {
+    try {
+        const res = await fetch(`${API}/customerdetail`,{
+            method: 'POST',
+            headers: { Accept: 'application/json','Content-Type': 'application/json'},
+            body: JSON.stringify(CustomerDetailData)
+        })
+        return await res.json()
+    }catch(error) {
         console.log(error)
     }
 }
@@ -109,7 +125,9 @@ export const DetallePedido = async(NPedido) => {
 
 export const DatosVentas = async(searchUser) => {
     try {
-        const res = await fetch(`${API}/DatosProgreso/${searchUser}`, {method: 'GET'})
+        const res = await fetch(`${API}/DatosProgreso/${searchUser}`, {
+            method: 'GET'
+        })
         return await res.json()
     }catch(error) {
         console.log(error)
@@ -118,7 +136,9 @@ export const DatosVentas = async(searchUser) => {
 
 export const PedidosPorEntregar = async(searchUser) => {
     try {
-        const res = await fetch(`${API}/PedidosPorEntregar/${searchUser}`, {method: 'GET'})
+        const res = await fetch(`${API}/PedidosPorEntregar/${searchUser}`, {
+            method: 'GET'
+        })
         return await res.json()
     }catch(error) {
         console.log(error)

@@ -11,20 +11,7 @@ const windowHeight = Dimensions.get('window').height;
 
 
 function DetalleCliente({ navigation, route }) {
-  const cliente={
-    Cod: route.params.Cod,
-    Nit: route.params.Nit,
-    Ferreteria: route.params.Ferreteria, 
-    Contacto: route.params.Contacto, 
-    Telefono: route.params.Telefono, 
-    Cel: route.params.Cel,
-    Email: route.params.Email,
-    Direccion: route.params.Direccion, 
-    Barrio: route.params.Barrio,
-    Ruta: route.params.Ruta,
-    Geo: route.params.Geolocalizacion,
-    Nota: route.params.Nota
-  }
+  const Cliente= route.params
   const [mostrar, setMostrar] = useState(false);
   const [mostrarGeo, setMostrarGeo] = useState(false);
 
@@ -50,40 +37,44 @@ function DetalleCliente({ navigation, route }) {
     }
   }
   return (
-    
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {flex: 1}]}>
       <Icon name='west'onPress={() => navigation.goBack()} style={styles.goBlack}/>
-      <View style={{height: windowHeight*0.78}}>
+      <View style={{flex: 1}}>{/*<View style={{height: windowHeight*0.78}}>*/}
       <ScrollView style={styles.scroll}>
+        { Cliente.Estado === 'BLOQUEADO' &&
+          <View style={{backgroundColor: '#D6320E', alignItems: 'center'}}>
+            <Text style={[styles.text, {color: '#FFF'}]}> {Cliente.Estado} </Text>
+          </View>
+        }
         <Text style={styles.subTitle}>Cod:</Text>
-        <Text style={styles.text}>{route.params.Cod}</Text>
+        <Text style={styles.text}>{Cliente.Cod}</Text>
         <Text style={styles.subTitle}>Nit:</Text>
-        <Text style={styles.text}>{route.params.Nit}</Text>
+        <Text style={styles.text}>{Cliente.Nit}</Text>
         <Text style={styles.subTitle}>Empresa:</Text>
-        <Text style={styles.text}>{route.params.Ferreteria}</Text>
+        <Text style={styles.text}>{Cliente.Ferreteria}</Text>
         <Text style={styles.subTitle}>Contacto:</Text>
-        <Text style={styles.text}>{route.params.Contacto}</Text>
+        <Text style={styles.text}>{Cliente.Contacto}</Text>
         <Text style={styles.subTitle}>Telefono:</Text>
-        <Text style={styles.text}>{route.params.Telefono}</Text>
+        <Text style={styles.text}>{Cliente.Telefono}</Text>
         <Text style={styles.subTitle}>Cel:</Text>
-        <Text style={styles.text}>{route.params.Cel}</Text>
+        <Text style={styles.text}>{Cliente.Cel}</Text>
         <Text style={styles.subTitle}>Email:</Text>
-        <Text style={styles.text}>{route.params.Email}</Text>
+        <Text style={styles.text}>{Cliente.Email}</Text>
         <Text style={styles.subTitle}>Direrccion:</Text>
-        <Text style={styles.text}>{route.params.Direccion}</Text>
+        <Text style={styles.text}>{Cliente.Direccion}</Text>
         <Text style={styles.subTitle}>Barrio:</Text>
-        <Text style={styles.text}>{route.params.Barrio}</Text>
+        <Text style={styles.text}>{Cliente.Barrio}</Text>
         <Text style={styles.subTitle}>Ruta:</Text>
-        <Text style={styles.text}>{route.params.Ruta}</Text>
+        <Text style={styles.text}>{Cliente.Ruta}</Text>
         <Text style={styles.subTitle}>Geolocalización:</Text>
-        <TouchableOpacity onPress={() => Geo(route.params.Geolocalizacion)}> 
-          <Text style={[styles.text, {color: '#003baa', textDecorationLine: 'underline'} ]}>{route.params.Geolocalizacion}</Text>
+        <TouchableOpacity onPress={() => Geo(Cliente.Geolocalizacion)}> 
+          <Text style={[styles.text, {color: '#003baa', textDecorationLine: 'underline'} ]}>{Cliente.Geolocalizacion}</Text>
         </TouchableOpacity>
         <Text style={styles.subTitle}>Nota:</Text>
-        <Text style={[styles.text, colorNota(route.params.Nota)]}>{route.params.Nota}</Text>
+        <Text style={[styles.text]}>{Cliente.Nota}</Text>
       </ScrollView>
       </View>
-      <TouchableOpacity style={styles.buttonLogin} onPress={() => navegar(route.params.Nota)}>
+      <TouchableOpacity style={styles.buttonLogin} onPress={() => navegar(Cliente.Estado)}>
         <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Agregar pedido</Text>
       </TouchableOpacity>
       <Warning visible={mostrar} title={'Cliente bloqueado'} warningText={'Este cliente se encuentra bloqueado, por favor comunicarse con la oficina principal'} setMostrar={setMostrar} SetConfirmation={()=>{}} ConfirmationText={'Entendido'}/>

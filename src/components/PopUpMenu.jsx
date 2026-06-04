@@ -1,3 +1,10 @@
+/**
+ * @file PopUpMenu.jsx
+ * @description Componente reutilizable de menú emergente (popup).
+ *              Muestra una lista de opciones al presionar un ícono de tres puntos.
+ * @author Jhoan Sierra
+ * @date 2024-01-15
+ */
 import React,{useState, useEffect, useRef, Fragment } from 'react'
 import { View,
           Text,
@@ -35,14 +42,18 @@ const PopUpMenu = ({ tasks, actions }) => {
         <TouchableOpacity style={styles.IconMenu} onPress={() => setShow(!show)}>
           <Icon name='more' color='#ffffff'/>
         </TouchableOpacity>
-        {show && (
-          <FlatList
-            style={styles.containerMenu}
-            data={tasks}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => index.toString()}
-          />
-        )}
+
+        <Modal transparent visible={show} onRequestClose={() => setShow(false)}>
+          <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={() => setShow(false)}>
+            <View style={styles.containerMenu}>
+              <FlatList
+                data={tasks}
+                renderItem={renderItem}
+                keyExtractor={(item, index) => index.toString()}
+              />
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </>
     );
   };
@@ -50,27 +61,23 @@ const PopUpMenu = ({ tasks, actions }) => {
 
   const styles = StyleSheet.create({
     containerMenu: {
-        width: '40%',//windowWidth/2.7,
-        position: 'absolute',
-        right: 0,
-        margin: 0,
-        marginTop: 0,
-        borderWidth: 0,
-        padding: 0,
-        backgroundColor: '#ffff',
-        borderColor: '#F2CB05',
-        borderWidth: 1,
-        zIndex: 99,
-      },
-      IconMenu: {
-        position: 'absolute',
-        right: '5%',
-        top: '-6.5%',
-        zIndex: 99,
-      },
-      text: {
-        fontSize: 16,
-      }
+      width: '40%',
+      position: 'absolute',
+      top: 60,   // ajusta este valor
+      right: 10,
+      backgroundColor: '#FFFFFF',
+      borderColor: '#F2CB05',
+      borderWidth: 1,
+    },
+    IconMenu: {
+      position: 'absolute',
+      right: '5%',
+      top: 20,
+      zIndex: 99,
+    },
+    text: {
+      fontSize: 16,
+    }
   })
 
   export default PopUpMenu;

@@ -13,6 +13,8 @@ import Record from "../components/modal/Record";
 import { useIsFocused } from "@react-navigation/native";
 import { useNavigation } from '@react-navigation/native';
 import Loading from '../components/modal/Loading';
+import { priceValue } from '../InternalFunctions';
+import { useTheContext } from '../TheProvider';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -22,10 +24,7 @@ const Main = () => {
     function formatNumber(number){
         return new Intl.NumberFormat().format(number);
     };
-
-    //let meta = 35000000;
-    //let meta2 = 48000000;
-    //let record = 55000000;
+    const { usD } = useTheContext();
     let rotateValue = new Animated.Value(0);
     const[meta, setMeta] =useState(0);
     const[meta2, setMeta2] =useState(0);
@@ -58,7 +57,7 @@ const Main = () => {
     Animated.loop(animation).start();
 
     const LCerradas = async()=> {
-        const datos = await pedidosCerrados(getGlobal('User'))
+        const datos = await pedidosCerrados(usD.Cod)
         setPCerrados(datos)
     }
 
@@ -67,16 +66,16 @@ const Main = () => {
         asinc()
         return () =>{
             animation.stop();
-            console.log("para");
+            //console.log("para");
         }
     },[isFocused])
 
     const asinc = async() => {
-        const datos = await DatosVentas(getGlobal('User'))
+        const datos = await DatosVentas(usD.Cod)
         setMeta(datos[0]["Meta"]);
         setMeta2(datos[0]["Meta2"]);
         setVentTotales(datos[0]["VentasMes"])
-        console.log(datos);
+        //console.log(datos);
         if((datos[0]["record"]) < 52459200){
             setRecord(52459200);
         }else{
@@ -109,12 +108,6 @@ const Main = () => {
         }
     }    
     
-    /*const newVenta = () =>{
-        setVentTotales(ventTotales + 1000000);
-    }
-    const quitVenta = () =>{
-        setVentTotales(ventTotales - 1000000);
-    }*/
     const FacturasCerradas = async() =>{
         setCargando(true)
         await LCerradas()
@@ -179,7 +172,7 @@ const Main = () => {
             <TouchableOpacity onPress={()=>FacturasCerradas()}>
                 <View style={styles.containerVentas} >
                     <Text style={styles.ventasText}> Mis Ventas</Text>
-                    <Text style={styles.ventasValor}> $ {formatNumber(ventTotales)}</Text>
+                    <Text style={styles.ventasValor}> $ {priceValue(ventTotales)}</Text>
                 </View>
             </TouchableOpacity>
             {/*<Button
@@ -199,7 +192,7 @@ const Main = () => {
                 color="#193773"
                 accessibilityLabel="prueba"
             />        --------Botones para prueba------------------*/}
-            <Record modalVisible={mVisible} setModalVisible={setMVisible} rec={formatNumber(record)}/>
+            <Record modalVisible={mVisible} setModalVisible={setMVisible} rec={priceValue(record)}/>
             <Loading visible={cargando} mensaje={'Cargando...'}/>
         </SafeAreaView>
     )

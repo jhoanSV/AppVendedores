@@ -28,9 +28,8 @@ import * as SecureStore from 'expo-secure-store';
 import PedidoItem from '../components/PedidoItem';
 import PopUpMenu from '../components/PopUpMenu';
 import { useTheContext } from '../TheProvider';
-import { formatDateForInput } from '../InternalFunctions';
+import { formatNumber, formatDateForInput } from '../InternalFunctions';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
@@ -73,6 +72,7 @@ function NuevaVenta({ navigation, route }) {
     "FechaDesde": "hoyDate",
     "FechaHasta": "textDate"
   });
+  
 
   useEffect(()=> {
     actualizar()
@@ -95,11 +95,13 @@ function NuevaVenta({ navigation, route }) {
     }
   };
 
-  function sendWarning( title, warningText, ConfirmationText, SetConfirmation) {
-    setVisibleSendWarning(true);
-    return(
-      <Warning visible={visibleSendWarning} title={title} warningText={warningText} setMostrar={setVisibleSendWarning} ConfirmationText={ConfirmationText} SetConfirmation={SetConfirmation} />
-    )
+  const sendWarning = (title, warningText, ConfirmationText, SetConfirmation) => {
+    setDataWarnig({
+      title: title,
+      warningText: warningText,
+      ConfirmationText: ConfirmationText,
+      SetConfirmation: SetConfirmation});
+    setVisibleWarning(true);
   };
 
   const actualizar = async () => {
@@ -109,12 +111,13 @@ function NuevaVenta({ navigation, route }) {
     setrefreshing(false);
   };
 
-  function formatNumber(number){
+  /*function formatNumber(number){
     return new Intl.NumberFormat().format(number);
-  };
+  };*/
 
   const shareImage = async() => {
     try {
+      // Esperar a que el layout esté listo
       const uri = await captureRef(viewRef, {
         format: 'png',
         quality: 0.7
@@ -140,19 +143,19 @@ function NuevaVenta({ navigation, route }) {
               </TouchableOpacity>
             </View>
             <Fragment>
-            <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFFF'}} ref={viewRef}>
-              <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
-              <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
-              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.error}</Text>
-              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
-              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.Cliente}</Text>
-              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
-              <Text style={[styles.text, {color: '#193773'}]}>$ {formatNumber(confirmar.Valor)}</Text>
-              <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
-              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaDesde}</Text>
-              <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaHasta}</Text>
-              <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.SIVAR.COM.CO</Text>
-            </View>
+              <View style={{borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFFF'}}>
+                <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
+                <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
+                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.NPedido}</Text>
+                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
+                <Text style={[styles.text, {color: '#193773'}]}>{confirmar.Cliente}</Text>
+                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
+                <Text style={[styles.text, {color: '#193773'}]}>$ {formatNumber(confirmar.Valor)}</Text>
+                <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
+                <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaDesde}</Text>
+                <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaHasta}</Text>
+                <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.SIVAR.COM.CO</Text>
+              </View>
             </Fragment>
             <TouchableOpacity style={[styles.buttonLogin, {position: 'absolute', bottom: 5, width: 290, backgroundColor: '#193773'}]} onPress={()=>shareImage()}>
               <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Compartir</Text>
@@ -190,7 +193,7 @@ function NuevaVenta({ navigation, route }) {
 
     const onChange = (event, selectedDate) => {
       const currentDate = selectedDate || date;
-      setShow(false); //Platform.OS === 'android'
+      setShow(false);
       setDate(currentDate)
       let tempDate = new Date(currentDate);
       let fDate = tempDate.getFullYear() + '-' + (tempDate.getMonth()+1) + '-' + tempDate.getDate();
@@ -200,13 +203,13 @@ function NuevaVenta({ navigation, route }) {
     };
 
     const ToNewSale = async () =>{
-      if (textDate === ''){
-        setAvisoRojo(true)
-        setTimeout(() => {  
-          setAvisoRojo(false)
-        }, 2000);
-        return
-      } else {
+      //if (textDate === ''){
+      //  setAvisoRojo(true)
+      //  setTimeout(() => {  
+      //    setAvisoRojo(false)
+      //  }, 2000);
+      //  return
+      //} else {
 
         try {
           setVisiblevCargando(true)
@@ -266,109 +269,47 @@ function NuevaVenta({ navigation, route }) {
             setTextDate('')
             setVisibleEnvioExitoso(true)
             setVisiblevCargando(false)
-            console.log('NSale', NSale.error)
             setTimeout(() => {  
                 setVisibleEnvioExitoso(false)
                 setVisible(false)
-                cancelarPedido()
+                cancelarPedido();
+                console.log('NSale.error', NSale.error)
                 setConfirmar({
-                "NPedido": NSale.error,
-                "Cliente": route.params.Ferreteria,
-                "Valor": sumaTotal().replace(/,/g, ''),
-                "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
-                "FechaHasta": "O a mas tardar un día habil despúes"
-              })
+                  "NPedido": NSale.error,
+                  "Cliente": route.params.Ferreteria,
+                  "Valor": sumaTotal().replace(/,/g, ''),
+                  "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
+                  "FechaHasta": "O a mas tardar un día habil despúes"
+                })
                 setRecordatorio(true)
               }, 2000);
           } else  {
             setVisiblevCargando(false)
-            setNotaRojo('Error al enviar pedido')
-            setAvisoRojo(true)
+            sendWarning(
+              'Error',
+              'Error al enviar:',
+              'Entendido',
+              setVisibleWarning
+            )
             setTimeout(() => {  
-              setAvisoRojo(false)
+              setVisibleWarning(false)
             }, 2000);
           }
         }
         catch (error) {
           setVisiblevCargando(false)
-          setNotaRojo('Error al enviar')
-          setAvisoRojo(true)
+          sendWarning(
+            'Error',
+            'Error al enviar: ' + error,
+            'Entendido',
+            setVisibleWarning
+          )
           setTimeout(() => {  
-            setAvisoRojo(false)
+            setVisibleWarning(false)
           }, 2000);
-          console.log(error)
         }
-      }
+      //}
     };
-
-    {/*const enviarPedido = async ()=>{
-      if (textDate === ''){
-        setAvisoRojo(true)
-        setTimeout(() => {  
-          setAvisoRojo(false)
-        }, 2000);
-      } else {
-        try {
-          setVisiblevCargando(true)
-          let aTablaDeIngresados = '';
-          let hoy = new Date(Date.now());
-          let hoyDate = hoy.getFullYear() + '-' + (hoy.getMonth()+1) + '-' + hoy.getDate();
-          let hora = hoy.getHours() + ':' + hoy.getMinutes() + ':' + hoy.getSeconds()
-          const dias = [
-            'domingo',
-            'lunes',
-            'martes',
-            'miércoles',
-            'jueves',
-            'viernes',
-            'sábado',
-          ];
-          const numeroDia = hoy.getDay();
-          const numeroDiaSeleccionado = new Date(date).getDay()
-          const nombreDia = dias[numeroDia];
-          const nombreDiaSeleccionado = dias[numeroDiaSeleccionado];
-          pedido.map((pedido, index) => {
-            aTablaDeIngresados = aTablaDeIngresados + ';' + pedido.Cantidad + ',' + pedido.cod + ',' + pedido.PVenta                       
-          })
-            console.log(aTablaDeIngresados)
-            const NpreFactura = await SubirPedido({
-              "CodCliente": route.params.Cod,
-              "FechaFactura": hoyDate + ' ' + hora,
-              "FechaDeEstado": hoyDate + ' ' + hora,
-              "FechaDeEntrega": textDate,
-              "FechaVencimiento" : textDate,
-              "NotaVenta": inputNotasV,
-              "VECommerce": "0",
-              "TIngresados": aTablaDeIngresados
-            });
-
-            setTextDate('')
-            setVisibleEnvioExitoso(true)
-            setVisiblevCargando(false)
-            setTimeout(() => {  
-              setVisibleEnvioExitoso(false)
-              setVisible(false)
-              cancelarPedido()
-              setConfirmar({
-              "NPedido": NpreFactura["NDePedido"],
-              "Cliente": route.params.Ferreteria,
-              "Valor": sumaTotal().replace(/,/g, ''),
-              "FechaDesde": nombreDiaSeleccionado + ' ' + FechaEnvioAviso,
-              "FechaHasta": "O a mas tardar un día habil despúes"
-            })
-              setRecordatorio(true)
-            }, 2000);
-        }catch (error) {
-          setVisiblevCargando(false)
-          setNotaRojo('Error al enviar')
-          setAvisoRojo(true)
-          setTimeout(() => {  
-            setAvisoRojo(false)
-          }, 2000);
-          console.log(error)
-        }
-      }
-    };*/}
 
     return (
       <Modal transparent visible={visible}>
@@ -418,19 +359,22 @@ function NuevaVenta({ navigation, route }) {
     if (pedido.length !== 0 && suma.replace(/,/g, '')>=150000){
       setVisible(true)
     } else if (pedido.length === 0){
-      setAvisoRojo(true)
-      setNotaRojo('No hay productos para enviar')
+      sendWarning(
+        'Sin Productos para enviar',
+        'No hay productos para enviar',
+        'Entendido',
+        ()=>{}
+      )
       setTimeout(() => {
-        setAvisoRojo(false)
+        setVisibleWarning(false)
       }, 2000);
     } else if (suma.replace(/,/g, '')<150000){
-      setDataWarnig ({
-        title:'Pedido insuficiente',
-        warningText: 'El pedido no cuenta con el mínimo de $150.000 para ser envíado.',
-        ConfirmationText: 'Entendido',
-        SetConfirmation: ()=>{}
-      })
-      setVisibleWarning(true)
+      sendWarning(
+        'Pedido insuficiente',
+        'El pedido no cuenta con el mínimo de $150.000 para ser envíado.',
+        'Entendido',
+        ()=>{}
+      )
     }
   };
 
@@ -456,9 +400,16 @@ function NuevaVenta({ navigation, route }) {
       setSuma(sumaTotal())
       await SecureStore.setItemAsync('ODePedido', JSON.stringify(pedido));
     } else if(index !== -1) {
-      setVisibleAvisoProducto(true)
+      //setVisibleAvisoProducto(true)
       setTimeout(() => {  
-        setVisibleAvisoProducto(false)
+        sendWarning(
+          'Producto repetido',
+          'verifique el pedido',
+          'Entendido',
+          visibleWarning
+        )
+        //setVisibleAvisoProducto(false)
+        setVisibleWarning(false)
       }, 2000);
     }
   };
@@ -481,16 +432,14 @@ function NuevaVenta({ navigation, route }) {
         if(Cantidad < 1){
           // solo guardas el índice y abres el modal
           setProductoAEliminar(index);
-          setDataWarnig ({
-            title:'Eliminar producto',
-            warningText: '¿Desea eliminar este producto?',
-            ConfirmationText: 'Eliminar',
-            SetConfirmation: () => {
+          sendWarning(
+            'Eliminar producto',
+            '¿Desea eliminar este producto?',
+            'Eliminar',
+            () => {
               pedido.splice(index, 1);
               handleSubmit('');
-            }
-          })
-          setVisibleWarning(true)
+            })
         } else {
           pedido[index].Cantidad = Cantidad;
           setSuma(sumaTotal());
@@ -552,7 +501,6 @@ function NuevaVenta({ navigation, route }) {
   return (
     <SafeAreaView style={{ flex: 1 }}>
     <View  keyboardVerticalOffset={0} behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.container, {flex: 1}]} enabled={true}>
-      {/*<PopUpMenu tasks={['Regla']} actions={[()=>navigation.navigate('Ruler')]}/>*/}
       <ScrollView
         style = {{flexGrow: 0}}
         horizontal={true}
@@ -611,7 +559,12 @@ function NuevaVenta({ navigation, route }) {
         </View>
         <View style={{flexDirection: 'row'}}>
           <View>
-            <TouchableOpacity style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]} onPress={()=>setVisibleAviso(true)}>
+            <TouchableOpacity
+              style={[styles.buttonLogin, {backgroundColor: '#D6320E',}]}
+              onPress={()=>{
+                sendWarning('Cancelar pedido','¿Esta seguro que desea cancelar este pedido?','Cancelar pedido',cancelarPedido)
+              }}
+            >
               <Text style={[styles.subTitle, {textAlign: 'center', color:  '#FFFF'}]}>Cancelar</Text>
             </TouchableOpacity>
           </View>
@@ -623,29 +576,42 @@ function NuevaVenta({ navigation, route }) {
         </View>
       </View>
 
-      <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
+      {/*Captura del modal*/}
+      <View style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}>
+        <View
+          ref={viewRef}
+          collapsable={false}
+          style={{width: 350, borderColor: '#193773', borderWidth: 2, marginBottom: 5, backgroundColor: '#FFFF'}}
+        >
+          <Image style={[{position: 'relative',width: 100, height: 50, marginLeft: 5}]} source={ Logo_color } resizeMode='contain' />
+          <Text style={[styles.text, {position: 'absolute', right: 5, fontSize: 20, color: '#4DBE25', fontWeight: 'bold'}]}>!Enviado con exito!</Text>
+          <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>N° de pedido: {confirmar.NPedido}</Text>
+          <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Empresa:</Text>
+          <Text style={[styles.text, {color: '#193773'}]}>{confirmar.Cliente}</Text>
+          <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Valor:</Text>
+          <Text style={[styles.text, {color: '#193773'}]}>$ {formatNumber(confirmar.Valor)}</Text>
+          <Text style={[styles.text, {color: '#193773', fontWeight: 'bold'}]}>Fecha de entrega:</Text>
+          <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaDesde}</Text>
+          <Text style={[styles.text, {color: '#193773'}]}>{confirmar.FechaHasta}</Text>
+          <Text style={[styles.subTitle, {color: '#193773', margin: 5, fontWeight: 'bold'}]}>WWW.SIVAR.COM.CO</Text>
+        </View>
+      </View>
 
-      <Warning 
+      {/*Modales*/}
+      <ModalPopUpEnviarPedido visible={visible}></ModalPopUpEnviarPedido>
+      <Warning
         visible={visibleWarning}
-        title={dataWarnig.tittle}
-        warningText={dataWarnig.warningText}
+        title={dataWarnig?.tittle}
+        warningText={dataWarnig?.warningText}
         setMostrar={setVisibleWarning}
-        ConfirmationText={dataWarnig.ConfirmationText}
-        SetConfirmation={dataWarnig.SetConfirmation}
+        ConfirmationText={dataWarnig?.ConfirmationText}
+        SetConfirmation={dataWarnig?.SetConfirmation}
       />
-      <Warning 
-        visible={visibleAviso}
-        title={'Cancelar pedido'}
-        warningText={'¿Esta seguro que desea cancelar este pedido?'}
-        setMostrar={setVisibleAviso}
-        ConfirmationText={'Cancelar pedido'}
-        SetConfirmation={cancelarPedido}
-      />
-      <Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto} ConfirmationText={'Entendido'} SetConfirmation={setVisibleAvisoProducto}/>
-      <Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo} ConfirmationText={'Entendido'} SetConfirmation={()=>{}} />
+      {/*<Warning visible={visibleAvisoProducto} title={'Producto repetido'} warningText={'Producto repetido, verifique el pedido'} setMostrar={setVisibleAvisoProducto} ConfirmationText={'Entendido'} SetConfirmation={setVisibleAvisoProducto}/>*/}
+      {/*<Warning visible={avisoRojo} title={'Pedido sin fecha'} warningText={'Escoja una fecha de envio'} setMostrar={setAvisoRojo} ConfirmationText={'Entendido'} SetConfirmation={()=>{}} />*/}
+      
       <ModalEnvioExitoso visible={visibleEnvioExitoso}></ModalEnvioExitoso>
       <Loading visible={visiblevCargando} mensaje={'Enviando...'}></Loading>
-      
       <ModalConfirmacion visible={recordatorio}></ModalConfirmacion>
     </View>
     </SafeAreaView>

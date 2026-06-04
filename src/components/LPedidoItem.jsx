@@ -2,21 +2,19 @@ import React, {useEffect} from 'react'
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native'
 import { onLongPress } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
+import { formatNumber, formatDateToShow } from '../InternalFunctions';
 
 import 'intl';
 import 'intl/locale-data/jsonp/en';
 
 const LPedidoItem = ({ task }) => {
-  function formatNumber(number){
-    return new Intl.NumberFormat().format(number);
-  }
 
   function colorNota(text){
     if(text === 'Ingresado'){
       return {backgroundColor: '#F2F2F2' }
     } else if (text === 'Alistado') {
       return {backgroundColor: '#FBD9B1' }
-    } else if (text === 'Verificado') {
+    } else if (text === 'Verificado' || text === 'Impreso') {
       return {backgroundColor: '#FBD9B1' }
     } else if (text === 'En ruta') {
       return {backgroundColor: '#FABD1F' }
@@ -40,12 +38,12 @@ const LPedidoItem = ({ task }) => {
 
   const navigation = useNavigation()
   return (
-    <TouchableOpacity onPress={() => navigation.navigate('DetallesDelPedido', {NDePedido: task.NDePedido, Ferreteria: task.Ferreteria, Direccion: task.Direccion, Barrio: task.Barrio, FechaFactura: task.FechaFactura,  FechaDeEntrega: task.FechaDeEntrega, VrFactura: task.VrFactura, Estado: task.Estado, ProcesoDelPedido: task.ProcesoDelPedido, NotaVenta: task.NotaVenta, NotaEntrega: task.NotaEntrega })}>
+    <TouchableOpacity onPress={() => navigation.navigate('DetallesDelPedido', task)}>
       <View style={[styles.itemContainer, colorNota(EstadoDelPedido(task.ProcesoDelPedido))]}>
         <Text style={[styles.itemText, {width: 80}]}>{task.NDePedido}</Text>
         <Text style={[styles.itemText, {width: 300}]}>{task.Ferreteria}</Text>
-        <Text style={[styles.itemText, {width: 150}]}>{task.FechaFactura}</Text>
-        <Text style={[styles.itemText, {width: 150}]}>{task.FechaDeEntrega}</Text>
+        <Text style={[styles.itemText, {width: 150}]}>{formatDateToShow(task.FechaFactura)}</Text>
+        <Text style={[styles.itemText, {width: 150}]}>{formatDateToShow(task.FechaDeEntrega)}</Text>
         <Text style={[styles.itemText, {width: 100}]}>$ {formatNumber(task.VrFactura)}</Text>
         <Text style={[styles.itemText, {width: 100}]}>{EstadoDelPedido(task.ProcesoDelPedido)}</Text>
       </View>

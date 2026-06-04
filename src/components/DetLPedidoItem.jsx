@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import { View, Text, StyleSheet, TextInput, Dimensions} from 'react-native'
+import { formatNumber } from '../InternalFunctions';
 
 import 'intl';
 import 'intl/locale-data/jsonp/en';
@@ -9,9 +10,9 @@ const windowHeight = Dimensions.get('window').height;
 
 const DetLPedidoItem = ({ item }) => {
   
-  function formatNumber(number){
+  /*function formatNumber(number){
     return new Intl.NumberFormat().format(number);
-  };
+  };*/
 
   function valorTotal(cantidad, Pventa){
     return formatNumber(cantidad*Pventa)
@@ -25,9 +26,9 @@ const DetLPedidoItem = ({ item }) => {
                 <View style={{flexDirection: 'row'}}>
                     <Text style={[styles.itemText, {width: 200}]}>{item.Descripcion}</Text>
                     <Text style={[styles.itemText, {width: 40, fontWeight: 'bold'}]}>{item.Cantidad}</Text>
-                    <Text style={[styles.itemText, {width: 200}]}>PT: $ {valorTotal(item.Cantidad, item.VrUnitario)}</Text>
+                    <Text style={[styles.itemText, {width: 200}]}>PT: $ {formatNumber(item.Cantidad * item.VrUnitario)}</Text>
                 </View>
-                <Text style={[styles.itemText, {width: 100}]}>PU: $ {item.VrUnitario}</Text>
+                <Text style={[styles.itemText, {width: 100}]}>PU: $ {formatNumber(item.VrUnitario)}</Text>
             </View>
         </View>
     </View>
