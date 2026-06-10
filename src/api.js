@@ -1,9 +1,9 @@
 //const API = 'http://44.209.105.117:80/tasks';
-const API = 'http://192.168.101.17:3100/app'; //My coputer backend app
-const API_INT = 'http://192.168.101.17:5000/int'; //My computer backend intern
+//const API = 'http://192.168.101.17:3100/app'; //My coputer backend app
+//const API_INT = 'http://192.168.101.17:5000/int'; //My computer backend intern
 /*44.209.105.117:80/tasks*/
-//const API = 'https://sivar.com.co/app';
-//const API_INT = 'https://sivar.com.co/int';
+const API = 'https://sivar.com.co/app';
+const API_INT = 'https://sivar.com.co/int';
 
 export const getTasks = async() => {
     try {
