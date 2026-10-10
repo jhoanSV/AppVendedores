@@ -356,7 +356,7 @@ function NuevaVenta({ navigation, route }) {
   };
 
   const verificarAgregarPedido = () => {
-    if (pedido.length !== 0 && suma.replace(/,/g, '')>=150000){
+    if (pedido.length !== 0 && suma.replace(/,/g, '')>=180000){
       setVisible(true)
     } else if (pedido.length === 0){
       sendWarning(
@@ -368,10 +368,10 @@ function NuevaVenta({ navigation, route }) {
       setTimeout(() => {
         setVisibleWarning(false)
       }, 2000);
-    } else if (suma.replace(/,/g, '')<150000){
+    } else if (suma.replace(/,/g, '')<180000){
       sendWarning(
         'Pedido insuficiente',
-        'El pedido no cuenta con el mínimo de $150.000 para ser envíado.',
+        'El pedido no cuenta con el mínimo de $180.000 para ser envíado.',
         'Entendido',
         ()=>{}
       )
@@ -499,7 +499,7 @@ function NuevaVenta({ navigation, route }) {
   } 
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, marginTop: -25 }}>
     <View  keyboardVerticalOffset={0} behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={[styles.container, {flex: 1}]} enabled={true}>
       <ScrollView
         style = {{flexGrow: 0}}

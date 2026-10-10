@@ -1,10 +1,16 @@
 import React, {useState, useEffect} from "react";
 import Constants from 'expo-constants';
-import { SafeAreaView, StyleSheet, TextInput, Text, View, FlatList } from "react-native";
-import { getTasks, SearchTasks } from '../api';
+import { StyleSheet,
+         TextInput,
+         Text,
+         View,
+         FlatList } from "react-native";
+import { getTasks,
+         SearchTasks } from '../api';
 import TaskList from '../components/TaskList';
 import Layout from '../components/Layout';
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const LPrecios = () => {
@@ -48,7 +54,7 @@ const LPrecios = () => {
 
   return (
     
-    <Layout>
+    <SafeAreaView style={{flex: 1}} >
       <TextInput 
         style={ styles.input }
         placeholder="Buscar..."
@@ -64,7 +70,7 @@ const LPrecios = () => {
         </View>
         <TaskList tasks={tasks || []}/>
 
-    </Layout>
+    </SafeAreaView>
   );
 };
 
